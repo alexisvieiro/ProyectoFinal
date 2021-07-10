@@ -1,0 +1,2269 @@
+MATRIX-SARVAM-UCS-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	enterprises,
+	MODULE-IDENTITY,
+	OBJECT-TYPE,
+	NOTIFICATION-TYPE
+		FROM SNMPv2-SMI
+	OBJECT-GROUP,
+	NOTIFICATION-GROUP,
+	MODULE-COMPLIANCE
+		FROM SNMPv2-CONF;
+
+matrixTelecom MODULE-IDENTITY
+	LAST-UPDATED "201511091126Z"
+	ORGANIZATION "Matrix Telecom Pvt. Ltd."
+	CONTACT-INFO
+		"Head Office:   394-GIDC, Makarpura
+		                Vadodara-390010
+		                India
+		                Ph: +91-265-2630555
+		                Fax: +91-265-2636598
+		                Email: Info@MatrixTeleSol.com
+
+		Factory:        39-GIDC, Waghodia
+		                Vadodara-391760
+		                India
+		                Ph: +91-2668-262056/57
+		                Fax: +91-2668-262631
+		                Email: Support@MatrixTeleSol.com
+
+		Visit Us:       www.MatrixTeleSol.com"
+	DESCRIPTION
+		"This MIB is used to define the enterprise-specific tree of Matrix Telecom's Products."
+	REVISION "201511091126Z"
+	DESCRIPTION
+		"Initial version."
+
+	-- 1.3.6.1.4.1.34527
+	::= { enterprises 34527 }
+
+
+--This assigned to Matrix  Telecom's PBX Product: SARVAM UCS
+
+sarvamUCS OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5
+	::= { matrixTelecom 5 }
+
+--This contains the Status and Configuration parameters of the SARVAM UCS system
+
+sarvamUCSObjects OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1
+	::= { sarvamUCS 1 }
+
+--This contains the Status Parameters of all the ports in the SARVAM UCS System.
+
+sarvamUCSStatus OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1
+	::= { sarvamUCSObjects 1 }
+
+--This contains the System Details like System variant and System Software Version Revision Information
+
+systemDetails OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.1
+	::= { sarvamUCSStatus 1 }
+
+systemInformation OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the System Variant and Version Revision."
+	-- 1.3.6.1.4.1.34527.5.1.1.1.1
+	::= { systemDetails 1 }
+
+
+systemCommand OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..12))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the System Command Version Revision."
+	-- 1.3.6.1.4.1.34527.5.1.1.1.2
+	::= { systemDetails 2 }
+
+
+--This contains available Card Information
+
+systemSlotPortDetails OBJECT-TYPE
+	SYNTAX  SEQUENCE OF SystemDetailsEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"Used to display the System Slot Port Details table."
+	-- 1.3.6.1.4.1.34527.5.1.1.2
+	::= { sarvamUCSStatus 2 }
+
+
+systemDetailsEntry OBJECT-TYPE
+	SYNTAX  SystemDetailsEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry containing System Slot Port Details parameters."
+	INDEX {
+		entryIndex }
+	-- 1.3.6.1.4.1.34527.5.1.1.2.1
+	::= { systemSlotPortDetails 1 }
+
+
+SystemDetailsEntry ::= SEQUENCE {
+
+	entryIndex       INTEGER,
+	slotNo           OCTET STRING,
+	cardType         OCTET STRING,
+	firmwareRevision OCTET STRING,
+	cpldVersion      OCTET STRING,
+	kernelDate       OCTET STRING,
+	st               OCTET STRING,
+	ch               OCTET STRING,
+	totalCH          OCTET STRING }
+
+
+entryIndex OBJECT-TYPE
+	SYNTAX  INTEGER (1..99)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to indicate the Table Index Number"
+	-- 1.3.6.1.4.1.34527.5.1.1.2.1.1
+	::= { systemDetailsEntry 1 }
+
+
+slotNo OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..2))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to indicate the Slot Number"
+	-- 1.3.6.1.4.1.34527.5.1.1.2.1.2
+	::= { systemDetailsEntry 2 }
+
+
+cardType OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..40))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Card Type inserted in the Slot of the System."
+	-- 1.3.6.1.4.1.34527.5.1.1.2.1.3
+	::= { systemDetailsEntry 3 }
+
+
+firmwareRevision OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display Firmware Version Revision of the Card."
+	-- 1.3.6.1.4.1.34527.5.1.1.2.1.4
+	::= { systemDetailsEntry 4 }
+
+
+cpldVersion OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display CPLD Version Revision of the Card."
+	-- 1.3.6.1.4.1.34527.5.1.1.2.1.5
+	::= { systemDetailsEntry 5 }
+
+
+kernelDate OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Date of the Kernel which is used in the Card."
+	-- 1.3.6.1.4.1.34527.5.1.1.2.1.6
+	::= { systemDetailsEntry 6 }
+
+
+st OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the assigned ST to the Card."
+	-- 1.3.6.1.4.1.34527.5.1.1.2.1.7
+	::= { systemDetailsEntry 7 }
+
+
+ch OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..5))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the starting channel number assigned to the card."
+	-- 1.3.6.1.4.1.34527.5.1.1.2.1.8
+	::= { systemDetailsEntry 8 }
+
+
+totalCH OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..5))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Total Channels assigned to the Card."
+	-- 1.3.6.1.4.1.34527.5.1.1.2.1.9
+	::= { systemDetailsEntry 9 }
+
+
+--This contains the Network status information of System
+
+networkStatus OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.3
+	::= { sarvamUCSStatus 3 }
+
+--This contains the Ethernet Port status information
+
+ethernetStatus OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.3.1
+	::= { networkStatus 1 }
+
+ipAddressingMode OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..17))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IP Addressing Mode used by Ethernet Port.
+
+		Possible modes are:
+		IPv4 only
+		IPv6 only
+		IPv4 and IPv6"
+	-- 1.3.6.1.4.1.34527.5.1.1.3.1.4
+	::= { ethernetStatus 4 }
+
+
+voipServerDomain OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..40))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the programmed VoIP Server Domain."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.1.5
+	::= { ethernetStatus 5 }
+
+
+voipRtpMode OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the programmed RTP Mode for VoIP.
+
+		Possible modes are:
+		Transcoding
+		RTP Relay
+		Direct RTP"
+	-- 1.3.6.1.4.1.34527.5.1.1.3.1.6
+	::= { ethernetStatus 6 }
+
+
+voipRtpDrtpFreeCallCount OBJECT-TYPE
+	SYNTAX  INTEGER (0..9999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total Relay/DRTP Free Call Count in VoIP."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.1.7
+	::= { ethernetStatus 7 }
+
+
+--This contains the Ethernet WAN Port status information
+
+wanPortStatus OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.3.2
+	::= { networkStatus 2 }
+
+wanLinkStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Link status of Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.2.1
+	::= { wanPortStatus 1 }
+
+
+wanDefaultMacAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..17))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Default MAC Address assigned to Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.2.2
+	::= { wanPortStatus 2 }
+
+
+wanMacAddressInUse OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..17))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the MAC Address in use (Default or Clone MAC Address) by Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.2.3
+	::= { wanPortStatus 3 }
+
+
+wanPreferredDnsServer OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..4))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Preferred DNS Server Mode for Ethernet - WAN Port.
+
+		Possible modes are:
+		IPv4
+		IPv6"
+	-- 1.3.6.1.4.1.34527.5.1.1.3.2.4
+	::= { wanPortStatus 4 }
+
+
+wanDynamicDnsStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the status of Dynamic DNS for Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.2.5
+	::= { wanPortStatus 5 }
+
+
+--This contains the IPv4 related information of WAN Port.
+
+wanPortIPv4Status OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3
+	::= { networkStatus 3 }
+
+wanIPv4StackStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..40))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv4 Stack Status for Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3.1
+	::= { wanPortIPv4Status 1 }
+
+
+wanIPv4IpAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..15))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv4 IP Address assigned to the Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3.2
+	::= { wanPortIPv4Status 2 }
+
+
+wanIPv4SubnetMask OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..15))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv4 Subnet Mask assigned to the Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3.3
+	::= { wanPortIPv4Status 3 }
+
+
+wanIPv4GatewayAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..15))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv4 Gateway Address assigned to the Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3.4
+	::= { wanPortIPv4Status 4 }
+
+
+wanIPv4DnsAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..15))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv4 DNS Address assigned to the Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3.5
+	::= { wanPortIPv4Status 5 }
+
+
+natStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the NAT Status whether NAT is configured or not."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3.6
+	::= { wanPortIPv4Status 6 }
+
+
+natType OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the NAT type."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3.7
+	::= { wanPortIPv4Status 7 }
+
+
+routerPublicIpAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..15))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the programmed Router's Public IP Address."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3.8
+	::= { wanPortIPv4Status 8 }
+
+
+ipAddressFetchUsingSTUN OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..15))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IP Address fetched using STUN."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3.9
+	::= { wanPortIPv4Status 9 }
+
+
+sipPortFetchedUsingSTUN OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..5))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the SIP Port fetched using STUN."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.3.10
+	::= { wanPortIPv4Status 10 }
+
+
+--This contains the IPv6 related information of WAN Port.
+
+wanPortIPv6Status OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.3.4
+	::= { networkStatus 4 }
+
+wanIPv6StackStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..40))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv6 Stack Status for Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.4.1
+	::= { wanPortIPv6Status 1 }
+
+
+wanIPv6IpAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..39))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv6 IP Address assigned to the Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.4.2
+	::= { wanPortIPv6Status 2 }
+
+
+wanIPv6PrefixLength OBJECT-TYPE
+	SYNTAX  INTEGER (0..255)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv6 Prefix Length assigned to the Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.4.3
+	::= { wanPortIPv6Status 3 }
+
+
+wanIPv6GatewayAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..39))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv6 Gateway Address assigned to the Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.4.4
+	::= { wanPortIPv6Status 4 }
+
+
+wanIPv6DnsAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..39))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv6 DNS Address assigned to the Ethernet - WAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.4.5
+	::= { wanPortIPv6Status 5 }
+
+
+--This contains the Ethernet LAN Port status information
+
+lanPortStatus OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.3.5
+	::= { networkStatus 5 }
+
+lanLinkStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Link status of Ethernet - LAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.5.1
+	::= { lanPortStatus 1 }
+
+
+lanMacAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..17))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Default MAC Address assigned to Ethernet - LAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.5.2
+	::= { lanPortStatus 2 }
+
+
+--This contains the IPv4 related information of LAN Port.
+
+lanPortIPv4Status OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.3.6
+	::= { networkStatus 6 }
+
+lanIPv4StackStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..40))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv4 Stack Status for Ethernet - LAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.6.1
+	::= { lanPortIPv4Status 1 }
+
+
+lanIPv4IpAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..15))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv4 IP Address assigned to the Ethernet - LAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.6.2
+	::= { lanPortIPv4Status 2 }
+
+
+lanIPv4SubnetMask OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..15))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv4 Subnet Mask assigned to the Ethernet - LAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.6.3
+	::= { lanPortIPv4Status 3 }
+
+
+--This contains the IPv6 related information of LAN Port.
+
+lanPortIPv6Status OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.3.7
+	::= { networkStatus 7 }
+
+lanIPv6StackStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..40))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv6 Stack Status for Ethernet - LAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.7.1
+	::= { lanPortIPv6Status 1 }
+
+
+lanIPv6IpAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..39))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv6 IP Address assigned to the Ethernet - LAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.7.2
+	::= { lanPortIPv6Status 2 }
+
+
+lanIPv6PrefixLength OBJECT-TYPE
+	SYNTAX  INTEGER (0..255)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IPv6 Prefix Length assigned to the Ethernet - LAN Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.3.7.3
+	::= { lanPortIPv6Status 3 }
+
+
+coStatus OBJECT-TYPE
+	SYNTAX  SEQUENCE OF CoStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table contains the status of all the CO Trunks in the system. CO Port availability depends on the System Variants."
+	-- 1.3.6.1.4.1.34527.5.1.1.4
+	::= { sarvamUCSStatus 4 }
+
+
+coStatusEntry OBJECT-TYPE
+	SYNTAX  CoStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry containing CO Trunk's status parameters applicable to a particular CO Trunk."
+	INDEX {
+		coStatusIndex }
+	-- 1.3.6.1.4.1.34527.5.1.1.4.1
+	::= { coStatus 1 }
+
+
+CoStatusEntry ::= SEQUENCE {
+
+	coStatusIndex                          INTEGER,
+	coStatusPortName                       OCTET STRING,
+	coStatusLineStatus                     OCTET STRING,
+	coStatusCallBudgetType                 OCTET STRING,
+	coStatusAllottedAmountOrMinutesOrCalls INTEGER,
+	coStatusConsumedAmountOrMinutesOrCalls INTEGER,
+	coStatusCallBudgetScheduledReset       OCTET STRING,
+	coStatusCallBudgetResetScheduledDate   INTEGER,
+	coCallStatus                           OCTET STRING }
+
+
+coStatusIndex OBJECT-TYPE
+	SYNTAX  INTEGER (1..128)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The value is used to define the CO Port Number."
+	-- 1.3.6.1.4.1.34527.5.1.1.4.1.1
+	::= { coStatusEntry 1 }
+
+
+coStatusPortName OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..18))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Name assigned to the CO port."
+	-- 1.3.6.1.4.1.34527.5.1.1.4.1.2
+	::= { coStatusEntry 2 }
+
+
+coStatusLineStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Link status of the CO Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.4.1.3
+	::= { coStatusEntry 3 }
+
+
+coStatusCallBudgetType OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Budget Type assigned to the CO Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.4.1.4
+	::= { coStatusEntry 4 }
+
+
+coStatusAllottedAmountOrMinutesOrCalls OBJECT-TYPE
+	SYNTAX  INTEGER (1..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the allotted Call Budget Amount or Minutes or Calls to the CO port."
+	-- 1.3.6.1.4.1.34527.5.1.1.4.1.5
+	::= { coStatusEntry 5 }
+
+
+coStatusConsumedAmountOrMinutesOrCalls OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the consumed Call Budget Amount or Minutes or Calls to the CO port."
+	-- 1.3.6.1.4.1.34527.5.1.1.4.1.6
+	::= { coStatusEntry 6 }
+
+
+coStatusCallBudgetScheduledReset OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Budget Reset Mode assigned to the CO port."
+	-- 1.3.6.1.4.1.34527.5.1.1.4.1.7
+	::= { coStatusEntry 7 }
+
+
+coStatusCallBudgetResetScheduledDate OBJECT-TYPE
+	SYNTAX  INTEGER (1..31)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the programmed date on which the Call Budget consumed statistics will get reset."
+	-- 1.3.6.1.4.1.34527.5.1.1.4.1.8
+	::= { coStatusEntry 8 }
+
+
+coCallStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..4))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Status of the CO port.		
+		0 = Idle
+		1 = Incoming
+		2 = Outgoing"
+	-- 1.3.6.1.4.1.34527.5.1.1.4.1.9
+	::= { coStatusEntry 9 }
+
+
+briStatus OBJECT-TYPE
+	SYNTAX  SEQUENCE OF BriStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table contains the status of all the BRI Trunks in the system. BRI Port availability depends on the System Variants."
+	-- 1.3.6.1.4.1.34527.5.1.1.5
+	::= { sarvamUCSStatus 5 }
+
+
+briStatusEntry OBJECT-TYPE
+	SYNTAX  BriStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry containing BRI Trunk's status parameters applicable to a particular BRI Trunk."
+	INDEX {
+		briStatusIndex }
+	-- 1.3.6.1.4.1.34527.5.1.1.5.1
+	::= { briStatus 1 }
+
+
+BriStatusEntry ::= SEQUENCE {
+
+	briStatusIndex                          INTEGER,
+	briStatusPortName                       OCTET STRING,
+	briStatusLayer1Staus                    OCTET STRING,
+	briStatusLayer2Status                   OCTET STRING,
+	briStatusCallBudgetType                 OCTET STRING,
+	briStatusAllottedAmountOrMinutesOrCalls INTEGER,
+	briStatusConsumedAmountOrMinutesOrCalls INTEGER,
+	briStatusCallBudgetScheduledReset       OCTET STRING,
+	briStatusCallBudgetResetScheduledDate   INTEGER }
+
+
+briStatusIndex OBJECT-TYPE
+	SYNTAX  INTEGER (1..32)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The value is used to define the BRI Port Number."
+	-- 1.3.6.1.4.1.34527.5.1.1.5.1.1
+	::= { briStatusEntry 1 }
+
+
+briStatusPortName OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..18))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Name assigned to the BRI port."
+	-- 1.3.6.1.4.1.34527.5.1.1.5.1.2
+	::= { briStatusEntry 2 }
+
+
+briStatusLayer1Staus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Layer-1 Link status of the BRI Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.5.1.3
+	::= { briStatusEntry 3 }
+
+
+briStatusLayer2Status OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Layer-2 Link status of the BRI Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.5.1.4
+	::= { briStatusEntry 4 }
+
+
+briStatusCallBudgetType OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Budget Type assigned to the BRI Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.5.1.5
+	::= { briStatusEntry 5 }
+
+
+briStatusAllottedAmountOrMinutesOrCalls OBJECT-TYPE
+	SYNTAX  INTEGER (1..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the allotted Call Budget Amount or Minutes or Calls to the BRI port."
+	-- 1.3.6.1.4.1.34527.5.1.1.5.1.6
+	::= { briStatusEntry 6 }
+
+
+briStatusConsumedAmountOrMinutesOrCalls OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the consumed Call Budget Amount or Minutes or Calls to the BRI port."
+	-- 1.3.6.1.4.1.34527.5.1.1.5.1.7
+	::= { briStatusEntry 7 }
+
+
+briStatusCallBudgetScheduledReset OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Budget Reset Mode assigned to the BRI port."
+	-- 1.3.6.1.4.1.34527.5.1.1.5.1.8
+	::= { briStatusEntry 8 }
+
+
+briStatusCallBudgetResetScheduledDate OBJECT-TYPE
+	SYNTAX  INTEGER (1..31)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the programmed date on which the Call Budget consumed statistics will get reset."
+	-- 1.3.6.1.4.1.34527.5.1.1.5.1.9
+	::= { briStatusEntry 9 }
+
+
+mobileStatus OBJECT-TYPE
+	SYNTAX  SEQUENCE OF MobileStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table contains the status of all the Mobile Trunks in the system. Mobile Port availability depends on the System Variants."
+	-- 1.3.6.1.4.1.34527.5.1.1.6
+	::= { sarvamUCSStatus 6 }
+
+
+mobileStatusEntry OBJECT-TYPE
+	SYNTAX  MobileStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry containing Mobile Trunk's status parameters applicable to a particular Mobile Trunk."
+	INDEX {
+		mobileStatusIndex }
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1
+	::= { mobileStatus 1 }
+
+
+MobileStatusEntry ::= SEQUENCE {
+
+	mobileStatusIndex                           INTEGER,
+	mobileStatusPortName                        OCTET STRING,
+	mobileStatusPortStatus                      OCTET STRING,
+	mobileStatusIMEI                            OCTET STRING,
+	mobileStatusNWOperatorCode                  OCTET STRING,
+	mobileStatusOperatorName                    OCTET STRING,
+	mobileStatusSMSCnumber                      OCTET STRING,
+	mobileStatusSignalStrengthIndBm             INTEGER,
+	mobileStatusBitErrorRate                    OCTET STRING,
+	mobileStatusEcIo                            INTEGER,
+	mobileStatusCallDuration                    OCTET STRING,
+	mobileStatusDialedCalls                     INTEGER,
+	mobileStatusSuccessfulCalls                 INTEGER,
+	mobileStatusASR                             INTEGER,
+	mobileStatusACD                             INTEGER,
+	mobileStatusSimID                           OCTET STRING,
+	mobileStatusIMSI                            OCTET STRING,
+	mobileStatusCellID                          OCTET STRING,
+	mobileStatusLAC                             OCTET STRING,
+	mobileStatusCallBudgetType                  OCTET STRING,
+	mobileStatusAllottedAmountOrMinutesOrCalls  INTEGER,
+	mobileiStatusConsumedAmountOrMinutesOrCalls INTEGER,
+	mobileStatusCallBudgetScheduledReset        OCTET STRING,
+	mobileStatusCallBudgetResetScheduledDate    INTEGER,
+	mobileStatusSMSBudgetScheduledReset         OCTET STRING,
+	mobileStatusSMSBudgetResetScheduledDate     INTEGER,
+	mobileStatusConsumedSMSTotal                INTEGER,
+	mobileStatusConsumedSMSDaily                INTEGER,
+	mobileStatusRegWithNW                       OCTET STRING,
+	mobileStatusFirmwareVersionEngine           OCTET STRING,
+	mobileCallStatus                            OCTET STRING }
+
+
+mobileStatusIndex OBJECT-TYPE
+	SYNTAX  INTEGER (1..128)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The value is used to define the Mobile Port Number."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.1
+	::= { mobileStatusEntry 1 }
+
+
+mobileStatusPortName OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..18))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Name assigned to the Mobile port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.2
+	::= { mobileStatusEntry 2 }
+
+
+mobileStatusPortStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the status of the Mobile port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.3
+	::= { mobileStatusEntry 3 }
+
+
+mobileStatusIMEI OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IMEI or ESN Number of the Module in Mobile Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.4
+	::= { mobileStatusEntry 4 }
+
+
+mobileStatusNWOperatorCode OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..6))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the MCC-MNC of operator with which Mobile Port is currently registered."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.5
+	::= { mobileStatusEntry 5 }
+
+
+mobileStatusOperatorName OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Operator Name with which Mobile Port is currently registered."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.6
+	::= { mobileStatusEntry 6 }
+
+
+mobileStatusSMSCnumber OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..16))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the SMSC Number (SMS Center Number) of the Mobile Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.7
+	::= { mobileStatusEntry 7 }
+
+
+mobileStatusSignalStrengthIndBm OBJECT-TYPE
+	SYNTAX  INTEGER (0..999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display Signal Strength of the Mobile Port in (-dBm)."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.8
+	::= { mobileStatusEntry 8 }
+
+
+mobileStatusBitErrorRate OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..40))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Bit Error Rate (BER) of the Mobile Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.9
+	::= { mobileStatusEntry 9 }
+
+
+mobileStatusEcIo OBJECT-TYPE
+	SYNTAX  INTEGER (0..255)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Ec/Io of the Mobile Port in dB. It is applicable only for WCDMA (3G) network."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.10
+	::= { mobileStatusEntry 10 }
+
+
+mobileStatusCallDuration OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..9))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Total Call Duration of Outgoing calls from Mobile Port.
+		Format will be as given below.
+		MMMMMM.SS (6 digits Minutes and 2 digits Seconds)"
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.11
+	::= { mobileStatusEntry 11 }
+
+
+mobileStatusDialedCalls OBJECT-TYPE
+	SYNTAX  INTEGER (0..9999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total numbers of dialed calls from Mobile Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.12
+	::= { mobileStatusEntry 12 }
+
+
+mobileStatusSuccessfulCalls OBJECT-TYPE
+	SYNTAX  INTEGER (0..9999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total numbers of Successful (Answered) outgoing calls from Mobile Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.13
+	::= { mobileStatusEntry 13 }
+
+
+mobileStatusASR OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display Answer Seizure Ratio (ASR) for Mobile port. Value is in Percentage (%)."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.14
+	::= { mobileStatusEntry 14 }
+
+
+mobileStatusACD OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Average Call Duration (ACD) of the Mobile Port.
+		Format will be as given below.
+		MMMMMM.SS (6 digits Minutes and 2 digits Seconds)"
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.15
+	::= { mobileStatusEntry 15 }
+
+
+mobileStatusSimID OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..20))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the SIM ID of SIM Card inserted in the Mobile port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.16
+	::= { mobileStatusEntry 16 }
+
+
+mobileStatusIMSI OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..16))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IMSI (International Mobile Subscriber Identity) of the SIM Card inserted in the Mobile Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.17
+	::= { mobileStatusEntry 17 }
+
+
+mobileStatusCellID OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..4))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Cell ID with which Mobile port is currently registered."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.18
+	::= { mobileStatusEntry 18 }
+
+
+mobileStatusLAC OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..4))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the LAC (Location Area Code) with which Mobile port is currently registered."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.19
+	::= { mobileStatusEntry 19 }
+
+
+mobileStatusCallBudgetType OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Budget Type assigned to the Mobile Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.20
+	::= { mobileStatusEntry 20 }
+
+
+mobileStatusAllottedAmountOrMinutesOrCalls OBJECT-TYPE
+	SYNTAX  INTEGER (1..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the allotted Call Budget Amount or Minutes or Calls to the Mobile port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.21
+	::= { mobileStatusEntry 21 }
+
+
+mobileiStatusConsumedAmountOrMinutesOrCalls OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the consumed Call Budget Amount or Minutes or Calls to the Mobile port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.22
+	::= { mobileStatusEntry 22 }
+
+
+mobileStatusCallBudgetScheduledReset OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Budget Reset Mode assigned to the Mobile port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.23
+	::= { mobileStatusEntry 23 }
+
+
+mobileStatusCallBudgetResetScheduledDate OBJECT-TYPE
+	SYNTAX  INTEGER (1..31)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the programmed date on which the Call Budget consumed statistics will get reset."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.24
+	::= { mobileStatusEntry 24 }
+
+
+mobileStatusSMSBudgetScheduledReset OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the SMS Budget Scheduled Reset status assigned to the Mobile port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.25
+	::= { mobileStatusEntry 25 }
+
+
+mobileStatusSMSBudgetResetScheduledDate OBJECT-TYPE
+	SYNTAX  INTEGER (1..31)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the programmed date on which the SMS Budget consumed statistics will get reset."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.26
+	::= { mobileStatusEntry 26 }
+
+
+mobileStatusConsumedSMSTotal OBJECT-TYPE
+	SYNTAX  INTEGER (0..9999999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total consumed SMS status on the Mobile Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.27
+	::= { mobileStatusEntry 27 }
+
+
+mobileStatusConsumedSMSDaily OBJECT-TYPE
+	SYNTAX  INTEGER (0..99999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the daily consumed SMS status on the Mobile Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.28
+	::= { mobileStatusEntry 28 }
+
+
+mobileStatusRegWithNW OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..16))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Currently registered Network Type."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.29
+	::= { mobileStatusEntry 29 }
+
+
+mobileStatusFirmwareVersionEngine OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Firmware Version Revision of the Module/Engine inserted into Mobile Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.30
+	::= { mobileStatusEntry 30 }
+
+
+mobileCallStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..4))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Status of Mobile port.
+		0 = Idle
+		1 = Incoming
+		2 = Outgoing"
+	-- 1.3.6.1.4.1.34527.5.1.1.6.1.31
+	::= { mobileStatusEntry 31 }
+
+
+sipExtensionStatus OBJECT-TYPE
+	SYNTAX  SEQUENCE OF SipExtensionStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table contains the status of all the SIP Extensions in the system. SIP Extension availability depends on the System Variants."
+	-- 1.3.6.1.4.1.34527.5.1.1.7
+	::= { sarvamUCSStatus 7 }
+
+
+sipExtensionStatusEntry OBJECT-TYPE
+	SYNTAX  SipExtensionStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry containing SIP Extensions' status parameters applicable to a particular SIP Extension."
+	INDEX {
+		sipExtensionStatusIndex }
+	-- 1.3.6.1.4.1.34527.5.1.1.7.1
+	::= { sipExtensionStatus 1 }
+
+
+SipExtensionStatusEntry ::= SEQUENCE {
+
+	sipExtensionStatusIndex                INTEGER,
+	sipExtensionStatusName                 OCTET STRING,
+	sipExtensionStatusSipID                OCTET STRING,
+	sipExtensionStatusRegistrationStatus   OCTET STRING,
+	sipExtensionStatusRegistrationContact1 OCTET STRING,
+	sipExtensionStatusRegistrationContact2 OCTET STRING,
+	sipExtensionStatusRegistrationContact3 OCTET STRING }
+
+
+sipExtensionStatusIndex OBJECT-TYPE
+	SYNTAX  INTEGER (1..2000)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The value is used to define the SIP Extension Number."
+	-- 1.3.6.1.4.1.34527.5.1.1.7.1.1
+	::= { sipExtensionStatusEntry 1 }
+
+
+sipExtensionStatusName OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..18))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Name assigned to the SIP Extension."
+	-- 1.3.6.1.4.1.34527.5.1.1.7.1.3
+	::= { sipExtensionStatusEntry 2 }
+
+
+sipExtensionStatusSipID OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..6))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the SIP ID (SIP Extension Number) assigned to the SIP Extension."
+	-- 1.3.6.1.4.1.34527.5.1.1.7.1.4
+	::= { sipExtensionStatusEntry 3 }
+
+
+sipExtensionStatusRegistrationStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Registration Status of the SIP Extension."
+	-- 1.3.6.1.4.1.34527.5.1.1.7.1.5
+	::= { sipExtensionStatusEntry 4 }
+
+
+sipExtensionStatusRegistrationContact1 OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Contact Information for SIP Extension."
+	-- 1.3.6.1.4.1.34527.5.1.1.7.1.6
+	::= { sipExtensionStatusEntry 5 }
+
+
+sipExtensionStatusRegistrationContact2 OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Contact Information for SIP Extension."
+	-- 1.3.6.1.4.1.34527.5.1.1.7.1.7
+	::= { sipExtensionStatusEntry 6 }
+
+
+sipExtensionStatusRegistrationContact3 OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Contact Information for SIP Extension."
+	-- 1.3.6.1.4.1.34527.5.1.1.7.1.8
+	::= { sipExtensionStatusEntry 7 }
+
+
+sipTrunkStatus OBJECT-TYPE
+	SYNTAX  SEQUENCE OF SipTrunkStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table contains the status of all the SIP Trunks in the system. SIP Trunk availability depends on the System Variants."
+	-- 1.3.6.1.4.1.34527.5.1.1.8
+	::= { sarvamUCSStatus 8 }
+
+
+sipTrunkStatusEntry OBJECT-TYPE
+	SYNTAX  SipTrunkStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry containing SIP Trunk's status parameters applicable to a particular SIP Trunk."
+	INDEX {
+		sipStatusIndex }
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1
+	::= { sipTrunkStatus 1 }
+
+
+SipTrunkStatusEntry ::= SEQUENCE {
+
+	sipStatusIndex                          INTEGER,
+	sipPortStatus                           OCTET STRING,
+	sipStatusRegistrationTime               INTEGER,
+	sipStatusRegistrationRetryCount         INTEGER,
+	sipStatusReasonForFailure               OCTET STRING,
+	sipStatusCallBudgetType                 OCTET STRING,
+	sipStatusAllottedAmountOrMinutesOrCalls INTEGER,
+	sipStatusConsumedAmountOrMinutesOrCalls INTEGER,
+	sipStatusCallBudgetScheduledReset       OCTET STRING,
+	sipStatusCallBudgetResetScheduledDate   INTEGER }
+
+
+sipStatusIndex OBJECT-TYPE
+	SYNTAX  INTEGER (1..99)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The value is used to define the SIP Port Number."
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1.1
+	::= { sipTrunkStatusEntry 1 }
+
+
+sipPortStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Status of the SIP Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1.2
+	::= { sipTrunkStatusEntry 2 }
+
+
+sipStatusRegistrationTime OBJECT-TYPE
+	SYNTAX  INTEGER (1..65535)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the registration time in seconds for SIP port."
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1.3
+	::= { sipTrunkStatusEntry 3 }
+
+
+sipStatusRegistrationRetryCount OBJECT-TYPE
+	SYNTAX  INTEGER (0..65535)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the number of times, system sent Registration Request after failure for SIP port."
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1.4
+	::= { sipTrunkStatusEntry 4 }
+
+
+sipStatusReasonForFailure OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Failure Reason for Registration request sent by system for SIP port."
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1.5
+	::= { sipTrunkStatusEntry 5 }
+
+
+sipStatusCallBudgetType OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Budget Type assigned to the SIP Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1.6
+	::= { sipTrunkStatusEntry 6 }
+
+
+sipStatusAllottedAmountOrMinutesOrCalls OBJECT-TYPE
+	SYNTAX  INTEGER (1..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the allotted Call Budget Amount or Minutes or Calls to the SIP port."
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1.7
+	::= { sipTrunkStatusEntry 7 }
+
+
+sipStatusConsumedAmountOrMinutesOrCalls OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the consumed Call Budget Amount or Minutes or Calls to the SIP port."
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1.8
+	::= { sipTrunkStatusEntry 8 }
+
+
+sipStatusCallBudgetScheduledReset OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Budget Reset Mode assigned to the SIP port."
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1.9
+	::= { sipTrunkStatusEntry 9 }
+
+
+sipStatusCallBudgetResetScheduledDate OBJECT-TYPE
+	SYNTAX  INTEGER (1..31)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the programmed date on which the Call Budget consumed statistics will get reset."
+	-- 1.3.6.1.4.1.34527.5.1.1.8.1.10
+	::= { sipTrunkStatusEntry 10 }
+
+
+smsGatewayStatus OBJECT-TYPE
+	SYNTAX  SEQUENCE OF SmppClientStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table contains the status of SMPP Server used by SMS Gateway in the system. SMS Gateway / SMPP Server availability depends on the System Variants."
+	-- 1.3.6.1.4.1.34527.5.1.1.9
+	::= { sarvamUCSStatus 9 }
+
+
+smppClientStatusEntry OBJECT-TYPE
+	SYNTAX  SmppClientStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry containing SMPP Client's status parameters."
+	INDEX {
+		smppClientIndex }
+	-- 1.3.6.1.4.1.34527.5.1.1.9.1
+	::= { smsGatewayStatus 1 }
+
+
+SmppClientStatusEntry ::= SEQUENCE {
+
+	smppClientIndex       INTEGER,
+	smppClientSystemID    OCTET STRING,
+	smppClientStatus      OCTET STRING,
+	smppClientBindingType OCTET STRING,
+	smppClientAddress     OCTET STRING }
+
+
+smppClientIndex OBJECT-TYPE
+	SYNTAX  INTEGER (1..128)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The value is used to define the SMPP Client Number."
+	-- 1.3.6.1.4.1.34527.5.1.1.9.1.1
+	::= { smppClientStatusEntry 1 }
+
+
+smppClientSystemID OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..16))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the System ID assigned on the SMPP Client."
+	-- 1.3.6.1.4.1.34527.5.1.1.9.1.2
+	::= { smppClientStatusEntry 2 }
+
+
+smppClientStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display status of the SMPP Client."
+	-- 1.3.6.1.4.1.34527.5.1.1.9.1.3
+	::= { smppClientStatusEntry 3 }
+
+
+smppClientBindingType OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Binding Type of the SMPP Client."
+	-- 1.3.6.1.4.1.34527.5.1.1.9.1.4
+	::= { smppClientStatusEntry 4 }
+
+
+smppClientAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..48))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display IP Address and Port information of SMPP Client connected."
+	-- 1.3.6.1.4.1.34527.5.1.1.9.1.5
+	::= { smppClientStatusEntry 5 }
+
+
+t1e1Status OBJECT-TYPE
+	SYNTAX  SEQUENCE OF T1e1StatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table contains the status of all the T1E1 Trunks in the system. T1E1 Port availability depends on the System Variants."
+	-- 1.3.6.1.4.1.34527.5.1.1.10
+	::= { sarvamUCSStatus 10 }
+
+
+t1e1StatusEntry OBJECT-TYPE
+	SYNTAX  T1e1StatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry containing T1E1 Trunk's status parameters applicable to a particular T1E1 Trunk."
+	INDEX {
+		t1e1StatusIndex }
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1
+	::= { t1e1Status 1 }
+
+
+T1e1StatusEntry ::= SEQUENCE {
+
+	t1e1StatusIndex                          INTEGER,
+	t1e1StatusPortName                       OCTET STRING,
+	t1e1StatusLayer1Staus                    OCTET STRING,
+	t1e1StatusLayer2Status                   OCTET STRING,
+	t1e1StatusCallBudgetType                 OCTET STRING,
+	t1e1StatusAllottedAmountOrMinutesOrCalls INTEGER,
+	t1e1StatusConsumedAmountOrMinutesOrCalls INTEGER,
+	t1e1StatusCallBudgetScheduledReset       OCTET STRING,
+	t1e1StatusCallBudgetResetScheduledDate   INTEGER,
+	t1e1LossOfSignalCounter                  INTEGER,
+	t1e1LossOfSignalStatus                   OCTET STRING,
+	t1e1RemoteAlarmIndicationCounter         INTEGER,
+	t1e1RemoteAlarmIndicationStatus          OCTET STRING,
+	t1e1AlarmIndicationSignalCounter         INTEGER,
+	t1e1AlarmIndicationSignalStatus          OCTET STRING,
+	t1e1CrcErrorCount                        OCTET STRING,
+	t1e1BitErrorCount                        OCTET STRING,
+	t1e1BlockOrSynchronizationErrorCount     OCTET STRING,
+	t1e1LineCodeViolationCount               OCTET STRING,
+	t1e1PositiveSlipCount                    OCTET STRING,
+	t1e1NegativeSlipCount                    OCTET STRING,
+	t1e1ElasticPhaseCount                    OCTET STRING,
+	t1e1ChannelCallStatus                    OCTET STRING }
+
+
+t1e1StatusIndex OBJECT-TYPE
+	SYNTAX  INTEGER (1..24)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The value is used to define the T1E1 Port Number."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.1
+	::= { t1e1StatusEntry 1 }
+
+
+t1e1StatusPortName OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..18))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Name assigned to the T1E1 port."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.2
+	::= { t1e1StatusEntry 2 }
+
+
+t1e1StatusLayer1Staus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Layer-1 Link status of the T1E1 Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.3
+	::= { t1e1StatusEntry 3 }
+
+
+t1e1StatusLayer2Status OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Layer-2 Link status of the T1E1 Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.4
+	::= { t1e1StatusEntry 4 }
+
+
+t1e1StatusCallBudgetType OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Budget Type assigned to the T1E1 Port."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.5
+	::= { t1e1StatusEntry 5 }
+
+
+t1e1StatusAllottedAmountOrMinutesOrCalls OBJECT-TYPE
+	SYNTAX  INTEGER (1..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the allotted Call Budget Amount or Minutes or Calls to the T1E1 port."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.6
+	::= { t1e1StatusEntry 6 }
+
+
+t1e1StatusConsumedAmountOrMinutesOrCalls OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the consumed Call Budget Amount or Minutes or Calls to the T1E1 port."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.7
+	::= { t1e1StatusEntry 7 }
+
+
+t1e1StatusCallBudgetScheduledReset OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..24))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Budget Reset Mode assigned to the T1E1 port."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.8
+	::= { t1e1StatusEntry 8 }
+
+
+t1e1StatusCallBudgetResetScheduledDate OBJECT-TYPE
+	SYNTAX  INTEGER (1..31)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the programmed date on which the Call Budget consumed statistics will get reset."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.9
+	::= { t1e1StatusEntry 9 }
+
+
+t1e1LossOfSignalCounter OBJECT-TYPE
+	SYNTAX  INTEGER (0..255)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Loss of Signal (LOS) Counter for T1E1 port."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.10
+	::= { t1e1StatusEntry 10 }
+
+
+t1e1LossOfSignalStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..10))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Loss of Signal (LOS) Status for T1E1 port.
+
+		Possible status are:
+		Absent
+		Present"
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.11
+	::= { t1e1StatusEntry 11 }
+
+
+t1e1RemoteAlarmIndicationCounter OBJECT-TYPE
+	SYNTAX  INTEGER (0..255)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Remote Alarm Indication (RAI) Counter for T1E1 port."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.12
+	::= { t1e1StatusEntry 12 }
+
+
+t1e1RemoteAlarmIndicationStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..10))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Remote Alarm Indication (RAI) Status for T1E1 port.
+
+		Possible status are:
+		Absent
+		Present"
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.13
+	::= { t1e1StatusEntry 13 }
+
+
+t1e1AlarmIndicationSignalCounter OBJECT-TYPE
+	SYNTAX  INTEGER (0..255)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Alarm Indication Signal (AIS) Counter for T1E1 port."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.14
+	::= { t1e1StatusEntry 14 }
+
+
+t1e1AlarmIndicationSignalStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..10))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Alarm Indication Signal (AIS) Status for T1E1 port.
+
+		Possible status are:
+		Absent
+		Present"
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.15
+	::= { t1e1StatusEntry 15 }
+
+
+t1e1CrcErrorCount OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..5))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the CRC-4 Error Count (For E1 carrier type) or CRC-6 Error Count (For T1 carrier type)."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.16
+	::= { t1e1StatusEntry 16 }
+
+
+t1e1BitErrorCount OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..3))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the FAS/NFAS Bit/Pattern Error Count (For E1 carrier type) or Frame Alignment Bit Error Count (For T1 carrier type)."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.17
+	::= { t1e1StatusEntry 17 }
+
+
+t1e1BlockOrSynchronizationErrorCount OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..5))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Far End Block Error Count (For E1 carrier type) or Out of Frame Synschronization Error Count (For T1 carrier type)."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.18
+	::= { t1e1StatusEntry 18 }
+
+
+t1e1LineCodeViolationCount OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..5))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Line Code Violation Count."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.19
+	::= { t1e1StatusEntry 19 }
+
+
+t1e1PositiveSlipCount OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..3))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Positive Slip Count."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.20
+	::= { t1e1StatusEntry 20 }
+
+
+t1e1NegativeSlipCount OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..3))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Negative Slip Count."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.21
+	::= { t1e1StatusEntry 21 }
+
+
+t1e1ElasticPhaseCount OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..3))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Elastic Phase Count."
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.22
+	::= { t1e1StatusEntry 22 }
+
+
+t1e1ChannelCallStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..64))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Call Status of each channel of the T1E1 port.
+		Comma separated value for each channel.
+		0 = Idle
+		1 = Incoming
+		2 = Outgoing"
+	-- 1.3.6.1.4.1.34527.5.1.1.10.1.23
+	::= { t1e1StatusEntry 23 }
+
+
+--This contains the VMS Memory status information.
+
+vmsStatus OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.11
+	::= { sarvamUCSStatus 11 }
+
+--This contains the Voice Mail Memory status information
+
+voiceMailMemoryStatus OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.1.1.11.1
+	::= { vmsStatus 1 }
+
+totalMemoryInMB OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total memory available for Voice Mail in MB."
+	-- 1.3.6.1.4.1.34527.5.1.1.11.1.1
+	::= { voiceMailMemoryStatus 1 }
+
+
+totalMemoryInMinutes OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total memory available for Voice Mail in Minutes."
+	-- 1.3.6.1.4.1.34527.5.1.1.11.1.2
+	::= { voiceMailMemoryStatus 2 }
+
+
+totalMemoryConsumedByPromptInMB OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total memory consumed by Prompts and Responses in MB."
+	-- 1.3.6.1.4.1.34527.5.1.1.11.1.3
+	::= { voiceMailMemoryStatus 3 }
+
+
+totalMemoryConsumedByPromptInMinutes OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total memory consumed by Prompts and Responses in Minutes."
+	-- 1.3.6.1.4.1.34527.5.1.1.11.1.4
+	::= { voiceMailMemoryStatus 4 }
+
+
+totalMemoryAllottedToMailboxesInMB OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total memory allotted to Mailboxes in MB."
+	-- 1.3.6.1.4.1.34527.5.1.1.11.1.5
+	::= { voiceMailMemoryStatus 5 }
+
+
+totalMemoryAllottedToMailboxesInMinutes OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total memory allotted to Mailboxes in Minutes."
+	-- 1.3.6.1.4.1.34527.5.1.1.11.1.6
+	::= { voiceMailMemoryStatus 6 }
+
+
+totalMemoryConsumedByMailboxUsersInMB OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total memory consumed by Mailbox Users in MB."
+	-- 1.3.6.1.4.1.34527.5.1.1.11.1.7
+	::= { voiceMailMemoryStatus 7 }
+
+
+totalMemoryConsumedByMailboxUsersInMinutes OBJECT-TYPE
+	SYNTAX  INTEGER (0..999999)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the total memory consumed by Mailbox Users in Minutes."
+	-- 1.3.6.1.4.1.34527.5.1.1.11.1.8
+	::= { voiceMailMemoryStatus 8 }
+
+
+ctiStatus OBJECT-TYPE
+	SYNTAX  SEQUENCE OF CtiStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"This table contains the status of all the CTI Links in the system."
+	-- 1.3.6.1.4.1.34527.5.1.1.12
+	::= { sarvamUCSStatus 12 }
+
+
+ctiStatusEntry OBJECT-TYPE
+	SYNTAX  CtiStatusEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"An entry containing CTI status parameters applicable to a particular CTI Link."
+	INDEX {
+		ctiStatusIndex }
+	-- 1.3.6.1.4.1.34527.5.1.1.12.1
+	::= { ctiStatus 1 }
+
+
+CtiStatusEntry ::= SEQUENCE {
+
+	ctiStatusIndex      INTEGER,
+	ctiStatusIpAddress  OCTET STRING,
+	ctiStatusPort       OCTET STRING,
+	ctiStatusTspVersion OCTET STRING,
+	ctiLinkStatus       OCTET STRING }
+
+
+ctiStatusIndex OBJECT-TYPE
+	SYNTAX  INTEGER (1..3)
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The value is used to define the CTI Link Number."
+	-- 1.3.6.1.4.1.34527.5.1.1.12.1.1
+	::= { ctiStatusEntry 1 }
+
+
+ctiStatusIpAddress OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..39))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the IP Address of CTI Link."
+	-- 1.3.6.1.4.1.34527.5.1.1.12.1.2
+	::= { ctiStatusEntry 2 }
+
+
+ctiStatusPort OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..5))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the Source Port of CTI Link."
+	-- 1.3.6.1.4.1.34527.5.1.1.12.1.3
+	::= { ctiStatusEntry 3 }
+
+
+ctiStatusTspVersion OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..10))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the TSP version of CTI Link."
+	-- 1.3.6.1.4.1.34527.5.1.1.12.1.4
+	::= { ctiStatusEntry 4 }
+
+
+ctiLinkStatus OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..40))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Used to display the CTI Link Status."
+	-- 1.3.6.1.4.1.34527.5.1.1.12.1.5
+	::= { ctiStatusEntry 5 }
+
+
+--This contains the Notification parameters of the SARVAM UCS system
+
+sarvamUCSNotifications OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.2
+	::= { sarvamUCS 2 }
+
+sarvamUCSNotificationEvents OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.2.0
+	::= { sarvamUCSNotifications 0 }
+
+
+information NOTIFICATION-TYPE
+	OBJECTS {
+		eventDescription}
+	STATUS  current
+	DESCRIPTION
+		"Indicates that Information Notification is generated in the System."
+	-- 1.3.6.1.4.1.34527.5.2.0.1
+	::= { sarvamUCSNotificationEvents 1 }
+
+
+warning NOTIFICATION-TYPE
+	OBJECTS {
+		eventDescription}
+	STATUS  current
+	DESCRIPTION
+		"Indicates that Warning Notification is generated in the System."
+	-- 1.3.6.1.4.1.34527.5.2.0.2
+	::= { sarvamUCSNotificationEvents 2 }
+
+
+error NOTIFICATION-TYPE
+	OBJECTS {
+		eventDescription}
+	STATUS  current
+	DESCRIPTION
+		"Indicates that Error Notification is generated in the System."
+	-- 1.3.6.1.4.1.34527.5.2.0.3
+	::= { sarvamUCSNotificationEvents 3 }
+
+sarvamUCSNotificationObjects OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.2.1
+	::= { sarvamUCSNotifications 1 }
+
+eventDescription OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (0..255))
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Gives the description of the event generated by the System."
+	-- 1.3.6.1.4.1.34527.5.2.1.1
+	::= { sarvamUCSNotificationObjects 1 }
+
+
+--This contains the Conformance for SARVAM UCS system
+
+sarvamUCSConformance OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.3
+	::= { sarvamUCS 3 }
+
+--This contains the Compliance for SARVAM UCS system
+
+sarvamUCSCompliances OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.3.1
+	::= { sarvamUCSConformance 1 }
+
+
+--This contains the Compliance Statement for SARVAM UCS system
+
+sarvamUCSCompliance MODULE-COMPLIANCE
+	STATUS  current
+	DESCRIPTION
+		"The compliance statement for the SARVAM UCS MIB."
+
+	MODULE 
+	MANDATORY-GROUPS {
+			sarvamUCSObjectsGroup,
+			sarvamUCSNotificationsGroup }
+
+	-- 1.3.6.1.4.1.34527.5.3.1.1
+	::= { sarvamUCSCompliances 1 }
+
+--This contains the Objects and Notification Groups
+
+sarvamUCSGroups OBJECT IDENTIFIER 
+	-- 1.3.6.1.4.1.34527.5.3.2
+	::= { sarvamUCSConformance 2 }
+
+sarvamUCSObjectsGroup OBJECT-GROUP
+	OBJECTS {
+		systemInformation,
+		systemCommand,
+		entryIndex,
+		slotNo,
+		cardType,
+		firmwareRevision,
+		cpldVersion,
+		kernelDate,
+		st,
+		ch,
+		totalCH,
+		ipAddressingMode,
+		voipServerDomain,
+		voipRtpMode,
+		voipRtpDrtpFreeCallCount,
+		wanLinkStatus,
+		wanDefaultMacAddress,
+		wanMacAddressInUse,
+		wanPreferredDnsServer,
+		wanDynamicDnsStatus,
+		wanIPv4StackStatus,
+		wanIPv4IpAddress,
+		wanIPv4SubnetMask,
+		wanIPv4GatewayAddress,
+		wanIPv4DnsAddress,
+		natStatus,
+		natType,
+		routerPublicIpAddress,
+		ipAddressFetchUsingSTUN,
+		sipPortFetchedUsingSTUN,
+		wanIPv6StackStatus,
+		wanIPv6IpAddress,
+		wanIPv6PrefixLength,
+		wanIPv6GatewayAddress,
+		wanIPv6DnsAddress,
+		lanLinkStatus,
+		lanMacAddress,
+		lanIPv4StackStatus,
+		lanIPv4IpAddress,
+		lanIPv4SubnetMask,
+		lanIPv6StackStatus,
+		lanIPv6IpAddress,
+		lanIPv6PrefixLength,
+		coStatusIndex,
+		coStatusPortName,
+		coStatusLineStatus,
+		coStatusCallBudgetType,
+		coStatusAllottedAmountOrMinutesOrCalls,
+		coStatusConsumedAmountOrMinutesOrCalls,
+		coStatusCallBudgetScheduledReset,
+		coStatusCallBudgetResetScheduledDate,
+		coCallStatus,
+		briStatusIndex,
+		briStatusPortName,
+		briStatusLayer1Staus,
+		briStatusLayer2Status,
+		briStatusCallBudgetType,
+		briStatusAllottedAmountOrMinutesOrCalls,
+		briStatusConsumedAmountOrMinutesOrCalls,
+		briStatusCallBudgetScheduledReset,
+		briStatusCallBudgetResetScheduledDate,
+		mobileStatusIndex,
+		mobileStatusPortName,
+		mobileStatusPortStatus,
+		mobileStatusIMEI,
+		mobileStatusNWOperatorCode,
+		mobileStatusOperatorName,
+		mobileStatusSMSCnumber,
+		mobileStatusSignalStrengthIndBm,
+		mobileStatusBitErrorRate,
+		mobileStatusEcIo,
+		mobileStatusCallDuration,
+		mobileStatusDialedCalls,
+		mobileStatusSuccessfulCalls,
+		mobileStatusASR,
+		mobileStatusACD,
+		mobileStatusSimID,
+		mobileStatusIMSI,
+		mobileStatusCellID,
+		mobileStatusLAC,
+		mobileStatusCallBudgetType,
+		mobileStatusAllottedAmountOrMinutesOrCalls,
+		mobileiStatusConsumedAmountOrMinutesOrCalls,
+		mobileStatusCallBudgetScheduledReset,
+		mobileStatusCallBudgetResetScheduledDate,
+		mobileStatusSMSBudgetScheduledReset,
+		mobileStatusSMSBudgetResetScheduledDate,
+		mobileStatusConsumedSMSTotal,
+		mobileStatusConsumedSMSDaily,
+		mobileStatusRegWithNW,
+		mobileStatusFirmwareVersionEngine,
+		mobileCallStatus,
+		sipExtensionStatusIndex,
+		sipExtensionStatusName,
+		sipExtensionStatusSipID,
+		sipExtensionStatusRegistrationStatus,
+		sipExtensionStatusRegistrationContact1,
+		sipExtensionStatusRegistrationContact2,
+		sipExtensionStatusRegistrationContact3,
+		sipStatusIndex,
+		sipPortStatus,
+		sipStatusRegistrationTime,
+		sipStatusRegistrationRetryCount,
+		sipStatusReasonForFailure,
+		sipStatusCallBudgetType,
+		sipStatusAllottedAmountOrMinutesOrCalls,
+		sipStatusConsumedAmountOrMinutesOrCalls,
+		sipStatusCallBudgetScheduledReset,
+		sipStatusCallBudgetResetScheduledDate,
+		smppClientIndex,
+		smppClientSystemID,
+		smppClientStatus,
+		smppClientBindingType,
+		smppClientAddress,
+		t1e1StatusIndex,
+		t1e1StatusPortName,
+		t1e1StatusLayer1Staus,
+		t1e1StatusLayer2Status,
+		t1e1StatusCallBudgetType,
+		t1e1StatusAllottedAmountOrMinutesOrCalls,
+		t1e1StatusConsumedAmountOrMinutesOrCalls,
+		t1e1StatusCallBudgetScheduledReset,
+		t1e1StatusCallBudgetResetScheduledDate,
+		t1e1LossOfSignalCounter,
+		t1e1LossOfSignalStatus,
+		t1e1RemoteAlarmIndicationCounter,
+		t1e1RemoteAlarmIndicationStatus,
+		t1e1AlarmIndicationSignalCounter,
+		t1e1AlarmIndicationSignalStatus,
+		t1e1CrcErrorCount,
+		t1e1BitErrorCount,
+		t1e1BlockOrSynchronizationErrorCount,
+		t1e1LineCodeViolationCount,
+		t1e1PositiveSlipCount,
+		t1e1NegativeSlipCount,
+		t1e1ElasticPhaseCount,
+		t1e1ChannelCallStatus,
+		totalMemoryInMB,
+		totalMemoryInMinutes,
+		totalMemoryConsumedByPromptInMB,
+		totalMemoryConsumedByPromptInMinutes,
+		totalMemoryAllottedToMailboxesInMB,
+		totalMemoryAllottedToMailboxesInMinutes,
+		totalMemoryConsumedByMailboxUsersInMB,
+		totalMemoryConsumedByMailboxUsersInMinutes,
+		ctiStatusIndex,
+		ctiStatusIpAddress,
+		ctiStatusPort,
+		ctiStatusTspVersion,
+		ctiLinkStatus,
+		eventDescription }
+	STATUS  current
+	DESCRIPTION
+		"The collection of objects which are used in SARVAM UCS."
+	-- 1.3.6.1.4.1.34527.5.3.2.1
+	::= { sarvamUCSGroups 1 }
+
+sarvamUCSNotificationsGroup NOTIFICATION-GROUP
+	NOTIFICATIONS {
+		information,
+		warning,
+		error }
+	STATUS  current
+	DESCRIPTION
+		"The notifications which indicate any activities or faults in the SARVAM UCS."
+	-- 1.3.6.1.4.1.34527.5.3.2.2
+	::= { sarvamUCSGroups 2 }
+
+END

@@ -1,0 +1,1960 @@
+-- ************************************************************* --
+-- * MX-ONE TS ALARM MIB                                         --
+-- * This MIB describes the alarm handling (activeAlarmTable)    --
+-- * and tables for equippment  (mxLimTable and tsObjects)       --
+-- * of the MX-ONE Telephony Server (TS)                         --
+-- ************************************************************* --
+-- Copyright (c) 2011 by Aastra Technologies Limited             --
+-- Copyright (c) 2020 by Mitel Sweden AB                         --
+-- All rights reserved.                                          --
+-- History                                                       --
+-- Date: 2020-06-05 mxalRunLevel and mxAlarmRunLevelChange added --
+-- Date: 2016-04-09 mxalHandle size adjusted.                    --
+-- (snmpget can not handle unsigned 32 bit integers)             --
+-- Date: 2013-09-02 MxCasBoardEntry corrected                    --
+-- Date: 2012-02-13 Adding value blocked(4) to mxOpiOperStatus.  --
+-- Date: 2012-02-08 Adding mxCasBoardDirno to mxCasBoardTable    --
+--                  NOTE: new index numbers in mxCasBoardTable.  --
+-- Date: 2012-02-03 Adding mxObjectStatus to mxObject-traps      --
+-- Date: 2011-12-01 Updating comments.                           --
+-- Date: 2011-05-27 Adding:mxLimTable                            --
+-- Date: 2011-05-25 Adding:tsObjects                             --
+-- Date: 2008-10-07                                              --
+--                                                               --
+-- Note: activeAlarms and mxserverStatus are local tables in the --
+--       server (lim) snmp is requesting.                        --
+--       mxInterfaces are system wide tables spanning all lims.  --
+-- Note: All taps are sent from the local server (lim).          --
+--                                                               --
+MX-ONE-TS-ALARM-MIB DEFINITIONS ::= BEGIN
+IMPORTS
+    NOTIFICATION-TYPE, OBJECT-TYPE,
+    enterprises
+        FROM SNMPv2-SMI
+    DisplayString
+        FROM SNMPv2-TC;
+
+aastraMibs OBJECT IDENTIFIER ::= {enterprises aastra(11268) 2}
+aastraOidMx-one OBJECT IDENTIFIER ::= {aastraMibs 8}
+tsAlarm OBJECT IDENTIFIER ::= {aastraOidMx-one 1}
+
+-- Version of TS Alarm MIB
+tsAlarmR1 OBJECT IDENTIFIER ::= {tsAlarm 1}
+
+activeAlarms OBJECT IDENTIFIER ::= {tsAlarmR1 1}
+tsTrap OBJECT IDENTIFIER ::= {tsAlarmR1 2}
+tsTrapV2 OBJECT IDENTIFIER ::= {tsTrap 0}
+
+-- ************************************************************* --
+-- * Alarm Status                                                --
+-- ************************************************************* --
+
+mxalStatus        OBJECT-TYPE
+      SYNTAX      INTEGER {  
+                   indeterminate(5),
+                   critical(4),
+                   major (3),
+                   minor (2),
+                   warning (1),		 
+                   normal (0)
+                   }
+      MAX-ACCESS   read-only
+      STATUS       current
+      DESCRIPTION 
+          "The current alarm status of the MX-ONE TS node:
+             indeterminate - Status unknown
+             critical - Any active alarms with severity 4
+             major    - Any active alarms with severity 3
+             minor    - Any active alarms with severity 2
+             warning  - Any active alarms with severity 1
+             normal   - Any active alarms with severity 0
+                        or no active alarms."
+      ::= {activeAlarms 1}
+
+-- ************************************************************* --
+-- * Active Alarm List                                           --
+-- ************************************************************* --
+
+activeAlarmTable  OBJECT-TYPE
+      SYNTAX      SEQUENCE OF ActiveAlarmEntry
+      MAX-ACCESS  not-accessible
+      STATUS      current
+      DESCRIPTION
+          "A table of active alarms in the MX-ONE TS node."
+      ::= {activeAlarms 2}
+
+activeAlarmEntry  OBJECT-TYPE
+      SYNTAX      ActiveAlarmEntry
+      MAX-ACCESS  not-accessible
+      STATUS      current
+      DESCRIPTION
+          "                    "
+        INDEX       {mxalHandle}
+      ::= {activeAlarmTable 1}
+
+ActiveAlarmEntry ::= SEQUENCE { 
+                        mxalHandle INTEGER,
+                        mxalFrom DisplayString,
+                        mxalFaultCode DisplayString,
+                        mxalSeverity INTEGER,
+                        mxalWhere DisplayString,
+                        mxalExplanation DisplayString,
+                        mxalNoticed INTEGER,
+                        mxalNoticedNote DisplayString
+                        }
+
+mxalHandle        OBJECT-TYPE
+      SYNTAX      INTEGER (0..2147483647) -- 2**31-1 --
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+          "Handle of an MX-ONE alarm. An alarm instance is
+            identified by its handle and the lim number."
+      ::= {activeAlarmEntry 1}
+
+mxalFrom         OBJECT-TYPE
+      SYNTAX      DisplayString
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+          "Sending lim (and unit) related to the alarm."
+      ::= {activeAlarmEntry 2}
+
+mxalFaultCode     OBJECT-TYPE
+      SYNTAX      DisplayString
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+          "Fault Code of an MX-ONE alarm. Indicates type of alarm.
+          Fault code is domain:code (within domain).
+          Example: Fault code 5:8."
+      ::= {activeAlarmEntry 3}
+
+mxalSeverity      OBJECT-TYPE  
+      SYNTAX      INTEGER {  
+                   indeterminate(5),
+                   critical(4),
+                   major (3),
+                   minor (2),
+                   warning (1),
+                   normal (0)
+                   }
+      MAX-ACCESS   read-only
+      STATUS       current
+      DESCRIPTION 
+          "The current alarm status of the MX-ONE TS node:
+             indeterminate - Status unknown
+             critical - Alarm with severity 4
+             major    - Alarm with severity 3
+             minor    - Alarm with severity 2
+             warning  - Alarm with severity 1
+             normal   - Alarm with severity 0."
+      ::= {activeAlarmEntry 4}
+
+mxalWhere         OBJECT-TYPE
+      SYNTAX      DisplayString
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+          "Faulty unit etc related to the alarm."
+      ::= {activeAlarmEntry 5}
+
+mxalExplanation   OBJECT-TYPE
+      SYNTAX      DisplayString
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+          "Textual description associated with the alarm."
+      ::= {activeAlarmEntry 6}
+
+mxalNoticed       OBJECT-TYPE
+      SYNTAX      INTEGER {
+                       yes (1),
+                       no (2)
+                       }
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+          "Indicates if the alarm is noticed. May indicate
+             that someone is working on the problem."
+      ::= {activeAlarmEntry 7}
+
+mxalNoticedNote   OBJECT-TYPE
+      SYNTAX      DisplayString
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+          "Comment added to the alarm when noticed."
+      ::= {activeAlarmEntry 8}
+
+-- ************************************************************* --
+-- * Server Standby Status                                                --
+-- ************************************************************* --
+
+mxalRunLevel       OBJECT-TYPE
+      SYNTAX      INTEGER {
+                   standby (2),
+                   active (1),
+                   indeterminate(0)
+                   }
+      MAX-ACCESS   read-only
+      STATUS       current
+      DESCRIPTION
+          "The current running status of the MX-ONE TS node:
+             indeterminate - Status unknown
+             active        - The server is running traffic.
+             standby       - The server is in standby mode."
+      ::= {activeAlarms 3}
+
+
+
+-- ************************************************************* --
+-- * The alarm traps                                             --
+-- ************************************************************* --
+
+mxAlarmCritical  NOTIFICATION-TYPE
+      OBJECTS  {
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when an MX-ONE alarm with 
+             severity 4 is detected."
+      ::=  {tsTrapV2 1 }
+
+mxAlarmMajor  NOTIFICATION-TYPE
+      OBJECTS  {
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when an MX-ONE alarm with 
+             severity 3 is detected."
+      ::=  {tsTrapV2 2 }
+
+mxAlarmMinor  NOTIFICATION-TYPE
+      OBJECTS  {
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current 
+      DESCRIPTION 
+          "This trap is sent when an MX-ONE alarm with 
+             severity 2 is detected."
+      ::=  {tsTrapV2 3 }
+
+mxAlarmWarning  NOTIFICATION-TYPE
+      OBJECTS  {
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when an MX-ONE alarm with 
+             severity 1 is detected."
+      ::=  {tsTrapV2 4 }
+
+mxAlarmSysClear  NOTIFICATION-TYPE
+      OBJECTS  {
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when an MX-ONE alarm is 
+             cleared by the system (problem gone)."
+      ::=  {tsTrapV2 5 }
+
+mxAlarmOpClear  NOTIFICATION-TYPE
+      OBJECTS  {
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when an MX-ONE alarm is 
+             cleared by the operator."
+      ::=  {tsTrapV2 6 }
+
+mxAlarmStatusChange  NOTIFICATION-TYPE
+      OBJECTS  {
+            mxalFrom,
+            mxalStatus
+            }
+      STATUS      current
+      DESCRIPTION
+          "This trap is sent when the alarm status
+             of the lim is changed."
+      ::=  {tsTrapV2 2000 }
+
+mxAlarmRunLevelChange  NOTIFICATION-TYPE
+      OBJECTS  {
+            mxalFrom,
+            mxalRunLevel
+            }
+      STATUS      current
+      DESCRIPTION
+          "This trap is sent when the standby status
+             of the lim is changed."
+      ::=  {tsTrapV2 2001 }
+
+
+-- ************************************************************* --
+-- * Object Status                                               --
+-- ************************************************************* --
+tsObjects OBJECT IDENTIFIER ::= {tsAlarm 2}
+
+-- MX-ONE Server status --
+mxSystemStatus OBJECT IDENTIFIER ::= {tsObjects 1}
+-- --
+mxRelease     OBJECT-TYPE
+              SYNTAX           DisplayString
+              ACCESS           read-only
+              STATUS           current
+              DESCRIPTION
+                            " Indicates MX-ONE release. This data is provided
+                             from the software interface and cannot be changed
+                             ex.  13.2.123 "  
+         ::= {mxSystemStatus 1}
+ 
+-- --
+
+mxLimTable  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxLimEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the interfaces.
+                   The variables are almost the same as the 
+                   interface group in mib-2." 
+              ::= { mxSystemStatus 2}
+
+mxLimEntry OBJECT-TYPE
+         SYNTAX  MxLimEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX        {mxLimIndex}
+              ::= { mxLimTable 1}
+
+MxLimEntry ::= SEQUENCE {  
+                         mxLimIndex          INTEGER,
+                         mxLimWhere          DisplayString,
+                         mxLimIp             DisplayString,
+                         mxlimBackupStatus   INTEGER,
+                         mxlimBackupInfo     DisplayString,
+                         mxLimCCLInfo        INTEGER,
+                         mxLimStatus         INTEGER
+                         }
+
+mxLimIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A directory number."
+              ::= {mxLimEntry 1}
+
+mxLimWhere OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                     "DNS name if any."
+              ::= {mxLimEntry 2}
+
+mxLimIp OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+              "The IP address currently in use"
+         ::= {mxLimEntry 3}
+
+mxlimBackupStatus  OBJECT-TYPE
+         SYNTAX  INTEGER {
+                   ok(1),
+                   error(2)
+                   }
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+              "Operational status of the backup in the LIM. "
+          ::= {mxLimEntry 4}
+
+mxlimBackupInfo  OBJECT-TYPE
+         SYNTAX  DisplayString
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+              "Additional information regarding the backup in the LIM."
+          ::= {mxLimEntry 5}
+
+mxLimCCLInfo  OBJECT-TYPE
+         SYNTAX  INTEGER {
+                          noCCL (1),
+                          masterCCL (2),
+                          reserveCCL (3),
+                          additionalCCL (4),
+                          unknown (5)
+                         }
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+              "Synchronization data in the LIM."
+              ::= {mxLimEntry 6}
+
+mxLimStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          running(1),
+                          manual-blocked(2),
+                          system-blocked(3),
+                          blocked(4),
+                          unknown (5)
+                        }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The traffic state of the lim.
+                       unknown result if the lim connected
+                       to is isolated."
+              ::= {mxLimEntry 7}
+
+-- --
+
+mxObjectStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          running  (1),
+                          disturbed(2),
+                          blocked  (3),
+                          removed  (4),
+                          created  (5),
+                          unknown  (6)
+                        }
+        MAX-ACCESS  accessible-for-notify
+        STATUS  current
+        DESCRIPTION
+                      "The traffic state of the object."
+         ::= {mxSystemStatus 3}
+
+
+-- MX-ONE Interface status --
+mxInterfaces OBJECT IDENTIFIER ::= {tsObjects 2}
+mxIfTrap  OBJECT IDENTIFIER ::= {tsObjects 3}
+-- --
+
+-- --
+mxIfTrunk OBJECT IDENTIFIER  ::= {mxInterfaces 2}
+-- --
+mxRouteTable OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxRouteEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the interfaces." 
+              ::= { mxIfTrunk 1}
+
+mxRouteEntry OBJECT-TYPE
+         SYNTAX  MxRouteEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX       {mxRouteIndex}
+              ::= { mxRouteTable 1}
+
+MxRouteEntry ::= SEQUENCE {  
+                         mxRouteIndex      INTEGER,
+                         mxRouteType       DisplayString,
+                         mxRouteDescr      DisplayString,
+                         mxRouteBearerCap  DisplayString
+                         }
+
+mxRouteIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "The route number."
+              ::= {mxRouteEntry 1}
+
+mxRouteType OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Type of route,  public or tie-line. Signalling system 
+                       used. 
+                       Example: Public route, signal system = ISDN."	
+              ::= {mxRouteEntry 2}
+
+mxRouteDescr OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Route type. See MML TYPE of interface."
+              ::= {mxRouteEntry 3}
+
+mxRouteBearerCap OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      " Bearer capabilities of the route
+                       Corresponds to the MML parameter RO BCAP.
+                       The positions is a string of 0 and 1.
+                       Each position of the string corresponds
+                       to a Bearer capability attribute, 
+                       A position set to 1 means that the 
+                       corresponding capability is provided.
+                       pos 1	     : 64 kbps Unresticted
+                       pos 2      : 64 kbps Restricted
+                       pos 3      : 3.1 kHz Audio
+                       pos 4      : Speech
+                       pos 5      : 7 kHz Audio
+                       pos 6      : 16 kbit/s unrestr. digital"
+              ::= {mxRouteEntry 4}
+
+
+-- --
+mxTrunkTable OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxTrunkEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the trunk interfaces." 
+              ::= { mxIfTrunk 2}
+
+mxTrunkEntry OBJECT-TYPE
+         SYNTAX  MxTrunkEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX       {mxTrunkIndex}
+              ::= { mxTrunkTable 1}
+
+MxTrunkEntry ::= SEQUENCE {  
+                         mxTrunkIndex      INTEGER,
+                         mxTrunkId         DisplayString,
+                         mxTrunkRouteNo    INTEGER,
+                         mxTrunkWhere      DisplayString,
+                         mxTrunkDescr      DisplayString,
+                         mxTrunkAddDescr   DisplayString,
+                         mxTrunkOperStatus INTEGER
+                         }
+
+mxTrunkIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each interface.  Its value
+                      is calculated as: X = route number, Y = lim number,
+                      Z = trunk induvidual within lim and route.
+                      mxTrunkIndex = (X*2097152) + (Y*4096) + Z  "
+              ::= {mxTrunkEntry 1}
+
+mxTrunkId OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      remote end."
+              ::= {mxTrunkEntry 2}
+
+mxTrunkRouteNo OBJECT-TYPE
+        SYNTAX  INTEGER 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The route number. Linkin to mxRouteTable"
+              ::= {mxTrunkEntry 3}
+
+mxTrunkWhere OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "EQU position."
+              ::= {mxTrunkEntry 4}
+
+mxTrunkDescr OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Trunk type. See MML TYPE of interface."
+              ::= {mxTrunkEntry 5}
+
+mxTrunkAddDescr OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      remote end."
+              ::= {mxTrunkEntry 6}
+
+mxTrunkOperStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          idle(1),
+                          busy(2),
+                          blocked(3),
+                          unknown(4)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The traffic state of the interface."
+              ::= {mxTrunkEntry 7}
+
+-- --
+mxIfOperator OBJECT IDENTIFIER ::= {mxInterfaces 3}
+-- --
+mxOpiTable  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxOpiEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+              "A table with data for each switch board attendant 
+              extension"
+              ::= { mxIfOperator 1}
+
+mxOpiEntry OBJECT-TYPE
+         SYNTAX  MxOpiEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX        {mxOpiIndex}
+              ::= { mxOpiTable 1}
+
+MxOpiEntry ::= SEQUENCE {  
+                         mxOpiIndex      INTEGER,
+                         mxOpiDirno      DisplayString,
+                         mxOpiType       DisplayString,
+                         mxOpiWhere      DisplayString,
+                         mxOpiDescr      DisplayString,
+                         mxOpiAddDescr   DisplayString,
+                         mxOpiOperStatus INTEGER,
+                         mxOpiBusyStatus INTEGER
+                         }
+
+mxOpiIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each Operator."
+
+              ::= {mxOpiEntry 1}
+
+mxOpiDirno        OBJECT-TYPE  
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string directory number."
+              ::= {mxOpiEntry 2}
+
+mxOpiType OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Information of type of interface for this
+                       interface, e.g. OPI."	
+              ::= {mxOpiEntry 3}
+
+mxOpiWhere OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+              "Portidentity, EQU position or IP address."
+              ::= {mxOpiEntry 4}
+
+mxOpiDescr OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      interface."
+              ::= {mxOpiEntry 5}
+
+mxOpiAddDescr OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      interface."
+             ::= {mxOpiEntry 6}
+
+mxOpiOperStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          manual-absent(1),
+                          automatic-absent(2),
+                          present(3),
+                          blocked(4),
+                          unknown(5)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The traffic state of the attendant."
+              ::= {mxOpiEntry 7}
+
+mxOpiBusyStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          idle(1),
+                          busy(2),
+                          unknown(3)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The traffic state of the attendant."
+              ::= {mxOpiEntry 8}
+
+
+-- --
+mxIfCil OBJECT IDENTIFIER ::= {mxInterfaces 5}
+-- --
+
+mxCilTable  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxCilEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the CIL otput." 
+              ::= { mxIfCil 1}
+
+mxCilEntry OBJECT-TYPE
+         SYNTAX  MxCilEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX	{mxCilIndex}
+          ::= { mxCilTable 1}
+
+MxCilEntry ::= SEQUENCE {  
+                         mxCilIndex      INTEGER,
+                         mxCilOutput     DisplayString,
+                         mxCilType       DisplayString,
+                         mxCilSubtype    DisplayString,
+                         mxCilDbName     DisplayString,
+                         mxCilServer     DisplayString,
+                         mxCilOperStatus INTEGER
+                         }
+
+mxCilIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each interface."
+              ::= {mxCilEntry 1}
+
+mxCilOutput OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A unique value for each interface.  Its value
+                      is a string in format XXX-Y.
+                      XXX = lim number, Y = output number."
+              ::= {mxCilEntry 2}
+
+mxCilType OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Information of type of storage."	
+              ::= {mxCilEntry 3}
+
+mxCilSubtype OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Information of type of storage."	
+              ::= {mxCilEntry 4}
+
+mxCilDbName OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Path or device for the storage."
+              ::= {mxCilEntry 5}
+
+mxCilServer OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+              "Storage server information."
+              ::= {mxCilEntry 6}
+
+mxCilOperStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          up(1),
+                          down(2),
+                          unknown(3)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The operational state of the interface.
+                       The unknown(3) state indicates that the agent
+                       can't get the status of the interface. The 
+                       interface can then be either up or down." 	
+              ::= {mxCilEntry 7}
+
+-- --
+mxIfCsta OBJECT IDENTIFIER ::= {mxInterfaces 6}
+-- --
+mxCti1Table  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxCti1Entry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the interfaces." 
+              ::= { mxIfCsta 1}
+
+mxCti1Entry OBJECT-TYPE
+         SYNTAX  MxCti1Entry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX        {mxCti1Index}
+              ::= { mxCti1Table 1}
+
+MxCti1Entry ::= SEQUENCE {  
+                         mxCti1Index      INTEGER,
+                         mxCti1Group      DisplayString,
+                         mxCti1Lim        INTEGER,
+                         mxCti1Ip         DisplayString,
+                         mxCti1OperStatus INTEGER
+                         }
+
+mxCti1Index  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each linkgroup."
+              ::= {mxCti1Entry 1}
+
+mxCti1Group OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Group name."
+              ::= {mxCti1Entry 2}
+
+mxCti1Lim OBJECT-TYPE
+        SYNTAX  INTEGER
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Lim number whare the interface is initiated."
+              ::= {mxCti1Entry 3}
+
+mxCti1Ip OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "IP address."
+              ::= {mxCti1Entry 4}
+
+mxCti1OperStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          up(1),
+                          down(2),
+                          faulty(3),
+                          unknown(4)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The operational state of the interface.
+                       The unknown state indicates that the agent
+                       can't get the status of the interface. The 
+                       interface can then be either up or down." 	
+              ::= {mxCti1Entry 5}
+
+
+-- --
+mxCti3Table  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxCti3Entry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the interfaces.
+                   The variables are almost the same as the 
+                   interface group in mib-2." 
+              ::= { mxIfCsta 2}
+
+mxCti3Entry OBJECT-TYPE
+         SYNTAX  MxCti3Entry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX        {mxCti3Index}
+              ::= { mxCti3Table 1}
+
+MxCti3Entry ::= SEQUENCE {  
+                         mxCti3Index      INTEGER,
+                         mxCti3Type       DisplayString,
+                         mxCti3Lim        INTEGER,
+                         mxCti3Ip         DisplayString,
+                         mxCti3Port       DisplayString,
+                         mxCti3AddDescr   DisplayString,
+                         mxCti3OperStatus INTEGER
+                         }
+
+mxCti3Index  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each interface."
+              ::= {mxCti3Entry 1}
+
+mxCti3Type OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Information of type of protocol used for this
+                       interface. ASN1 or XML."	
+              ::= {mxCti3Entry 2}
+
+mxCti3Lim OBJECT-TYPE
+        SYNTAX  INTEGER
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Lim number where the interface is initiated."
+              ::= {mxCti3Entry 3}
+
+mxCti3Ip OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "IP address."
+              ::= {mxCti3Entry 4}
+
+mxCti3Port OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Port number."
+              ::= {mxCti3Entry 5}
+
+mxCti3OperStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          UnInitialized (1),
+                          Initialized (2),
+                          Enabled (3),
+                          Disabled (4),
+                          NotExist (5)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The operational state of the interface.
+                       The unknown(3) state indicates that the agent
+                       can't get the status of the interface. The 
+                       interface can then be either up or down." 	
+              ::= {mxCti3Entry 6}
+
+
+-- --
+mxIfGici OBJECT IDENTIFIER ::= {mxInterfaces 7}
+-- --
+mxIcuTable  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxIcuEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with information system computer 
+                  connections." 
+              ::= { mxIfGici 1}
+
+mxIcuEntry OBJECT-TYPE
+         SYNTAX  MxIcuEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX        {mxIcuIndex}
+              ::= { mxIcuTable 1}
+
+MxIcuEntry ::= SEQUENCE {  
+                         mxIcuIndex      INTEGER,
+                         mxIcuIfcInd     INTEGER,
+                         mxIcuType       INTEGER,
+                         mxIcuInterface  INTEGER,
+                         mxIcuLim        INTEGER,
+                         mxIcuInfo       DisplayString,
+                         mxIcuOperStatus INTEGER
+                         }
+
+mxIcuIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each information system."
+              ::= {mxIcuEntry 1}
+
+mxIcuIfcInd  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each information system."
+              ::= {mxIcuEntry 2}
+
+mxIcuType OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          IFC-initiated(1),
+                          ICS(2),
+                          VS-F(3),
+                          EM(4),
+                          ACD-MIS(5),
+                          ANCD(6),
+                          unknown(255)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Information of type of interface."	
+             ::= {mxIcuEntry 3}
+
+mxIcuInterface OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          ICU(1),
+                          V24(2),
+                          Ethernet(3),
+                          Generic(4),
+                          unknown(5)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Type of interface. e.g. V24 or Ethernet."	
+              ::= {mxIcuEntry 4}
+
+mxIcuLim OBJECT-TYPE
+        SYNTAX  INTEGER
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+          "Lim number where the information system computer is
+          connected. Not used = 0 "
+              ::= {mxIcuEntry 5}
+
+mxIcuInfo OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "IP address, port number 
+                       or V24 data"
+              ::= {mxIcuEntry 6}
+
+mxIcuOperStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          up(1),
+                          down(2),
+                          unknown(3)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The operational state of the interface.
+                       The unknown(3) state indicates that the agent
+                       can't get the status of the interface. The 
+                       interface can then be either up or down,
+                       also used for generic type" 	
+              ::= {mxIcuEntry 7}
+
+
+-- --
+mxIfSwitch OBJECT IDENTIFIER ::= {mxInterfaces 9}
+-- --
+mxMgwTable  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxMgwEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for backplanes (MGW)." 
+              ::= { mxIfSwitch 1}
+
+mxMgwEntry OBJECT-TYPE
+         SYNTAX  MxMgwEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX        {mxMgwIndex}
+              ::= { mxMgwTable 1}
+
+MxMgwEntry ::= SEQUENCE {  
+                         mxMgwIndex      INTEGER,
+                         mxMgwWhere      DisplayString,
+                         mxMgwType       DisplayString,
+                         mxMgwDescr      DisplayString,
+                         mxMgwOperStatus INTEGER
+                         }
+
+mxMgwIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each backplane. 
+                      format: XXXY.  XXX is Lim 001-124, and 
+                      Y is backplane A-O"
+              ::= {mxMgwEntry 1}
+
+mxMgwWhere OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Text string, address in system ex: Mgw 1B"	
+              ::= {mxMgwEntry 2}
+
+mxMgwType OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Information of type of backplane.."	
+              ::= {mxMgwEntry 3}
+
+mxMgwDescr OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      interface."
+              ::= {mxMgwEntry 4}
+
+mxMgwOperStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          up(1),
+                          down(2),
+                          unknown(3)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The operational state of the interface.
+                       The unknown(3) state indicates that the agent
+                       can't get the status of the interface. The 
+                       interface can then be either up or down." 	
+              ::= {mxMgwEntry 5}
+
+
+-- --
+mxGateWayTable  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxGateWayEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the interfaces.
+                   The variables are almost the same as the 
+                   interface group in mib-2." 
+              ::= { mxIfSwitch 2}
+
+mxGateWayEntry OBJECT-TYPE
+         SYNTAX  MxGateWayEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX        {mxGateWayIndex}
+              ::= { mxGateWayTable 1}
+
+MxGateWayEntry ::= SEQUENCE {  
+                         mxGateWayIndex      INTEGER,
+                         mxGateWayType       DisplayString,
+                         mxGateWayWhere      DisplayString,
+                         mxGateWayDescr      DisplayString,
+                         mxGateWayOperStatus INTEGER
+                         }
+
+mxGateWayIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each interface. "
+              ::= {mxGateWayEntry 1}
+
+mxGateWayType OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Information of type of interface for this
+                       interface, e.g. IPLU...."	
+              ::= {mxGateWayEntry 2}
+
+mxGateWayWhere OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Board position."
+          ::= {mxGateWayEntry 3}
+
+mxGateWayDescr OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      interface."
+          ::= {mxGateWayEntry 4}
+
+mxGateWayOperStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          up(1),
+                          down(2),
+                          unknown(3)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The operational state of the interface.
+                       The unknown(3) state indicates that the agent
+                       can't get the status of the interface. The 
+                       interface can then be either up or down." 	
+              ::= {mxGateWayEntry 5}
+
+-- --
+mxIfInterlim OBJECT IDENTIFIER  ::= {mxInterfaces 10}
+-- --
+mxGjuTable  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxGjuEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the interfaces."
+              ::= { mxIfInterlim 1}
+
+mxGjuEntry OBJECT-TYPE
+         SYNTAX  MxGjuEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX         {mxGjuIndex}
+              ::= { mxGjuTable 1}
+
+MxGjuEntry ::= SEQUENCE {  
+                         mxGjuIndex      INTEGER,
+                         mxGjuType       DisplayString,
+                         mxGjuWhere      DisplayString,
+                         mxGjuRemote     DisplayString,
+                         mxGjuDescr0     DisplayString,
+                         mxGjuDescr1     DisplayString,
+                         mxGjuStatus0    DisplayString,
+                         mxGjuStatus1    DisplayString
+                         }
+
+mxGjuIndex OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each interface. Format XXXYYYY
+                      XXXX =  LIM, YYYY = switchposition."
+              ::= {mxGjuEntry 1}
+
+mxGjuType OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Information of type of remote end
+                       e.g. GJU-G or GJU-L."	
+              ::= {mxGjuEntry 2}
+
+mxGjuWhere OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Board position of GJU-L."
+              ::= {mxGjuEntry 3}
+
+mxGjuRemote OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Remote end position."
+              ::= {mxGjuEntry 4}
+
+mxGjuDescr0 OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      interface connection side 0."
+              ::= {mxGjuEntry 5}
+
+mxGjuDescr1 OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      interface connection side 1."
+              ::= {mxGjuEntry 6}
+
+mxGjuStatus0 OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      status of the interface side 0."
+              ::= {mxGjuEntry 7}
+
+mxGjuStatus1 OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      status of the interface side 1."
+              ::= {mxGjuEntry 8}
+
+
+
+-- --
+mxGsmTable  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxGsmEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the interfaces." 
+          ::= { mxIfInterlim 2}
+
+mxGsmEntry OBJECT-TYPE
+         SYNTAX  MxGsmEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX        {mxGsmIndex}
+              ::= { mxGsmTable 1}
+
+MxGsmEntry ::= SEQUENCE {  
+                         mxGsmIndex      INTEGER,
+                         mxGsmWhere      INTEGER,
+                         mxGsmSyncCtrl   INTEGER,
+                         mxGsmAStatus    INTEGER,
+                         mxGsmBStatus    INTEGER
+                         }
+
+mxGsmIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each GSM starts at 1."
+              ::= {mxGsmEntry 1}
+
+mxGsmWhere OBJECT-TYPE
+        SYNTAX  INTEGER
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "Gsm number."
+              ::= {mxGsmEntry 2}
+
+mxGsmSyncCtrl OBJECT-TYPE
+           SYNTAX        INTEGER {
+                                  noSync (1),
+                                  masterSync (2),
+                                  spareSync (3),
+                                  unknown (4)
+                                   }
+          ACCESS  read-only
+          STATUS  current
+          DESCRIPTION
+                      "Clock status of GSM."
+              ::= {mxGsmEntry 3}
+
+mxGsmAStatus OBJECT-TYPE
+           SYNTAX        INTEGER {
+                                  up (1),
+                                  down (2),
+                                  notPresent (3)
+                                   }
+           ACCESS	read-only
+             STATUS	mandatory
+             DESCRIPTION
+                               "
+                               Operational state of the group Switch side A"
+              ::= {mxGsmEntry 4}	
+
+mxGsmBStatus OBJECT-TYPE
+           SYNTAX        INTEGER {
+                                  up (1),
+                                  down (2),
+                                  notPresent (3)
+                                   }
+           ACCESS	read-only
+             STATUS	mandatory
+             DESCRIPTION
+                               "
+                               Operational state of the group Switch side B"
+              ::= {mxGsmEntry 5}	
+
+
+-- --
+mxGsmActiveSide	OBJECT-TYPE
+           SYNTAX	INTEGER {
+                             side0 (1),
+                             side1 (2), 
+                             notDuplicated (3), 
+                             unknown (4),
+                             notPresent (5)
+                        }
+           ACCESS	read-only
+           STATUS	mandatory
+           DESCRIPTION
+              "
+              The active side of a group Switch 
+              - side0 or side1.
+              "
+              ::= {mxIfInterlim 4}
+
+
+-- --
+mxIfVoiceCard OBJECT IDENTIFIER  ::= {mxInterfaces 11}
+-- --
+mxVcuTable  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxVcuEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the interfaces." 
+              ::= { mxIfVoiceCard 1}
+
+mxVcuEntry OBJECT-TYPE
+         SYNTAX  MxVcuEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX        {mxVcuIndex}
+              ::= { mxVcuTable 1}
+
+MxVcuEntry ::= SEQUENCE {  
+                         mxVcuIndex      INTEGER,
+                         mxVcuType       INTEGER,
+                         mxVcuWhere      DisplayString,
+                         mxVcuDescr      DisplayString,
+                         mxVcuAddDescr   DisplayString,
+                         mxVcuOperStatus INTEGER
+                         }
+
+mxVcuIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A unique value for each interface. Its value
+                      ranges between 0 and the value of mdIfNumber -1.
+                      The value is assigned as: 
+                      LIM * 0x10000 + switchposition."
+              ::= {mxVcuEntry 1}
+
+mxVcuType OBJECT-TYPE
+           SYNTAX	INTEGER {
+                             4B-D16          (1),
+                             4B-D64          (2), 
+                             3BplusD         (3), 
+                             4B              (4),
+                             4B-4B-D16-D16   (5),
+                             4B-4B-D64-D64   (6),
+                             3BplusD-3BplusD (7),
+                             3BplusD-4B-D64  (8),
+                             reserved1       (9),
+                             reserved2      (10)
+                        }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                     "Type of configuration used for this board."
+              ::= {mxVcuEntry 2}
+
+mxVcuWhere OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The equipment position of the VCU board"
+              ::= {mxVcuEntry 3}
+
+mxVcuDescr OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string containing information about the
+                      interface."
+              ::= {mxVcuEntry 4}
+
+mxVcuOperStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          up(1),
+                          down(2),
+                          unknown(3)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The operational state of the interface.
+                       The unknown(3) state indicates that the agent
+                       can't get the status of the interface. The 
+                       interface can then be either up or down." 	
+              ::= {mxVcuEntry 5}
+
+
+-- --
+mxIfCasboards OBJECT IDENTIFIER  ::= {mxInterfaces 12}
+-- --
+mxCasBoardTable  OBJECT-TYPE
+         SYNTAX  SEQUENCE OF MxCasBoardEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+                  "A table with data for the interfaces.
+                   The variables are almost the same as the 
+                   interface group in mib-2." 
+              ::= { mxIfCasboards 1}
+
+mxCasBoardEntry OBJECT-TYPE
+         SYNTAX  MxCasBoardEntry
+         ACCESS  not-accessible
+         STATUS  current
+         DESCRIPTION
+         "                    "
+         INDEX        {mxCasBoardIndex}
+              ::= { mxCasBoardTable 1}
+
+MxCasBoardEntry ::= SEQUENCE {  
+                         mxCasBoardIndex      INTEGER,
+                         mxCasBoardData       DisplayString,
+                         mxCasBoardWhere      DisplayString,
+                         mxCasBoardDirno      DisplayString,
+                         mxCasBoardOperStatus INTEGER
+                         }
+
+mxCasBoardIndex  OBJECT-TYPE
+         SYNTAX  INTEGER
+         ACCESS  read-only
+         STATUS  current
+         DESCRIPTION
+                      "A directory number."
+              ::= {mxCasBoardEntry 1}
+
+mxCasBoardData OBJECT-TYPE
+        SYNTAX  DisplayString 
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                     "Type of configuration, corresponds to the 
+                      EL7 ICAT configuration see command EXTEI.
+                      "
+              ::= {mxCasBoardEntry 2}
+
+mxCasBoardWhere OBJECT-TYPE
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The equipment position of the CAS line"
+              ::= {mxCasBoardEntry 3}
+
+mxCasBoardDirno OBJECT-TYPE  
+        SYNTAX  DisplayString
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "A textual string directory number."
+              ::= {mxCasBoardEntry 4}
+
+
+mxCasBoardOperStatus OBJECT-TYPE
+        SYNTAX  INTEGER {
+                          idle(1),
+                          busy(2),
+                          blocked(3),
+                          unknown(4)
+                          }
+        ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                      "The operational state of the interface.
+                       The unknown(3) state indicates that the agent
+                       can't get the status of the interface. The 
+                       interface can then be either up or down." 	
+              ::= {mxCasBoardEntry 5}
+
+
+-- ************************************************************* --
+-- * The interface traps                                         --
+-- ************************************************************* --
+-- The object traps are sent when status is affected.            --
+--                                                               --
+-- The trap contains the mxObjectStatus.                         --
+-- If the trap was generated from an mxAlarm-trap the alarm      --
+-- data causing change of status is present if possible.         --
+-- If the object trap was caused by alarm the mxObjectStatus     --
+-- is unknown.                                                   --
+--                                                               --
+-- If the mxObject-trap was sent without connection to any       --
+-- mxAlarm-trap, a default value is aasigned to mxalHandle == 0. --
+-- If mxalHandle == 0, mxObjectStatus has a known status.        --
+--                                                               --
+-- Note: Several alarms can be made for the same object,         --
+--       thus a new reading of the object is required to         --
+--       get the new status.                                     --
+--                                                               --
+
+mxObjectBackupStatusChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxLimIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 1 }
+
+mxObjectTrunkChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxTrunkIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 2 }
+
+mxObjectOpiChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxOpiIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 3 }
+
+mxObjectCilChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxCilIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 4 }
+
+mxObjectCti1Change NOTIFICATION-TYPE
+      OBJECTS  {
+            mxCti1Index,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 5 }
+
+mxObjectCti3Change NOTIFICATION-TYPE
+      OBJECTS  {
+            mxCti3Index,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 6 }
+
+mxObjectIcuChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxIcuIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 7 }
+
+mxObjectMgwChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxMgwIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 8 }
+
+mxObjectGatewayChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxGateWayIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 9 }
+
+mxObjectGjuChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxGjuIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 10 }
+
+mxObjectGsmChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxGsmIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 11 }
+
+mxObjectGsmSideChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxGsmActiveSide,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 12 }
+
+mxObjectVcuChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxVcuIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 13 }
+
+mxObjectCasBoardChange NOTIFICATION-TYPE
+      OBJECTS  {
+            mxCasBoardIndex,
+            mxObjectStatus,
+            mxalHandle,
+            mxalFrom,
+            mxalFaultCode,
+            mxalSeverity, 
+            mxalWhere,  
+            mxalExplanation,
+            mxalNoticed,
+            mxalNoticedNote
+            }
+      STATUS      current
+      DESCRIPTION 
+          "This trap is sent when MX-ONE status 
+           for this object is changed."
+              ::=  {mxIfTrap 14 }
+
+
+END
+
