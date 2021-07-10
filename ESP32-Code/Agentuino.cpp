@@ -707,7 +707,7 @@ void pduReceived() {
                 // response packet from get-request - ardTemperature1
                 //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, ardTemperature1);
                 status = pdu.VALUE.encode(SNMP_SYNTAX_INT, temperaturaC);
-                Serial.println("Temperatura mandada");
+                //Serial.println("Temperatura mandada");
                 //mando temperatura
                 pdu.type = SNMP_PDU_RESPONSE;
                 pdu.error = status;

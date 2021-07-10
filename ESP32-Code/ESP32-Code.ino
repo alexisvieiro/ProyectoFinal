@@ -115,9 +115,9 @@ void loop() {
    if(millis()>(tiempoSensor+1000)){
       tiempoSensor=millis();
       sensors.requestTemperatures(); 
-      temperaturaC = (int) sensors.getTempCByIndex(0);
-      Serial.print("Temperatura sobrescrita: ");
-      Serial.println(temperaturaC);
+      temperaturaC = round(sensors.getTempCByIndex(0));
+      //Serial.print("Temperatura sobrescrita: ");
+      //Serial.println(temperaturaC);
       
     }
     
