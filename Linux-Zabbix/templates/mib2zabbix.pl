@@ -548,7 +548,7 @@ sub node_to_trapitem {
     # Create trap key
     my $oid = $node->{ objectID };
     $oid =~ s/\./\\./g;
-    $item->{ key } = "snmptrap[$node->{ label }]";
+    $item->{ key } = "snmptrap[$node->{ moduleID }::$node->{ label }]";
 
     # Parse item desciption
     my $desc = '';
