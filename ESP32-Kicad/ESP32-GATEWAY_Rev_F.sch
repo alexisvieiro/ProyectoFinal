@@ -237,31 +237,6 @@ F 3 "" H 5700 4000 60  0000 C CNN
 $EndComp
 Text Notes 4400 1100 0    157  Italic 31
 Power Supply
-$Comp
-L ESP32-GATEWAY_Rev_F:SIDE_WTCM-TR(3x4) BUT1
-U 1 1 580F02B2
-P 19400 7300
-F 0 "BUT1" H 19050 7430 60  0000 L CNN
-F 1 "T1107A(6x3,8x2,5MM)" H 19040 7230 39  0000 L CNN
-F 2 "OLIMEX_Buttons-FP:T1107A(6x3,8x2,5MM)" H 19399 7338 60  0001 C CNN
-F 3 "" H 19399 7338 60  0000 C CNN
-F 4 "Value 1" H 19400 7300 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 19400 7300 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 19400 7300 60  0001 C CNN "Fieldname3"
-	1    19400 7300
-	-1   0    0    -1  
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:GND #PWR052
-U 1 1 580FA130
-P 18400 7300
-F 0 "#PWR052" H 18400 7050 50  0001 C CNN
-F 1 "GND" H 18400 7150 50  0000 C CNN
-F 2 "" H 18400 7300 60  0000 C CNN
-F 3 "" H 18400 7300 60  0000 C CNN
-	1    18400 7300
-	0    1    1    0   
-$EndComp
 Text Notes 19700 6300 0    138  Italic 28
 Buttons
 $Comp
@@ -724,8 +699,6 @@ Text Notes 3700 5500 0    177  ~ 35
 Ethernet
 Text Notes 12500 1300 0    118  Italic 24
 ESP-WROOM-32\n     MODULE
-Text Notes 12400 6300 0    138  Italic 28
-SD/MMC Card
 Text Label 15600 2000 0    50   ~ 0
 GPIO1\U0TXD
 Text Label 15600 2200 0    50   ~ 0
@@ -919,9 +892,7 @@ $EndComp
 Text Label 10600 3000 0    60   ~ 0
 ESP_EN
 Text Label 15600 4700 0    50   ~ 0
-GPI34\BUT1
-Text Label 20000 7300 0    39   ~ 0
-GPI34\BUT1
+GPI34
 $Comp
 L ESP32-GATEWAY_Rev_F:SJ PHY_RST1
 U 1 1 582C1134
@@ -1051,99 +1022,19 @@ F 6 "Value3" H 7800 9650 60  0001 C CNN "Fieldname3"
 	-1   0    0    1   
 $EndComp
 $Comp
-L ESP32-GATEWAY_Rev_F:MICRO_SD(TFC-WXCP11-08-LF) MICRO_SD1
-U 1 1 5817A7CB
-P 16600 7400
-F 0 "MICRO_SD1" H 16200 7950 50  0000 L CNN
-F 1 "TFC-WXCP11-08-LF" H 15900 6700 50  0000 L CNN
-F 2 "OLIMEX_Connectors-FP:TFC-WXCP11-08-LF" H 16630 7550 20  0001 C CNN
-F 3 "" H 16600 7400 60  0000 C CNN
-F 4 "Value 1" H 16600 7400 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 16600 7400 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 16600 7400 60  0001 C CNN "Fieldname3"
-	1    16600 7400
-	1    0    0    -1  
-$EndComp
-$Comp
 L ESP32-GATEWAY_Rev_F:+3.3V #PWR044
 U 1 1 58194E17
-P 10800 6600
-F 0 "#PWR044" H 10800 6450 50  0001 C CNN
-F 1 "+3.3V" H 10815 6773 50  0000 C CNN
-F 2 "" H 10800 6600 60  0000 C CNN
-F 3 "" H 10800 6600 60  0000 C CNN
-	1    10800 6600
+P 18100 6400
+F 0 "#PWR044" H 18100 6250 50  0001 C CNN
+F 1 "+3.3V" H 18115 6573 50  0000 C CNN
+F 2 "" H 18100 6400 60  0000 C CNN
+F 3 "" H 18100 6400 60  0000 C CNN
+	1    18100 6400
 	1    0    0    -1  
 $EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:R R29
-U 1 1 58196627
-P 11450 6900
-F 0 "R29" H 11225 6950 50  0000 C CNN
-F 1 "10k/R0603" H 11825 6950 50  0000 C CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 11450 6830 30  0001 C CNN
-F 3 "" V 11450 6900 30  0000 C CNN
-F 4 "Value 1" H 11450 6900 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 11450 6900 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 11450 6900 60  0001 C CNN "Fieldname3"
-	1    11450 6900
-	1    0    0    -1  
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:R R43
-U 1 1 581B0269
-P 15250 7400
-F 0 "R43" H 15050 7450 50  0000 C CNN
-F 1 "10R/R0603" H 15610 7440 50  0000 C CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 15250 7330 30  0001 C CNN
-F 3 "" V 15250 7400 30  0000 C CNN
-F 4 "Value 1" H 15250 7400 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 15250 7400 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 15250 7400 60  0001 C CNN "Fieldname3"
-	1    15250 7400
-	1    0    0    -1  
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:GND #PWR049
-U 1 1 581C1790
-P 15500 8200
-F 0 "#PWR049" H 15500 7950 50  0001 C CNN
-F 1 "GND" H 15580 8060 50  0000 R CNN
-F 2 "" H 15500 8200 60  0000 C CNN
-F 3 "" H 15500 8200 60  0000 C CNN
-	1    15500 8200
-	1    0    0    -1  
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:C C10
-U 1 1 581D0018
-P 12700 7200
-F 0 "C10" V 12660 7030 50  0000 C CNN
-F 1 "47uF/6.3V/20%/X5R/C0805" V 12650 7725 39  0000 C CNN
-F 2 "OLIMEX_RLC-FP:C_0805_5MIL_DWS" H 12700 7200 60  0001 C CNN
-F 3 "" H 12700 7200 60  0000 C CNN
-F 4 "Value 1" H 12700 7200 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 12700 7200 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 12700 7200 60  0001 C CNN "Fieldname3"
-	1    12700 7200
-	0    1    1    0   
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:GND #PWR048
-U 1 1 581D887C
-P 11400 7200
-F 0 "#PWR048" H 11400 6950 50  0001 C CNN
-F 1 "GND" V 11405 7072 50  0000 R CNN
-F 2 "" H 11400 7200 60  0000 C CNN
-F 3 "" H 11400 7200 60  0000 C CNN
-	1    11400 7200
-	0    1    1    0   
-$EndComp
-Text Label 13200 7400 0    50   ~ 0
-GPIO14\HS2_CLK
-Text Label 13200 7500 0    50   ~ 0
+Text Label 20500 7300 0    50   ~ 0
 GPIO2\HS2_DATA0
-Text Label 13200 6900 0    50   ~ 0
+Text Label 20500 6700 0    50   ~ 0
 GPIO15\HS2_CMD
 Text Label 7600 5900 0    39   ~ 0
 GPIO19\EMAC_TXD0(RMII)
@@ -1172,17 +1063,6 @@ F 2 "" H 8000 10700 60  0000 C CNN
 F 3 "" H 8000 10700 60  0000 C CNN
 	1    8000 10700
 	0    -1   -1   0   
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:PWR_FLAG #FLG08
-U 1 1 58216434
-P 15500 6600
-F 0 "#FLG08" H 15500 6695 50  0001 C CNN
-F 1 "PWR_FLAG" H 15500 6780 31  0000 C CNN
-F 2 "" H 15500 6600 60  0000 C CNN
-F 3 "" H 15500 6600 60  0000 C CNN
-	1    15500 6600
-	1    0    0    -1  
 $EndComp
 Text Label 5000 6200 2    39   ~ 0
 VDD1A-2A
@@ -1249,31 +1129,6 @@ F 6 "Value3" H 2100 8100 60  0001 C CNN "Fieldname3"
 $EndComp
 Text Notes 900  2600 0    100  Italic 20
 +5V_Only!!!
-$Comp
-L ESP32-GATEWAY_Rev_F:+3.3V #PWR059
-U 1 1 58D45C48
-P 22100 7000
-F 0 "#PWR059" H 22100 6850 50  0001 C CNN
-F 1 "+3.3V" H 22000 7150 50  0000 L CNN
-F 2 "" H 22100 7000 60  0000 C CNN
-F 3 "" H 22100 7000 60  0000 C CNN
-	1    22100 7000
-	-1   0    0    -1  
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:R R45
-U 1 1 58D45C51
-P 21150 7300
-F 0 "R45" H 20940 7340 50  0000 C CNN
-F 1 "10k/R0603" H 21475 7350 50  0000 C CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 21150 7230 30  0001 C CNN
-F 3 "" V 21150 7300 30  0000 C CNN
-F 4 "Value 1" H 21150 7300 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 21150 7300 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 21150 7300 60  0001 C CNN "Fieldname3"
-	1    21150 7300
-	-1   0    0    -1  
-$EndComp
 $Comp
 L ESP32-GATEWAY_Rev_F:CH340T(SSOP20W) U5
 U 1 1 58D41048
@@ -1635,31 +1490,31 @@ NoConn ~ 5200 14000
 NoConn ~ 5200 14200
 Text Notes 3850 12300 0    177  ~ 35
 USB to UART
-Text Label 20000 8100 0    39   ~ 0
+Text Label 20950 8100 0    39   ~ 0
 ESP_EN
 $Comp
 L ESP32-GATEWAY_Rev_F:GND #PWR053
 U 1 1 580FA16E
-P 18400 8100
-F 0 "#PWR053" H 18400 7850 50  0001 C CNN
-F 1 "GND" H 18400 7950 50  0000 C CNN
-F 2 "" H 18400 8100 60  0000 C CNN
-F 3 "" H 18400 8100 60  0000 C CNN
-	1    18400 8100
+P 19350 8100
+F 0 "#PWR053" H 19350 7850 50  0001 C CNN
+F 1 "GND" H 19350 7950 50  0000 C CNN
+F 2 "" H 19350 8100 60  0000 C CNN
+F 3 "" H 19350 8100 60  0000 C CNN
+	1    19350 8100
 	0    1    1    0   
 $EndComp
 $Comp
 L ESP32-GATEWAY_Rev_F:SIDE_WTCM-TR(3x4) RST1
 U 1 1 580F1A95
-P 19400 8100
-F 0 "RST1" H 19050 8220 60  0000 L CNN
-F 1 "T1107A(6x3,8x2,5MM)" H 19040 8020 39  0000 L CNN
-F 2 "OLIMEX_Buttons-FP:T1107A(6x3,8x2,5MM)" H 19399 8138 60  0001 C CNN
-F 3 "" H 19399 8138 60  0000 C CNN
-F 4 "Value 1" H 19400 8100 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 19400 8100 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 19400 8100 60  0001 C CNN "Fieldname3"
-	1    19400 8100
+P 20350 8100
+F 0 "RST1" H 20000 8220 60  0000 L CNN
+F 1 "T1107A(6x3,8x2,5MM)" H 19990 8020 39  0000 L CNN
+F 2 "OLIMEX_Buttons-FP:T1107A(6x3,8x2,5MM)" H 20349 8138 60  0001 C CNN
+F 3 "" H 20349 8138 60  0000 C CNN
+F 4 "Value 1" H 20350 8100 60  0001 C CNN "Fieldname 1"
+F 5 "Value2" H 20350 8100 60  0001 C CNN "Fieldname2"
+F 6 "Value3" H 20350 8100 60  0001 C CNN "Fieldname3"
+	1    20350 8100
 	-1   0    0    -1  
 $EndComp
 $Comp
@@ -1725,17 +1580,6 @@ F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" V 6630 14950 30  0001 C CNN
 F 3 "" H 6700 14950 30  0000 C CNN
 	1    6700 14950
 	0    -1   1    0   
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:R R16
-U 1 1 58F59DC8
-P 15250 7500
-F 0 "R16" H 15050 7450 50  0000 C CNN
-F 1 "220R/R0603" H 15625 7450 50  0000 C CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" V 15180 7500 30  0001 C CNN
-F 3 "" H 15250 7500 30  0000 C CNN
-	1    15250 7500
-	1    0    0    1   
 $EndComp
 $Comp
 L ESP32-GATEWAY_Rev_F:BAT54C(SOT23-3) D4
@@ -1823,7 +1667,7 @@ Connection ~ 11300 2100
 Wire Wire Line
 	11500 2500 11200 2500
 Wire Notes Line
-	17150 700  17150 5500
+	17100 700  17100 5500
 Wire Wire Line
 	15200 3500 16700 3500
 Wire Wire Line
@@ -2199,14 +2043,6 @@ Wire Wire Line
 Wire Wire Line
 	6700 9200 6700 9100
 Connection ~ 6700 8400
-Wire Notes Line
-	17200 6000 10000 6000
-Wire Notes Line
-	10000 6000 10000 8500
-Wire Notes Line
-	10000 8500 17200 8500
-Wire Notes Line
-	17200 8500 17200 6000
 Wire Wire Line
 	15200 4700 16700 4700
 Wire Wire Line
@@ -2226,51 +2062,6 @@ Wire Notes Line
 Wire Notes Line
 	17700 5500 22600 5500
 Wire Wire Line
-	10800 7500 11300 7500
-Wire Wire Line
-	12800 7200 14800 7200
-Wire Wire Line
-	11400 7200 11500 7200
-Wire Wire Line
-	16100 7300 11500 7300
-Wire Wire Line
-	11500 7300 11500 7200
-Connection ~ 11500 7200
-Wire Wire Line
-	10800 7100 12600 7100
-Connection ~ 10800 7100
-Wire Wire Line
-	13000 7100 14800 7100
-Wire Wire Line
-	14800 7100 14800 7200
-Connection ~ 14800 7200
-Wire Wire Line
-	11600 7500 15100 7500
-Wire Wire Line
-	11600 7600 14900 7600
-Wire Wire Line
-	11600 7700 15000 7700
-Wire Wire Line
-	10800 6900 11300 6900
-Connection ~ 10800 6900
-Wire Wire Line
-	11300 6800 10800 6800
-Connection ~ 10800 6800
-Wire Wire Line
-	11600 6900 14900 6900
-Wire Wire Line
-	14900 6900 14900 7100
-Wire Wire Line
-	14900 7100 16100 7100
-Wire Wire Line
-	16100 7000 15000 7000
-Wire Wire Line
-	15000 7000 15000 6800
-Wire Wire Line
-	16100 7400 15400 7400
-Wire Wire Line
-	15100 7400 13100 7400
-Wire Wire Line
 	6500 5900 8500 5900
 Wire Wire Line
 	11000 2700 11200 2700
@@ -2283,15 +2074,6 @@ Wire Wire Line
 	8000 10700 8500 10700
 Wire Notes Line
 	700  11200 9500 11200
-Wire Wire Line
-	15500 6600 15500 7200
-Connection ~ 15500 7200
-Wire Wire Line
-	10800 6600 10800 6800
-Wire Wire Line
-	15500 8200 15500 7900
-Wire Wire Line
-	15500 7900 16100 7900
 Wire Wire Line
 	1700 9100 1700 9200
 Wire Wire Line
@@ -2316,10 +2098,6 @@ Wire Notes Line
 	22600 8500 22600 6000
 Wire Notes Line
 	22600 6000 17700 6000
-Wire Wire Line
-	21300 7300 22100 7300
-Wire Wire Line
-	22100 7300 22100 7000
 Wire Wire Line
 	1500 13700 4200 13700
 Wire Wire Line
@@ -2446,9 +2224,9 @@ Wire Notes Line
 Wire Notes Line
 	9500 15800 9500 11800
 Wire Wire Line
-	20400 8100 19600 8100
+	21350 8100 20550 8100
 Wire Wire Line
-	18400 8100 19200 8100
+	19350 8100 20150 8100
 Wire Wire Line
 	10500 2500 10500 2700
 Wire Wire Line
@@ -2469,8 +2247,6 @@ Wire Wire Line
 	6700 14600 6700 14800
 Wire Wire Line
 	6700 15100 6700 15400
-Wire Wire Line
-	15400 7500 16100 7500
 Wire Wire Line
 	7100 15400 7100 15000
 Wire Wire Line
@@ -2527,12 +2303,6 @@ $EndComp
 Connection ~ 2300 1800
 Wire Wire Line
 	1600 4000 1600 3300
-Text Label 13200 7900 0    50   ~ 0
-GPIO4\HS2_DATA1
-Text Label 13200 8200 0    50   ~ 0
-GPIO12\HS2_DATA2
-Text Label 13200 6600 0    50   ~ 0
-GPIO13\HS2_DATA3
 Wire Wire Line
 	22050 4100 20750 4100
 Wire Wire Line
@@ -2545,8 +2315,6 @@ Wire Wire Line
 	22050 3200 20750 3200
 Wire Wire Line
 	22050 3300 20750 3300
-Wire Wire Line
-	22050 3800 20750 3800
 Wire Wire Line
 	22050 3900 20750 3900
 Wire Wire Line
@@ -2616,22 +2384,12 @@ F 3 "" H 1250 1800 60  0000 C CNN
 	1    1250 1800
 	0    -1   -1   0   
 $EndComp
-Text Label 20850 3400 0    50   ~ 0
-GPIO32
 Text Label 20850 3500 0    50   ~ 0
 GPIO33\LED
 Text Label 20850 2500 0    50   ~ 0
 GPIO5\PHY_PWR
-Text Label 20850 3700 0    50   ~ 0
-GPI35
-Text Label 20850 3800 0    50   ~ 0
-GPI36
-Text Label 20850 3900 0    50   ~ 0
-GPI39
 Text Label 20850 3200 0    50   ~ 0
 GPIO16
-Text Label 20850 3600 0    49   ~ 0
-GPI34\BUT1
 Text Label 20850 2400 0    50   ~ 0
 ESP_EN
 $Comp
@@ -2716,43 +2474,18 @@ Wire Notes Line
 Text Notes 19200 9400 0    138  Italic 28
 Mounting Holes
 $Comp
-L ESP32-GATEWAY_Rev_F:R R2
-U 1 1 59651CE9
-P 11450 6800
-F 0 "R2" H 11150 6750 50  0000 L CNN
-F 1 "2.2k/R0603" H 11600 6750 50  0000 L CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 11450 6730 30  0001 C CNN
-F 3 "" V 11450 6800 30  0000 C CNN
-F 4 "Value 1" H 11450 6800 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 11450 6800 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 11450 6800 60  0001 C CNN "Fieldname3"
-	1    11450 6800
-	1    0    0    1   
-$EndComp
-$Comp
 L ESP32-GATEWAY_Rev_F:R R3
 U 1 1 596534C1
-P 11450 7500
-F 0 "R3" H 11150 7450 50  0000 L CNN
-F 1 "2.2k/R0603" H 11600 7450 50  0000 L CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 11450 7430 30  0001 C CNN
-F 3 "" V 11450 7500 30  0000 C CNN
-F 4 "Value 1" H 11450 7500 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 11450 7500 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 11450 7500 60  0001 C CNN "Fieldname3"
-	1    11450 7500
+P 18750 7300
+F 0 "R3" H 18450 7250 50  0000 L CNN
+F 1 "2.2k/R0603" H 18900 7250 50  0000 L CNN
+F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 18750 7230 30  0001 C CNN
+F 3 "" V 18750 7300 30  0000 C CNN
+F 4 "Value 1" H 18750 7300 60  0001 C CNN "Fieldname 1"
+F 5 "Value2" H 18750 7300 60  0001 C CNN "Fieldname2"
+F 6 "Value3" H 18750 7300 60  0001 C CNN "Fieldname3"
+	1    18750 7300
 	1    0    0    1   
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:L L4
-U 1 1 59658F3F
-P 12800 7100
-F 0 "L4" H 12550 7150 50  0000 C CNN
-F 1 "FB0805/600R/2A" H 13325 7150 50  0000 C CNN
-F 2 "OLIMEX_RLC-FP:L_0805_5MIL_DWS" H 12750 7100 60  0001 C CNN
-F 3 "" H 12750 7100 60  0000 C CNN
-	1    12800 7100
-	1    0    0    -1  
 $EndComp
 $Comp
 L ESP32-GATEWAY_Rev_F:L L2
@@ -2875,19 +2608,7 @@ Wire Wire Line
 Wire Wire Line
 	6700 10000 6700 10600
 Wire Wire Line
-	11500 7200 12600 7200
-Wire Wire Line
-	10800 7100 10800 7500
-Wire Wire Line
-	14800 7200 15500 7200
-Wire Wire Line
-	10800 6900 10800 7100
-Wire Wire Line
-	10800 6800 10800 6900
-Wire Wire Line
 	11200 2700 11500 2700
-Wire Wire Line
-	15500 7200 16100 7200
 Wire Wire Line
 	1800 8800 1900 8800
 Wire Wire Line
@@ -3172,14 +2893,8 @@ Wire Wire Line
 	15400 1900 16700 1900
 Text Label 20850 3000 0    50   ~ 0
 GPIO14\HS2_CLK
-Text Label 20850 2600 0    50   ~ 0
-GPIO2\HS2_DATA0
-Text Label 20850 3100 0    50   ~ 0
-GPIO15\HS2_CMD
 Text Label 20850 2700 0    50   ~ 0
 GPIO4\HS2_DATA1
-Text Label 20850 2800 0    50   ~ 0
-GPIO12\HS2_DATA2
 Text Label 20850 2900 0    50   ~ 0
 GPIO13\HS2_DATA3
 Wire Wire Line
@@ -3200,113 +2915,6 @@ NoConn ~ 15200 2700
 NoConn ~ 15200 2800
 NoConn ~ 15200 2900
 NoConn ~ 15200 3000
-$Comp
-L ESP32-GATEWAY_Rev_F:R R7
-U 1 1 5CCFCC2A
-P 11450 7600
-F 0 "R7" H 11150 7550 50  0000 L CNN
-F 1 "2.2k/R0603" H 11600 7550 50  0000 L CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 11450 7530 30  0001 C CNN
-F 3 "" V 11450 7600 30  0000 C CNN
-F 4 "Value 1" H 11450 7600 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 11450 7600 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 11450 7600 60  0001 C CNN "Fieldname3"
-	1    11450 7600
-	1    0    0    1   
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:R R8
-U 1 1 5CCFD3E5
-P 11450 7700
-F 0 "R8" H 11150 7650 50  0000 L CNN
-F 1 "2.2k/R0603" H 11600 7650 50  0000 L CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 11450 7630 30  0001 C CNN
-F 3 "" V 11450 7700 30  0000 C CNN
-F 4 "Value 1" H 11450 7700 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 11450 7700 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 11450 7700 60  0001 C CNN "Fieldname3"
-	1    11450 7700
-	1    0    0    1   
-$EndComp
-Wire Wire Line
-	10800 7700 11300 7700
-Wire Wire Line
-	10800 7500 10800 7600
-Connection ~ 10800 7500
-Wire Wire Line
-	11300 7600 10800 7600
-Connection ~ 10800 7600
-Wire Wire Line
-	10800 7600 10800 7700
-Wire Wire Line
-	14900 7600 14900 7900
-Wire Wire Line
-	14900 7900 14500 7900
-Connection ~ 14900 7600
-Wire Wire Line
-	14900 7600 16100 7600
-Wire Wire Line
-	15000 7700 15000 8200
-Wire Wire Line
-	15000 8200 14500 8200
-Connection ~ 15000 7700
-Wire Wire Line
-	15000 7700 16100 7700
-Wire Wire Line
-	14200 7900 13100 7900
-Wire Wire Line
-	14200 8200 13100 8200
-Wire Wire Line
-	15000 6800 15000 6600
-Wire Wire Line
-	15000 6600 14500 6600
-Wire Wire Line
-	14200 6600 13100 6600
-Connection ~ 15000 6800
-Wire Wire Line
-	15000 6800 11600 6800
-$Comp
-L ESP32-GATEWAY_Rev_F:R R11
-U 1 1 5CD4BFBA
-P 14350 8200
-F 0 "R11" H 14300 8125 50  0000 L CNN
-F 1 "NA/R0603" H 14150 8300 50  0000 L CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 14350 8130 30  0001 C CNN
-F 3 "" V 14350 8200 30  0000 C CNN
-F 4 "Value 1" H 14350 8200 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 14350 8200 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 14350 8200 60  0001 C CNN "Fieldname3"
-	1    14350 8200
-	1    0    0    1   
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:R R9
-U 1 1 5CD4D1F6
-P 14350 6600
-F 0 "R9" H 14300 6525 50  0000 L CNN
-F 1 "NA/R0603" H 14175 6700 50  0000 L CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 14350 6530 30  0001 C CNN
-F 3 "" V 14350 6600 30  0000 C CNN
-F 4 "Value 1" H 14350 6600 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 14350 6600 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 14350 6600 60  0001 C CNN "Fieldname3"
-	1    14350 6600
-	1    0    0    1   
-$EndComp
-$Comp
-L ESP32-GATEWAY_Rev_F:R R10
-U 1 1 5CD50200
-P 14350 7900
-F 0 "R10" H 14300 7825 50  0000 L CNN
-F 1 "NA/R0603" H 14175 8000 50  0000 L CNN
-F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 14350 7830 30  0001 C CNN
-F 3 "" V 14350 7900 30  0000 C CNN
-F 4 "Value 1" H 14350 7900 60  0001 C CNN "Fieldname 1"
-F 5 "Value2" H 14350 7900 60  0001 C CNN "Fieldname2"
-F 6 "Value3" H 14350 7900 60  0001 C CNN "Fieldname3"
-	1    14350 7900
-	1    0    0    1   
-$EndComp
 $Comp
 L ESP32-GATEWAY_Rev_F:SJ LED_E1
 U 1 1 5CDAC40C
@@ -3455,24 +3063,10 @@ Wire Wire Line
 	3500 6800 3500 6500
 Connection ~ 3500 6800
 Connection ~ 3500 6500
-Text Notes 12000 8250 0    39   ~ 0
-No usar. Se necesita LOW o desconectado\n para la flash con 3v3.\n\n
-Text Notes 11900 7950 0    39   ~ 0
-Incluido en ll bootstrap pero no se usa.\nSe puede usar tranquilamente.
-Text Notes 12000 7550 0    39   ~ 0
-Requiere de LOW para descargar codigo\nDejar desconectado o a masa.
-Text Notes 13900 7400 0    39   ~ 0
-Arranca con PWM. \nTestear con ds18b20
-Text Notes 14200 8400 0    50   ~ 0
-No está\n
-Text Notes 14200 8100 0    50   ~ 0
-No está\n
-Text Notes 13650 7100 0    39   ~ 0
-Dejar la pull-up para habilitar los logs\ndurante el boot. Evitar usar\n\n
-Text Notes 14200 6500 0    50   ~ 0
-No está\n
-Text Notes 13400 6650 0    39   ~ 0
-Se puede usar.
+Text Notes 21250 7350 0    39   ~ 0
+Requiere de LOW para descargar codigo\nDejar desconectado o a masa. Listo.
+Text Notes 21250 6750 0    39   ~ 0
+Dejar la pull-up para habilitar los logs\ndurante el boot. Listo
 Text Notes 7550 14600 0    39   ~ 0
 Debil pull-up interno. \nCon 1 entra a boot normal\nCon 0, descarga codigo.
 Text Notes 7500 15500 0    39   ~ 0
@@ -3487,53 +3081,37 @@ Text Notes 18500 2400 0    39   ~ 0
 Se usa para habilitar el esp32. Dejar un pin para el programador externo
 Text Notes 19450 2500 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet
-Text Notes 17800 2600 0    39   ~ 0
-Debil pull-down interno. Requiere de LOW para descargar codigo. Dejar desconectado o a masa.
-Text Notes 20300 3300 0    39   ~ 0
-No Usar. Listo
-Text Notes 18550 2700 0    39   ~ 0
-Incluido en el bootstrap pero no se usa. Se puede usar tranquilamente.
-Text Notes 18750 2800 0    39   ~ 0
-No usar. Se necesita LOW o desconectado para la flash con 3v3.
-Text Notes 19550 2900 0    39   ~ 0
-Probado con ds18b20 y pullup interno.
+Text Notes 18800 2700 0    39   ~ 0
+Incluido en el bootstrap pero no se usa. Dejado por las dudas.
+Text Notes 20400 2900 0    39   ~ 0
+Usar. Listo
 Text Notes 19000 3000 0    39   ~ 0
 Arranca con PWM. Probado con ds18b20 y pullup interno.\n
-Text Notes 18650 3100 0    39   ~ 0
-Dejar la pull-up para habilitar los logs durante el boot. Evitar usar\n
-Text Notes 19550 3200 0    39   ~ 0
-Probado con ds18b20 y pullup interno.\n
+Text Notes 20400 3200 0    39   ~ 0
+Usar. Listo\n
 Text Notes 20400 3400 0    39   ~ 0
 Usar. Listo\n
 Text Notes 20400 3500 0    39   ~ 0
 Usar. Listo\n
-Text Notes 19650 3600 0    39   ~ 0
-Solo entrada. Sin pulldown-pullup
-Text Notes 19650 3700 0    39   ~ 0
-Solo entrada. Sin pulldown-pullup
-Text Notes 19650 3800 0    39   ~ 0
-Solo entrada. Sin pulldown-pullup
-Text Notes 19650 3900 0    39   ~ 0
-Solo entrada. Sin pulldown-pullup
 Text Notes 7750 13100 0    39   ~ 0
 TX/RX para programarlo\n
 Text Notes 7050 13450 0    39   ~ 0
 Se usa para habilitar el esp32. Dejar un pin para el programador externo
-Text Notes 16800 3800 0    39   ~ 0
+Text Notes 16750 3800 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet
-Text Notes 16800 4000 0    39   ~ 0
+Text Notes 16750 4000 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet
-Text Notes 16800 4200 0    39   ~ 0
+Text Notes 16750 4200 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet
-Text Notes 16800 4300 0    39   ~ 0
+Text Notes 16750 4300 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet
-Text Notes 16800 3900 0    39   ~ 0
+Text Notes 16750 3900 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet
-Text Notes 16800 4100 0    39   ~ 0
+Text Notes 16750 4100 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet
-Text Notes 16800 3700 0    39   ~ 0
+Text Notes 16750 3700 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet
-Text Notes 16800 4400 0    39   ~ 0
+Text Notes 16750 4400 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet
 Text Notes 16750 2400 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet
@@ -3542,36 +3120,77 @@ TX/RX para programarlo\n
 Text Notes 16750 2200 0    39   ~ 0
 TX/RX para programarlo\n
 Text Notes 16750 2100 0    39   ~ 0
-Debil pull-down interno. Requiere de LOW para descargar codigo. Dejar desconectado o a masa. Faltaria un pulldown.
+Debil pull-down interno. Requiere de LOW para descargar codigo. Dejar desconectado o a masa. Listo
 Text Notes 16750 2300 0    39   ~ 0
 Se puede usar.
-Text Notes 16800 3100 0    39   ~ 0
-Se necesita LOW o desconectado para la flash con 3v3.
-Text Notes 16800 3200 0    39   ~ 0
-Se puede usar.
-Text Notes 16800 3300 0    39   ~ 0
+Text Notes 16750 3100 0    39   ~ 0
+Se necesita LOW o desconectado para la flash con 3v3. Listo
+Text Notes 16750 3200 0    39   ~ 0
+Usar. Listo
+Text Notes 16750 3300 0    39   ~ 0
 Arranca con PWM. Testear con ds18b20
-Text Notes 16800 3400 0    39   ~ 0
+Text Notes 17850 3400 0    39   ~ 0
 Dejar la pull-up para habilitar los logs durante el boot. Evitar usar\n
-Text Notes 16800 3500 0    39   ~ 0
-Se puede usar con duda.
-Text Notes 16800 3600 0    39   ~ 0
+Text Notes 16750 3500 0    39   ~ 0
+Usar. Listo\n
+Text Notes 16750 3600 0    39   ~ 0
 NO usar. Lo necesita la parte de Ethernet. Listo
-Text Notes 16800 4500 0    39   ~ 0
+Text Notes 16750 4500 0    39   ~ 0
 Usar. Listo\n
-Text Notes 16800 4600 0    39   ~ 0
+Text Notes 16750 4600 0    39   ~ 0
 Usar. Listo\n
-Text Notes 16800 4700 0    39   ~ 0
-Solo entrada. Sin pulldown-pullup
-Text Notes 16800 4800 0    39   ~ 0
-Solo entrada. Sin pulldown-pullup
-Text Notes 16800 4900 0    39   ~ 0
-Solo entrada. Sin pulldown-pullup
-Text Notes 16800 5000 0    39   ~ 0
-Solo entrada. Sin pulldown-pullup
 NoConn ~ 20750 3300
+Text Label 20850 3400 0    50   ~ 0
+GPIO32
+NoConn ~ 20750 3600
+NoConn ~ 20750 3700
+NoConn ~ 20750 3800
+NoConn ~ 16700 4700
+NoConn ~ 16700 4800
+NoConn ~ 16700 4900
+NoConn ~ 20750 3900
 Wire Wire Line
-	19600 7300 21000 7300
+	22050 3800 20750 3800
+NoConn ~ 16700 5000
+NoConn ~ 20750 2800
+NoConn ~ 16700 3100
 Wire Wire Line
-	18400 7300 19200 7300
+	18100 6400 18100 6700
+NoConn ~ 20750 3100
+Wire Wire Line
+	20500 7300 18900 7300
+$Comp
+L ESP32-GATEWAY_Rev_F:GND #PWR0101
+U 1 1 618C77D3
+P 18250 7700
+F 0 "#PWR0101" H 18250 7450 50  0001 C CNN
+F 1 "GND" H 18330 7560 50  0000 R CNN
+F 2 "" H 18250 7700 60  0000 C CNN
+F 3 "" H 18250 7700 60  0000 C CNN
+	1    18250 7700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	18600 7300 18250 7300
+Wire Wire Line
+	18250 7300 18250 7700
+NoConn ~ 20750 2600
+Wire Wire Line
+	18900 6700 20500 6700
+Wire Wire Line
+	18100 6700 18600 6700
+$Comp
+L ESP32-GATEWAY_Rev_F:R R29
+U 1 1 58196627
+P 18750 6700
+F 0 "R29" H 18525 6750 50  0000 C CNN
+F 1 "10k/R0603" H 19125 6750 50  0000 C CNN
+F 2 "OLIMEX_RLC-FP:R_0603_5MIL_DWS" H 18750 6630 30  0001 C CNN
+F 3 "" V 18750 6700 30  0000 C CNN
+F 4 "Value 1" H 18750 6700 60  0001 C CNN "Fieldname 1"
+F 5 "Value2" H 18750 6700 60  0001 C CNN "Fieldname2"
+F 6 "Value3" H 18750 6700 60  0001 C CNN "Fieldname3"
+	1    18750 6700
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
