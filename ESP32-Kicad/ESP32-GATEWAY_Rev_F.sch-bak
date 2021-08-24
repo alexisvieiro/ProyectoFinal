@@ -797,7 +797,7 @@ F 6 "Value3" H 10850 2700 60  0001 C CNN "Fieldname3"
 	1    10850 2700
 	1    0    0    -1  
 $EndComp
-Text Label 10600 3000 0    60   ~ 0
+Text Label 11150 2700 0    60   ~ 0
 ESP_EN
 Text Label 15600 4700 0    50   ~ 0
 GPI34
@@ -1533,8 +1533,6 @@ Wire Notes Line
 Wire Notes Line
 	10000 700  10000 5500
 Wire Wire Line
-	11200 3000 10500 3000
-Wire Wire Line
 	6700 9200 6700 9100
 Connection ~ 6700 8400
 Wire Wire Line
@@ -1553,11 +1551,6 @@ Wire Wire Line
 	15200 5000 16700 5000
 Wire Wire Line
 	6500 5900 8500 5900
-Wire Wire Line
-	11000 2700 11200 2700
-Wire Wire Line
-	11200 2700 11200 3000
-Connection ~ 11200 2700
 Wire Wire Line
 	8000 10500 8500 10500
 Wire Wire Line
@@ -1711,7 +1704,7 @@ Wire Wire Line
 Wire Wire Line
 	7050 2450 7050 2850
 Wire Wire Line
-	7050 2450 7650 2450
+	7050 2450 7400 2450
 Wire Wire Line
 	6550 2450 7050 2450
 Wire Wire Line
@@ -1794,8 +1787,6 @@ Wire Wire Line
 	6700 9900 6700 10000
 Wire Wire Line
 	6700 10000 6700 10600
-Wire Wire Line
-	11200 2700 11500 2700
 Wire Wire Line
 	1800 8800 1900 8800
 Wire Wire Line
@@ -2095,8 +2086,6 @@ Wire Wire Line
 	3500 6800 3500 6500
 Connection ~ 3500 6800
 Connection ~ 3500 6500
-Text Notes 10200 3250 0    39   ~ 0
-Se usa para habilitar el esp32.\nDejar un pin para el programador externo.\nEs el reset.
 Text Notes 16750 3400 0    39   ~ 0
 (logs)\n
 NoConn ~ 16700 4700
@@ -2484,4 +2473,66 @@ Wire Wire Line
 Connection ~ 20550 2900
 Wire Wire Line
 	20550 2900 21900 2900
+$Comp
+L ESP32-GATEWAY_Rev_F:GND #PWR0108
+U 1 1 612BD481
+P 10450 3050
+F 0 "#PWR0108" H 10450 2800 50  0001 C CNN
+F 1 "GND" V 10455 2922 50  0000 R CNN
+F 2 "" H 10450 3050 60  0000 C CNN
+F 3 "" H 10450 3050 60  0000 C CNN
+	1    10450 3050
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	11000 3050 11250 3050
+Wire Wire Line
+	10600 3050 10450 3050
+Wire Wire Line
+	11000 2700 11250 2700
+Wire Wire Line
+	11250 3050 11250 2700
+Connection ~ 11250 2700
+Wire Wire Line
+	11250 2700 11500 2700
+$Comp
+L Device:C C5
+U 1 1 6126FE78
+P 7400 2900
+F 0 "C5" V 7300 2950 50  0000 L CNN
+F 1 "10uF/6.3V/20%/X5R/C0805/1mΩ" V 7550 2200 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 7438 2750 50  0001 C CNN
+F 3 "~" H 7400 2900 50  0001 C CNN
+	1    7400 2900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7400 2750 7400 2450
+Connection ~ 7400 2450
+Wire Wire Line
+	7400 2450 7650 2450
+$Comp
+L ESP32-GATEWAY_Rev_F:GND #PWR0109
+U 1 1 612A65DA
+P 7400 3550
+F 0 "#PWR0109" H 7400 3300 50  0001 C CNN
+F 1 "GND" H 7400 3410 50  0000 C CNN
+F 2 "" H 7400 3550 60  0000 C CNN
+F 3 "" H 7400 3550 60  0000 C CNN
+	1    7400 3550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7400 3050 7400 3550
+$Comp
+L Switch:SW_Push RESET1
+U 1 1 613A766A
+P 10800 3050
+F 0 "RESET1" H 10800 2950 50  0000 C CNN
+F 1 "TAC-SWITCH SMD 6X6MM" H 10800 2850 50  0000 C CNN
+F 2 "Button_Switch_SMD:SW_SPST_PTS645" H 10800 3250 50  0001 C CNN
+F 3 "~" H 10800 3250 50  0001 C CNN
+	1    10800 3050
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
