@@ -713,7 +713,22 @@ void pduReceived() {
                 pdu.error = status;
             }
             //
-
+          }else if (strcmp_P(oid, ardFreeHeap) == 0) {
+            // handle ardTemperature1 (set/get) requests
+            if (pdu.type == SNMP_PDU_SET) {
+                // response packet from set-request - object is read-only
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = SNMP_ERR_READ_ONLY;
+            } else {
+                // response packet from get-request - ardTemperature1
+                //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, ardTemperature1);
+                status = pdu.VALUE.encode(SNMP_SYNTAX_INT, (int32_t) freeHeap);
+                //Serial.println("Temperatura mandada");
+                //mando temperatura
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = status;
+            }
+            //
         } else {
             // oid does not exist
             //

@@ -116,9 +116,14 @@ void loop() {
       tiempoSensor=millis();
       sensors.requestTemperatures(); 
       temperaturaC = round(sensors.getTempCByIndex(0));
+      if(temperaturaC==-127){
+        temperaturaC=0;
+      }
       //Serial.print("Temperatura sobrescrita: ");
       //Serial.println(temperaturaC);
-      
+      freeHeap=(ESP.getFreeHeap());
+      //Serial.print("Free Heap: ");
+      Serial.println(freeHeap);
     }
     
 ////FIN SNMP

@@ -6,4 +6,5 @@ char locName[20]                = "Agentuino";                                  
 char locLocation[20]            = "Zilina, Slovak";                             // should be stored/read from EEPROM - read/write (not done for simplicity)
 int32_t locServices             = 7;    
 int temperaturaC;
+long int freeHeap;
 byte my_IP_address[4]           = {0,0,0,0};                                    // arduino IP address

@@ -32,6 +32,7 @@ const char sysServices[] PROGMEM = "1.3.6.1.2.1.1.7.0"; // read-only  (Integer)
 // .iso.org.dod.internet.private.enterprises (.1.3.6.1.4.1)
 // .iso.org.dod.internet.private.enterprises.arduino (.1.3.6.1.4.1.36582)
 const char ardTemperature1[] PROGMEM = "1.3.6.1.4.1.36582.0"; // read-only  (Integer)
+const char ardFreeHeap[] PROGMEM = "1.3.6.1.4.1.36582.1"; // read-only  (Integer)
 //
 //        
 #endif
