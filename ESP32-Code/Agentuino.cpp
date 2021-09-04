@@ -583,6 +583,7 @@ SNMP_API_STAT_CODES api_status;
 SNMP_ERR_CODES status;
 char oid[SNMP_MAX_OID_LEN];
 uint32_t prevMillis = 0;
+uint32_t periodoLecturaRAM = 0;
 
 /**
  *

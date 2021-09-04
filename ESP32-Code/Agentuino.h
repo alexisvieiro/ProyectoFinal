@@ -626,7 +626,7 @@ extern SNMP_API_STAT_CODES api_status;
 extern SNMP_ERR_CODES status;
 extern char oid[SNMP_MAX_OID_LEN];
 extern uint32_t prevMillis;
-
+extern uint32_t periodoLecturaRAM;
 void pduReceived(); // function the perform at SNMP Requirements 
 
 #endif
