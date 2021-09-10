@@ -3,7 +3,7 @@
   (general
     (thickness 1.6)
     (drawings 19)
-    (tracks 1711)
+    (tracks 1715)
     (zones 0)
     (modules 71)
     (nets 78)
@@ -3742,7 +3742,11 @@
   (gr_line (start 69.596 73.152) (end 89.154 73.152) (angle 90) (layer Edge.Cuts) (width 0.254))
 
   (via (at 94.1705 110.109) (size 0.9) (drill 0.6) (layers F.Cu B.Cu) (net 2) (tstamp 612BA859))
-  (via (at 94.1705 108.966) (size 0.9) (drill 0.6) (layers F.Cu B.Cu) (net 0) (tstamp 612BA85A))
+  (via (at 94.1705 108.966) (size 0.9) (drill 0.6) (layers F.Cu B.Cu) (net 2) (tstamp 612BA85A))
+  (via (at 79.5655 118.5545) (size 0.9) (drill 0.6) (layers F.Cu B.Cu) (net 2) (tstamp 612BA859))
+  (via (at 79.5655 117.4115) (size 0.9) (drill 0.6) (layers F.Cu B.Cu) (net 2) (tstamp 612BA85A))
+  (via (at 80.9625 118.618) (size 0.9) (drill 0.6) (layers F.Cu B.Cu) (net 2) (tstamp 612BA859))
+  (via (at 80.9625 117.475) (size 0.9) (drill 0.6) (layers F.Cu B.Cu) (net 2) (tstamp 612BA85A))
   (via (at 90.4875 112.8395) (size 0.7) (drill 0.4) (layers F.Cu B.Cu) (net 2) (tstamp 612B18F6))
   (via (at 90.4875 113.7285) (size 0.7) (drill 0.4) (layers F.Cu B.Cu) (net 2) (tstamp 612B18F6))
   (via (at 90.4875 112.014) (size 0.7) (drill 0.4) (layers F.Cu B.Cu) (net 2))
