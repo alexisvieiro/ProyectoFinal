@@ -35,7 +35,12 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    //AnyChart
     implementation 'com.github.AnyChart:AnyChart-Android:0.0.3'
+    //OkHttp
+    implementation 'com.squareup.okhttp3:mockwebserver3:5.0.0-alpha.2'
+    //Searchable Spinner
+    implementation 'com.toptoche.searchablespinner:searchablespinnerlibrary:1.3.1'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

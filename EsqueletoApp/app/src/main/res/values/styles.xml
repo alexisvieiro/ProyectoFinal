@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="spinnerTheme">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">22dp</item>
+    </style>
+</resources>
