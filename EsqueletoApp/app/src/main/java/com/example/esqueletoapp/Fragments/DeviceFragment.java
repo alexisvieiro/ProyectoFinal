@@ -33,6 +33,7 @@ import com.anychart.anychart.ValueDataEntry;
 import com.example.esqueletoapp.Adapters.DeviceSampleAdapter;
 import com.example.esqueletoapp.Models.DeviceSampleItem;
 import com.example.esqueletoapp.R;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -88,6 +89,7 @@ public class DeviceFragment extends Fragment {
 
         SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String sToken = userData.getString("Token",null);
+        String sURL = userData.getString("URL", null);
 
         rclHostList.setHasFixedSize(true);
         rclHostList.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -99,11 +101,10 @@ public class DeviceFragment extends Fragment {
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create("{\n   \"jsonrpc\": \"2.0\",\n   \"method\": \"host.get\"," +
                         "\n   \"params\": {\n       \"output\": [\n           \"hostid\",\n           \"host\"\n" +
-                        "       ],\n       \"selectInterfaces\": [\n           \"interfaceid\",\n           \"ip\"\n" +
                         "       ]\n   },\n   \"id\": 1,\n   \"auth\": \"" +
                         sToken + "\"\n}\n"
                 , mediaType);
-        Request request = new Request.Builder().url("http://52.186.171.45/zabbix/api_jsonrpc.php")
+        Request request = new Request.Builder().url("http://"+sURL+"/zabbix/api_jsonrpc.php")
                 .method("POST", body).addHeader("Content-Type","application/json")
                 .build();
         client.newCall(request).enqueue(new Callback() {
@@ -113,7 +114,7 @@ public class DeviceFragment extends Fragment {
                 hostHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getContext(),sMessage,Toast.LENGTH_LONG);
+                        Snackbar.make(getView(),sMessage,Snackbar.LENGTH_LONG).show();
                     }
                 });
             }
@@ -140,21 +141,19 @@ public class DeviceFragment extends Fragment {
                         }
                     }
                 });
-
-                swRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        swRefreshLayout.setRefreshing(false);
-                        DeviceFragment deviceFragment = new DeviceFragment();
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .detach(deviceFragment).attach(deviceFragment).commit();
-                    }
-                });
             }
         });
 
 
-
+        swRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swRefreshLayout.setRefreshing(false);
+                DeviceFragment deviceFragment = new DeviceFragment();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .detach(deviceFragment).attach(deviceFragment).commit();
+            }
+        });
 
         /*chartDevice = view.findViewById(R.id.myAnyChart);
 

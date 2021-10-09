@@ -1,20 +1,35 @@
 package com.example.esqueletoapp.Fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.esqueletoapp.Adapters.DashboardSampleAdapter;
+import com.example.esqueletoapp.Adapters.DeviceSampleAdapter;
+import com.example.esqueletoapp.Models.DashboardSampleItem;
 import com.example.esqueletoapp.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 public class DashboardFragment extends Fragment {
     private FloatingActionButton fabAdd;
+    private RecyclerView rclDashboardList;
+    private DashboardSampleAdapter dashboardSampleAdapter;
+    private ArrayList<DashboardSampleItem> sampleItemArrayList = new ArrayList<>();
 
     public DashboardFragment() {
         // Required empty public constructor
@@ -38,6 +53,28 @@ public class DashboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         fabAdd = view.findViewById(R.id.buttonAddToDashboard);
+        rclDashboardList = view.findViewById(R.id.listDashboardItems);
+
+        rclDashboardList.setHasFixedSize(true);
+        rclDashboardList.setLayoutManager(new LinearLayoutManager(getContext()));
+        rclDashboardList.addItemDecoration
+                (new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+
+        SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        String sDashboardHostName = userData.getString("HostNames", null);
+        String sDashboardItemName = userData.getString("ItemNames", null);
+
+        dashboardSampleAdapter = new DashboardSampleAdapter(sampleItemArrayList, getActivity());
+        rclDashboardList.setAdapter(dashboardSampleAdapter);
+
+        if ((sDashboardHostName!=null) &&(sDashboardItemName!=null)){
+            sampleItemArrayList.clear();
+            String[] arrayItems = sDashboardItemName.split(",");
+            String[] arrayHosts = sDashboardHostName.split(",");
+            for (int i=0; i<arrayItems.length; i++){
+                sampleItemArrayList.add(new DashboardSampleItem(arrayItems[i],arrayHosts[i]));
+            }
+        }
 
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override

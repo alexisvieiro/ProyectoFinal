@@ -3,12 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable-anydpi/delete_icon.xml" value="0.18703703703703703" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable/custom_round_corners.xml" value="0.240625" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable/rounded_corner.xml" value="0.240625" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable/spinner_background.xml" value="0.240625" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/activity_menu.xml" value="0.14447463768115942" />
-        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/fragment_dashboard.xml" value="0.12409420289855072" />
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/dashboard_item_layout.xml" value="0.33" />
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/fragment_dashboard.xml" value="0.2" />
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/fragment_dashboard_item.xml" value="0.10916919959473151" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/fragment_device.xml" value="0.14" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/fragment_new_dashboard_item.xml" value="0.1035031847133758" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/item_layout.xml" value="0.25" />

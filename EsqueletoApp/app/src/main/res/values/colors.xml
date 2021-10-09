@@ -12,4 +12,7 @@
     <color name="item_button_background">#FF306236</color>
     <color name="item_background">#FF767676</color>
     <color name="fab_icon">#FFC0CFC2</color>
+
+    <color name="dashboard_item_background">#FF81C784</color>
+    <color name="dashboard_delete_background">#FF00600F</color>
 </resources>
