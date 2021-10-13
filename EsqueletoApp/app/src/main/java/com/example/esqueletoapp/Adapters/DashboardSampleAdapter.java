@@ -67,7 +67,6 @@ public class DashboardSampleAdapter extends RecyclerView.Adapter<DashboardSample
                                 getItemCount()-1);
                         sDashboardItemID = DeleteSection(sDashboardItemID,holder.getAdapterPosition(),
                                 getItemCount()-1);
-                        Snackbar.make(v,sDashboardItemName,Snackbar.LENGTH_LONG).show();
 
                         SharedPreferences.Editor editor = userData.edit();
                         editor.putString("HostNames", sDashboardHostName);

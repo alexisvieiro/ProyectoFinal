@@ -2,6 +2,7 @@ package com.example.esqueletoapp.Fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,25 +12,36 @@ import androidx.fragment.app.Fragment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-import com.anychart.anychart.AnyChart;
-import com.anychart.anychart.AnyChartView;
-import com.anychart.anychart.Cartesian;
-import com.anychart.anychart.DataEntry;
-import com.anychart.anychart.TooltipPositionMode;
-import com.anychart.anychart.ValueDataEntry;
 import com.example.esqueletoapp.R;
 import com.google.android.material.snackbar.Snackbar;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
+import com.jjoe64.graphview.helper.StaticLabelsFormatter;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.DataPointInterface;
+import com.jjoe64.graphview.series.LineGraphSeries;
+import com.jjoe64.graphview.series.OnDataPointTapListener;
+import com.jjoe64.graphview.series.Series;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.Call;
@@ -44,11 +56,12 @@ import okhttp3.Response;
 public class DashboardItemFragment extends Fragment {
     private String sItemName;
     private Integer iPosition;
-    private AnyChartView chartDashboard;
     private Handler mHandler;
     private String sMessage;
     private JSONObject jsonResponse;
-    private List<DataEntry> seriesData = new ArrayList<>();
+    private GraphView graphView;
+    private String[] sTime;
+    private LineGraphSeries<DataPoint> series;
 
     public DashboardItemFragment() {
         // Required empty public constructor
@@ -72,19 +85,11 @@ public class DashboardItemFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        chartDashboard = view.findViewById(R.id.anyChartDashboard);
 
-        Cartesian cartesian = AnyChart.line();
-        cartesian.setAnimation(true);
-        cartesian.setPadding(10d,20d,5d,20d);
-        cartesian.setCrosshair(true);
-        cartesian.setYAxis(true);
-        cartesian.getTooltip().setPositionMode(TooltipPositionMode.POINT);
-        cartesian.setTitle(sItemName);
+        graphView = view.findViewById(R.id.graphItem);
 
-        //https://www.oodlestechnologies.com/blogs/drawing-graphs-in-android-using-achartengine-charting-library-(line-charts)/
-
-        cartesian.getYAxis().getLabels().setFormat("{%Value}{numDecimals:2}");
+        graphView.setTitle(sItemName);
+        graphView.setTitleTextSize(35);
 
         SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String sToken = userData.getString("Token",null);
@@ -93,6 +98,8 @@ public class DashboardItemFragment extends Fragment {
         String[] arrayIDs = sDashboardItemID.split(",");
         String sItemID = arrayIDs[iPosition];
 
+
+
         mHandler = new Handler(Looper.getMainLooper());
         OkHttpClient client = new OkHttpClient().newBuilder().build();
         MediaType mediaType = MediaType.parse("application/json");
@@ -100,7 +107,7 @@ public class DashboardItemFragment extends Fragment {
                         "\"method\": \"history.get\",\n   \"params\": {\n       \"output\": " +
                         "\"extend\",\n       \"history\": 0,\n       \"itemids\": \"" +
                         sItemID +
-                        "\",\n       \"sortfield\": \"clock\",\n       \"sortorder\": \"DESC\"" +
+                        "\",\n       \"sortfield\": \"clock\",\n       \"sortorder\": \"ASC\"" +
                         ",\n       \"limit\": 10\n   },\n   \"id\": 1,\n   \"auth\": \"" +
                         sToken +
                         "\"\n}\n"
@@ -132,18 +139,48 @@ public class DashboardItemFragment extends Fragment {
                             Log.e("Parsing","Could not parse malformed JSON: \"" + sMessage + "\"");
                         }if(jsonResponse.has("result")){
                             JSONArray jsonResult = jsonResponse.optJSONArray("result");
+                            sTime = new String[jsonResult.length()];
+                            Float[] fValue = new Float[jsonResult.length()];
+                            DataPoint[] dataPoints= new DataPoint[jsonResult.length()];
                             for (int i=0;i<jsonResult.length();i++){
-                                String sValue = jsonResult.optJSONObject(i).optString("value");
-                                String sTime = jsonResult.optJSONObject(i).optString("clock");
-                                Integer iValue = Math.round(Float.valueOf(sValue));
-                                seriesData.add(new ValueDataEntry(sTime,iValue));
-                                cartesian.setData(seriesData);
-                                chartDashboard.setChart(cartesian);
-                            }
+                                sTime[i] = jsonResult.optJSONObject(i).optString("clock");
+                                fValue[i] = Float.valueOf(jsonResult.optJSONObject(i).optString("value"));
+                                dataPoints[i]= new DataPoint(i,fValue[i]);
+                            }series = new LineGraphSeries<>(dataPoints);
+                            series.setDrawDataPoints(true);
+                            graphView.addSeries(series);
+                            sTime=DateParser(sTime);
+                            StaticLabelsFormatter staticLabelsFormatter = new StaticLabelsFormatter(graphView);
+                            staticLabelsFormatter.setHorizontalLabels(sTime);
+                            graphView.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
+                            graphView.getGridLabelRenderer().setNumHorizontalLabels(2);
+                            graphView.getGridLabelRenderer().setLabelHorizontalHeight(50);
+                            graphView.getGridLabelRenderer().setHorizontalLabelsAngle(15);
+                            graphView.getViewport().setScrollable(true);
+                            graphView.getViewport().setScalable(true);
+
+                            series.setOnDataPointTapListener(new OnDataPointTapListener() {
+                                @Override
+                                public void onTap(Series series, DataPointInterface dataPoint) {
+                                    String msg = dataPoint.getY()+" at "+sTime[(int)dataPoint.getX()];
+                                    Toast toast = Toast.makeText(getActivity(),msg,Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.CENTER,0,0);
+                                    toast.show();
+                                }
+                            });
                         }
                     }
                 });
             }
         });
+    }
+
+    String[] DateParser(String[] str){
+        for (int i=0;i<str.length;i++){
+            long dl = Long.valueOf(str[i])*1000; //Debe estar en milisegundos
+            Date dd = new java.util.Date(dl);
+            str[i] = new SimpleDateFormat("dd MMM yyyy HH:mm z").format(dd).toUpperCase();
+        }
+        return str;
     }
 }

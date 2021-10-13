@@ -22,14 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.anychart.anychart.AnyChart;
-import com.anychart.anychart.AnyChartView;
-import com.anychart.anychart.Cartesian;
-import com.anychart.anychart.DataEntry;
-import com.anychart.anychart.Pie;
-import com.anychart.anychart.Set;
-import com.anychart.anychart.TooltipPositionMode;
-import com.anychart.anychart.ValueDataEntry;
 import com.example.esqueletoapp.Adapters.DeviceSampleAdapter;
 import com.example.esqueletoapp.Models.DeviceSampleItem;
 import com.example.esqueletoapp.R;
@@ -53,7 +45,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class DeviceFragment extends Fragment {
-    private AnyChartView chartDevice;
     private RecyclerView rclHostList;
     private SwipeRefreshLayout swRefreshLayout;
     private Handler hostHandler;
@@ -155,26 +146,5 @@ public class DeviceFragment extends Fragment {
             }
         });
 
-        /*chartDevice = view.findViewById(R.id.myAnyChart);
-
-        Cartesian cartesian = AnyChart.line();
-        cartesian.setAnimation(true);
-        cartesian.setPadding(10d,20d,5d,20d);
-        cartesian.setCrosshair(true);
-        cartesian.setYAxis(true);
-        cartesian.getTooltip().setPositionMode(TooltipPositionMode.POINT);
-        cartesian.setTitle("Trend of Sales of the Most Popular Products of ACME Corp.");
-        cartesian.getYAxis().setTitle("Number of Bottles Sold (thousands)");
-        cartesian.getXAxis().getLabels().setPadding(5d,5d,5d,5d);
-
-        List<DataEntry> seriesData = new ArrayList<>();
-        seriesData.add(new ValueDataEntry("1986",12));
-        seriesData.add(new ValueDataEntry("1987",15));
-        seriesData.add(new ValueDataEntry("1988",4));
-        seriesData.add(new ValueDataEntry("1989",28));
-
-        cartesian.setData(seriesData);
-
-        chartDevice.setChart(cartesian);*/
     }
 }
