@@ -63,6 +63,8 @@ void handleAdminPage(HTTPRequest * req, HTTPResponse * res);
 void handlePublicPage(HTTPRequest * req, HTTPResponse * res);
 void handle404(HTTPRequest * req, HTTPResponse * res);
 void handleConf(HTTPRequest * req, HTTPResponse * res);
+void handleConfIPFija(HTTPRequest * req, HTTPResponse * res);
+void handleConfIPDHCP(HTTPRequest * req, HTTPResponse * res);
 
 //Middlewares (verifican que estes logueado y tengas permisos de navegar en distintas URLs)
 void middlewareAuthentication(HTTPRequest * req, HTTPResponse * res, std::function<void()> next);
@@ -106,9 +108,7 @@ void setup(){
 
 
   //IP fija o por DHCP
-  /*char ip[4];
-  char ip_gateway[4];
-  char subnet_mask[4];
+  char ip[4],ipm[4],ipg[4];
   char modo;
 
 
@@ -116,12 +116,19 @@ void setup(){
   ip[1]=preferences.getChar("ip2",0);
   ip[2]=preferences.getChar("ip3",0);
   ip[3]=preferences.getChar("ip4",0);
-  ip_gateway[0]=preferences.getChar("ip1_gateway",0);
-  ip_gateway[1]=preferences.getChar("ip2_gateway",0);
-  ip_gateway[2]=preferences.getChar("ip3_gateway",0);
-  ip_gateway[3]=preferences.getChar("ip4_gateway",0);
+  
+  ipg[0]=preferences.getChar("ipg1",0);
+  ipg[1]=preferences.getChar("ipg2",0);
+  ipg[2]=preferences.getChar("ipg3",0);
+  ipg[3]=preferences.getChar("ipg4",0);
+  
+  ipm[0]=preferences.getChar("ipm1",0);
+  ipm[1]=preferences.getChar("ipm2",0);
+  ipm[2]=preferences.getChar("ipm3",0);
+  ipm[3]=preferences.getChar("ipm4",0);
+  
   modo=preferences.getChar("modo",0);
-  preferences.putChar("modo",0);
+
   Serial.println("");
   Serial.println("");
   Serial.println("-------------------------------");
@@ -136,13 +143,25 @@ void setup(){
   Serial.println("");  
 
   Serial.print("IP Gateway leida de las preferences: ");
-  Serial.print((uint8_t) ip_gateway[0]);
+  Serial.print((uint8_t) ipg[0]);
   Serial.print(".");
-  Serial.print((uint8_t) ip_gateway[1]);
+  Serial.print((uint8_t) ipg[1]);
   Serial.print(".");
-  Serial.print((uint8_t) ip_gateway[2]);
+  Serial.print((uint8_t) ipg[2]);
   Serial.print(".");
-  Serial.println  ((uint8_t) ip_gateway[3]);
+  Serial.println  ((uint8_t) ipg[3]);
+
+
+  Serial.print("IP Mask leida de las preferences: ");
+  Serial.print((uint8_t) ipm[0]);
+  Serial.print(".");
+  Serial.print((uint8_t) ipm[1]);
+  Serial.print(".");
+  Serial.print((uint8_t) ipm[2]);
+  Serial.print(".");
+  Serial.print((uint8_t) ipm[3]);
+  Serial.println("");  
+  
   Serial.println("-------------------------------");
   Serial.println("");
   Serial.println("");
@@ -164,7 +183,7 @@ void setup(){
   }
 
 
-*/
+
     
     
     //Inicialización Pullups Puertas
@@ -190,8 +209,6 @@ void setup(){
     PuertaEstado[3]=digitalRead(PinPuerta4);
     UltimoEstado[3]=PuertaEstado[3];   
 
-
-     
     //Inicialización Ethernet
     WiFi.onEvent(WiFiEvent);
     ETH.begin();
@@ -200,15 +217,15 @@ void setup(){
     }
 
 
-/*
   if(modo== IP_FIJA){
     
     Serial.print("Modo: ");
     Serial.println("IP Fija");
     IPAddress local_IP(ip[0], ip[1], ip[2], ip[3]);
-    IPAddress gateway(ip_gateway[0], ip_gateway[1], ip_gateway[2], ip_gateway[3]);
-    IPAddress subnet(255, 255, 255, 0);
-    if (!ETH.config(local_IP, gateway, subnet)) {
+    IPAddress gateway(ipg[0], ipg[1], ipg[2], ipg[3]);
+    IPAddress subnet(ipm[0], ipm[1], ipm[2], ipm[3]);
+    IPAddress dns(ipg[0], ipg[1], ipg[2], ipg[3]);
+    if (!ETH.config(local_IP, gateway, subnet,dns)) {
     Serial.println("STA Fallo al configurar");
     }
     //Modo 1 == FIJA
@@ -216,8 +233,14 @@ void setup(){
     Serial.println("IP por DHCP");
     //Modo 1 == DHCP
   }
-  */
+     
 
+
+
+
+
+
+  
 
     // The ResourceNode links URL and HTTP method to a handler function
     ResourceNode * nodeRoot     = new ResourceNode("/", "GET", &handleRoot);
@@ -226,14 +249,16 @@ void setup(){
     ResourceNode * nodePublic   = new ResourceNode("/public", "GET", &handlePublicPage);
     ResourceNode * node404      = new ResourceNode("", "GET", &handle404);
     ResourceNode * nodeConf     = new ResourceNode("/conf", "GET", &handleConf);
-    ResourceNode * nodeConfPost = new ResourceNode("/conf_post", "POST", &handleConfPost);
+    ResourceNode * nodeConfIPFija = new ResourceNode("/conf_ipfija", "POST", &handleConfIPFija);
+    ResourceNode * nodeConfIPDHCP = new ResourceNode("/conf_ipdhcp", "GET", &handleConfIPDHCP);
     // Add the nodes to the server
     secureServer->registerNode(nodeRoot);
     secureServer->registerNode(nodeInternal);
     secureServer->registerNode(nodeAdmin);
     secureServer->registerNode(nodePublic);
     secureServer->registerNode(nodeConf);
-    secureServer->registerNode(nodeConfPost);
+    secureServer->registerNode(nodeConfIPFija);
+    secureServer->registerNode(nodeConfIPDHCP);
     // The path is ignored for the default node.
     secureServer->setDefaultNode(node404);
     // middleware (First we check the identity, then we see what the user is allowed to do)
@@ -257,11 +282,11 @@ void setup(){
         delay(10);
         Serial.println("Agente SNMP no inicializado");
     }
-
+/*
     //Para la lectura datos
     periodoLecturaPuertas=millis();
     periodoLecturaTemperatura=periodoLecturaPuertas;
-    periodoLecturaRAM=periodoLecturaPuertas;
+    periodoLecturaRAM=periodoLecturaPuertas;*/
    
 }
 
@@ -269,10 +294,10 @@ void setup(){
 
 void loop() {
 
-    Agentuino.listen();
-    SensadoPuertas();
-    SensadoTemperatura();
-    SensadoInterno();
+    //Agentuino.listen();
+    //SensadoPuertas();
+    //SensadoTemperatura();
+    //SensadoInterno();
     secureServer->loop();
     delay(1);
 }
@@ -631,7 +656,7 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
 
 
   std::string header = "<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>";
-  std::string footer = "  </fieldset></form></body></html>";
+  std::string footer = "</body></html>";
 
   // Checking permissions can not only be done centrally in the middleware function but also in the actual request handler.
   // This would be handy if you provide an API with lists of resources, but access rights are defined object-based.
@@ -654,8 +679,25 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
     res->println("</select>");
     res->println("</form>");
     res->println("<script>");
-    res->println("function funcion() {var x = document.getElementById(\"modo\").value;if(x==\"DHCP\"){document.getElementById(\"configuracion_boxes\").style.display=\"none\";}else{document.getElementById(\"configuracion_boxes\").style.display=\"block\";}}</script>");
-    res->println("<form style=\"display:none\" id=\"configuracion_boxes\" action=\"/conf_post\" method=\"POST\">");
+    res->println("function funcion() {");
+    res->println("var x = document.getElementById(\"modo\").value;");
+    res->println("if(x==\"DHCP\"){");
+    res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"none\";");
+    res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"block\";");
+    res->println("}else{");
+    res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"block\";");
+    res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"none\";");
+    res->println("}}</script>");
+
+
+    
+    //HTML para form de ip fija
+    if(preferences.getChar("modo",0)==IP_FIJA){
+      res->println("<form style=\"display:block\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
+    }else{
+      res->println("<form style=\"display:none\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
+    } 
+    
     res->println("<fieldset style=\"width:240px\">");
     res->println("<legend>Configuración Estática:</legend>");
     res->println("<label for=\"fname\">Dirección IP:</label><br>");
@@ -664,17 +706,27 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip3\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip4\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<br><label for=\"fname\">Mascara de Subred:</label><br>");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg1\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<br><label for=\"fname\">Puerta de Enlace predeterminada:</label><br>");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm1\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm2\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm3\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm4\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<br><br>");
-    res->println("<input type=\"submit\" value=\"Aceptar\">");
+    res->println("<br><label for=\"fname\">Puerta de Enlace predeterminada:</label><br>");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg1\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<br></fieldset><br>");
+    res->println("<input type=\"submit\" value=\"Aceptar\"></form>");
+
+    //HTML para form de dhcp
+    if(preferences.getChar("modo",0)==IP_FIJA){
+      res->println("<form style=\"display:none\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
+    }else{
+      res->println("<form style=\"display:block\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
+    }
+    res->println("<input type=\"submit\" value=\"Aceptar\" />");
+    res->println("</form>");
+    
 
     //res->println("<p><a href=\"/internal\">Go back</a></p>");
 
@@ -691,11 +743,11 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
 }
 
 
-void handleConfPost(HTTPRequest * req, HTTPResponse * res) {
+void handleConfIPFija(HTTPRequest * req, HTTPResponse * res) {
 
 
  // The echo callback will return the request body as response body.
-
+  char ip[4],ipg[4],ipm[4];
   // We use text/plain for the response
   res->setHeader("Content-Type","text/plain");
 
@@ -722,13 +774,140 @@ void handleConfPost(HTTPRequest * req, HTTPResponse * res) {
     // to write binary data to the response.
     res->write(buffer, s);
   }
-  char *parametros=NULL;
-  parametros=strtok(bufferChar,"&");
-  while(parametros!=NULL){
-    Serial.println(parametros);
-    parametros= strtok(NULL,"&");
+  char *parametro=NULL;
+  parametro=strtok(bufferChar,"&");
+  while(parametro!=NULL){
+    //Serial.println(parametro);
+    
+    
+    if(!strncmp(parametro,"ip1=",4)){
+      Serial.print("El parametro ip1 es igual a ");
+      ip[0]=(char) atoi((parametro+ sizeof(char)*4));
+      Serial.println(ip[0]); 
+    }
+
+    if(!strncmp(parametro,"ip2=",4)){
+      Serial.print("El parametro ip2 es igual a ");
+      ip[1]=(char) atoi((parametro+ sizeof(char)*4));
+      Serial.println(ip[1]); 
+    }
+
+    if(!strncmp(parametro,"ip3=",4)){
+      Serial.print("El parametro ip3 es igual a ");
+      ip[2]=(char) atoi((parametro+ sizeof(char)*4));
+      Serial.println(ip[2]); 
+    }
+
+
+    if(!strncmp(parametro,"ip4=",4)){
+      Serial.print("El parametro ip4 es igual a ");
+      ip[3]=(char) atoi((parametro+ sizeof(char)*4));
+      Serial.println(ip[3]); 
+    }
+
+
+    if(!strncmp(parametro,"ipm1=",5)){
+      Serial.print("El parametro ipm1 es igual a ");
+      ipm[0]=(char) atoi((parametro+ sizeof(char)*5));
+      Serial.println(ipm[0]); 
+    }
+
+    if(!strncmp(parametro,"ipm2=",5)){
+      Serial.print("El parametro ipm2 es igual a ");
+      ipm[1]=(char) atoi((parametro+ sizeof(char)*5));
+      Serial.println(ipm[1]); 
+    }
+
+    if(!strncmp(parametro,"ipm3=",5)){
+      Serial.print("El parametro ipm3 es igual a ");
+      ipm[2]=(char) atoi((parametro+ sizeof(char)*5));
+      Serial.println(ipm[2]); 
+    }
+
+
+    if(!strncmp(parametro,"ipm4=",5)){
+      Serial.print("El parametro ipm4 es igual a ");
+      ipm[3]=(char) atoi((parametro+ sizeof(char)*5));
+      Serial.println(ipm[3]); 
+    }
+
+
+
+
+    if(!strncmp(parametro,"ipg1=",5)){
+      Serial.print("El parametro ipg1 es igual a ");
+      ipg[0]=(char) atoi((parametro+ sizeof(char)*5));
+      Serial.println(ipg[0]); 
+    }
+
+    if(!strncmp(parametro,"ipg2=",5)){
+      Serial.print("El parametro ipg2 es igual a ");
+      ipg[1]=(char) atoi((parametro+ sizeof(char)*5));
+      Serial.println(ipg[1]); 
+    }
+
+    if(!strncmp(parametro,"ipg3=",5)){
+      Serial.print("El parametro ipg3 es igual a ");
+      ipg[2]=(char) atoi((parametro+ sizeof(char)*5));
+      Serial.println(ipg[2]); 
+    }
+
+
+    if(!strncmp(parametro,"ipg4=",5)){
+      Serial.print("El parametro ipg4 es igual a ");
+      ipg[3]=(char) atoi((parametro+ sizeof(char)*5));
+      Serial.println(ipg[3]); 
+    }
+
+   
+    parametro= strtok(NULL,"&");
   }
   free(bufferChar);
+
+
+
+    //Modo 0= dhcp, Modo 1= IP fija
+  Serial.println("IP Fija, reiniciando");
+  preferences.putChar("ip1",ip[0]);
+  preferences.putChar("ip2",ip[1]);
+  preferences.putChar("ip3",ip[2]);
+  preferences.putChar("ip4",ip[3]);
+  
+  preferences.putChar("ipg1",ipg[0]);
+  preferences.putChar("ipg2",ipg[1]);
+  preferences.putChar("ipg3",ipg[2]);
+  preferences.putChar("ipg4",ipg[3]);
+  
+  preferences.putChar("ipm1",ipm[0]);
+  preferences.putChar("ipm2",ipm[1]);
+  preferences.putChar("ipm3",ipm[2]);
+  preferences.putChar("ipm4",ipm[3]);
+
+  
+  preferences.putChar("modo",IP_FIJA);
+  delay(2000);
+  ESP.restart();
+
+}
+
+
+
+
+void handleConfIPDHCP(HTTPRequest * req, HTTPResponse * res) {
+
+  res->setHeader("Content-Type", "text/html");
+  res->println("<!DOCTYPE html>");
+  res->println("<html>");
+  res->println("<head><title>DHCP</title></head>");
+  res->println("<body><h1>DHCP</h1></body>");
+  res->println("</html>");
+
+
+
+  Serial.println("IP por DHCP, reiniciando");
+  preferences.putChar("modo",IP_DHCP);
+  delay(2000);
+  ESP.restart();
 }
 
 
