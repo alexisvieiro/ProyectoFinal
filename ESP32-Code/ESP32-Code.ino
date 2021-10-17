@@ -27,10 +27,10 @@ static uint32_t periodoLecturaPuertas=0;
 #define ABIERTA 0
 #define CERRADA 1
 #define PinPuerta1 34
-//#define PinPuerta1 32
-//#define PinPuerta2 33
-//#define PinPuerta3 14
-//#define PinPuerta4 16
+#define PinPuerta1 32
+#define PinPuerta2 33
+#define PinPuerta3 14
+#define PinPuerta4 16
 static int PuertaEstado[4];
 static int UltimoEstado[4];
 
@@ -44,6 +44,8 @@ DallasTemperature sensors(&oneWire);
 //WebServer
 #define HEADER_USERNAME "X-USERNAME"
 #define HEADER_GROUP    "X-GROUP"
+#define IP_FIJA 1
+#define IP_DHCP 0
 using namespace httpsserver;
 HTTPSServer * secureServer;
 SSLCert * cert;
@@ -101,29 +103,92 @@ void setup(){
     //HTTPSServer::HTTPSServer(SSLCert * cert, const uint16_t port, const uint8_t maxConnections, const in_addr_t bindAddress)
     secureServer = new HTTPSServer(cert);
 
+
+
+  //IP fija o por DHCP
+  /*char ip[4];
+  char ip_gateway[4];
+  char subnet_mask[4];
+  char modo;
+
+
+  ip[0]=preferences.getChar("ip1",0);
+  ip[1]=preferences.getChar("ip2",0);
+  ip[2]=preferences.getChar("ip3",0);
+  ip[3]=preferences.getChar("ip4",0);
+  ip_gateway[0]=preferences.getChar("ip1_gateway",0);
+  ip_gateway[1]=preferences.getChar("ip2_gateway",0);
+  ip_gateway[2]=preferences.getChar("ip3_gateway",0);
+  ip_gateway[3]=preferences.getChar("ip4_gateway",0);
+  modo=preferences.getChar("modo",0);
+  preferences.putChar("modo",0);
+  Serial.println("");
+  Serial.println("");
+  Serial.println("-------------------------------");
+  Serial.print("IP leida de las preferences: ");
+  Serial.print((uint8_t) ip[0]);
+  Serial.print(".");
+  Serial.print((uint8_t) ip[1]);
+  Serial.print(".");
+  Serial.print((uint8_t) ip[2]);
+  Serial.print(".");
+  Serial.print((uint8_t) ip[3]);
+  Serial.println("");  
+
+  Serial.print("IP Gateway leida de las preferences: ");
+  Serial.print((uint8_t) ip_gateway[0]);
+  Serial.print(".");
+  Serial.print((uint8_t) ip_gateway[1]);
+  Serial.print(".");
+  Serial.print((uint8_t) ip_gateway[2]);
+  Serial.print(".");
+  Serial.println  ((uint8_t) ip_gateway[3]);
+  Serial.println("-------------------------------");
+  Serial.println("");
+  Serial.println("");
+ 
+  
+  
+  
+  if (!ip[0] && !ip[1] && !ip[2] && !ip[3] && !modo){
+
+
+    //Modo 0= dhcp, Modo 1= IP fija
+    Serial.println("IP por DHCP, primer inicio.");
+    preferences.putChar("ip1",0);
+    preferences.putChar("ip2",0);
+    preferences.putChar("ip3",0);
+    preferences.putChar("ip4",0);
+    preferences.putChar("modo",IP_DHCP);
+    
+  }
+
+
+*/
+    
     
     //Inicialización Pullups Puertas
-    pinMode(PinPuerta1, INPUT);
-    //pinMode(PinPuerta1, INPUT_PULLUP);
-    //pinMode(PinPuerta2, INPUT_PULLUP);
-    //pinMode(PinPuerta3, INPUT_PULLUP);
-    //pinMode(PinPuerta41, INPUT_PULLUP);
+    //pinMode(PinPuerta1, INPUT);
+    pinMode(PinPuerta1, INPUT_PULLUP);
+    pinMode(PinPuerta2, INPUT_PULLUP);
+    pinMode(PinPuerta3, INPUT_PULLUP);
+    pinMode(PinPuerta4, INPUT_PULLUP);
 
     //Puerta1
     PuertaEstado[0]=digitalRead(PinPuerta1);
     UltimoEstado[0]=PuertaEstado[0];
 
     //Puerta2
-    //PuertaEstado[1]=digitalRead(PinPuerta2);
-    //UltimoEstado[1]=PuertaEstado[1];
+    PuertaEstado[1]=digitalRead(PinPuerta2);
+    UltimoEstado[1]=PuertaEstado[1];
 
     //Puerta3
-    //PuertaEstado[2]=digitalRead(PinPuerta3);
-    //UltimoEstado[2]=PuertaEstado[2];
+    PuertaEstado[2]=digitalRead(PinPuerta3);
+    UltimoEstado[2]=PuertaEstado[2];
 
     //Puerta4
-    //PuertaEstado[3]=digitalRead(PinPuerta4);
-    //UltimoEstado[3]=PuertaEstado[3];   
+    PuertaEstado[3]=digitalRead(PinPuerta4);
+    UltimoEstado[3]=PuertaEstado[3];   
 
 
      
@@ -135,6 +200,25 @@ void setup(){
     }
 
 
+/*
+  if(modo== IP_FIJA){
+    
+    Serial.print("Modo: ");
+    Serial.println("IP Fija");
+    IPAddress local_IP(ip[0], ip[1], ip[2], ip[3]);
+    IPAddress gateway(ip_gateway[0], ip_gateway[1], ip_gateway[2], ip_gateway[3]);
+    IPAddress subnet(255, 255, 255, 0);
+    if (!ETH.config(local_IP, gateway, subnet)) {
+    Serial.println("STA Fallo al configurar");
+    }
+    //Modo 1 == FIJA
+  }else{
+    Serial.println("IP por DHCP");
+    //Modo 1 == DHCP
+  }
+  */
+
+
     // The ResourceNode links URL and HTTP method to a handler function
     ResourceNode * nodeRoot     = new ResourceNode("/", "GET", &handleRoot);
     ResourceNode * nodeInternal = new ResourceNode("/internal", "GET", &handleInternalPage);
@@ -142,13 +226,14 @@ void setup(){
     ResourceNode * nodePublic   = new ResourceNode("/public", "GET", &handlePublicPage);
     ResourceNode * node404      = new ResourceNode("", "GET", &handle404);
     ResourceNode * nodeConf     = new ResourceNode("/conf", "GET", &handleConf);
-    
+    ResourceNode * nodeConfPost = new ResourceNode("/conf_post", "POST", &handleConfPost);
     // Add the nodes to the server
     secureServer->registerNode(nodeRoot);
     secureServer->registerNode(nodeInternal);
     secureServer->registerNode(nodeAdmin);
     secureServer->registerNode(nodePublic);
     secureServer->registerNode(nodeConf);
+    secureServer->registerNode(nodeConfPost);
     // The path is ignored for the default node.
     secureServer->setDefaultNode(node404);
     // middleware (First we check the identity, then we see what the user is allowed to do)
@@ -212,15 +297,15 @@ void SensadoInterno(){
 void SensadoTemperatura(){
 
       //Lectura ds18b20
-      if(millis()>(periodoLecturaTemperatura+30000)){
+      if(millis()>(periodoLecturaTemperatura+3000)){
       periodoLecturaTemperatura=millis();
       sensors.requestTemperatures(); 
       temperaturaC = round(sensors.getTempCByIndex(0));
       if(temperaturaC==-127){
         temperaturaC=0;
       }
-      //Serial.print("Temperatura sobrescrita: ");
-      //Serial.println(temperaturaC);
+      Serial.print("Temperatura sobrescrita: ");
+      Serial.println(temperaturaC);
 
     }
 }
@@ -235,6 +320,8 @@ void SensadoPuertas(){
       
         //Puerta1
         PuertaEstado[0]=digitalRead(PinPuerta1);
+        Serial.print("Puerta1: ");
+        Serial.println(PuertaEstado[0]);
         if(PuertaEstado[0]==ABIERTA && UltimoEstado[0]==CERRADA){
             Serial.println("Send TRAP: Puerta1 Abierta");
             Agentuino.Trap("Puerta1 Abierta", RemoteIP, locUpTime);
@@ -245,9 +332,11 @@ void SensadoPuertas(){
             UltimoEstado[0]=PuertaEstado[0];
         }
   
-      /*
+      
         //Puerta2
         PuertaEstado[1]=digitalRead(PinPuerta2);
+        Serial.print("Puerta2: ");
+        Serial.println(PuertaEstado[1]);
         if(PuertaEstado[1]==ABIERTA && UltimoEstado[1]==CERRADA){
             Serial.println("Send TRAP: Puerta2 Abierta");
             Agentuino.Trap("Puerta2 Abierta", RemoteIP, locUpTime);
@@ -261,6 +350,8 @@ void SensadoPuertas(){
 
         //Puerta3
         PuertaEstado[2]=digitalRead(PinPuerta3);
+        Serial.print("Puerta3: ");
+        Serial.println(PuertaEstado[2]);
         if(PuertaEstado[2]==ABIERTA && UltimoEstado[2]==CERRADA){
             Serial.println("Send TRAP: Puerta3 Abierta");
             Agentuino.Trap("Puerta3 Abierta", RemoteIP, locUpTime);
@@ -274,6 +365,8 @@ void SensadoPuertas(){
 
         //Puerta4
         PuertaEstado[3]=digitalRead(PinPuerta4);
+        Serial.print("Puerta4: ");
+        Serial.println(PuertaEstado[3]);
         if(PuertaEstado[3]==ABIERTA && UltimoEstado[3]==CERRADA){
             Serial.println("Send TRAP: Puerta4 Abierta");
             Agentuino.Trap("Puerta4 Abierta", RemoteIP, locUpTime);
@@ -283,7 +376,7 @@ void SensadoPuertas(){
             Agentuino.Trap("Puerta4 Cerrada", RemoteIP, locUpTime);
             UltimoEstado[3]=PuertaEstado[3];
         }
-        */
+        
     }
 }
 
@@ -298,14 +391,14 @@ void WiFiEvent(WiFiEvent_t event){
       Serial.println("ETH Conectado");
       break;
     case SYSTEM_EVENT_ETH_GOT_IP:
-      Serial.print("MAC: ");
-      Serial.println(ETH.macAddress());
+      //Serial.print("MAC: ");
+      //Serial.println(ETH.macAddress());
       Serial.print("IP: ");
       Serial.println(ETH.localIP());
-      if (ETH.fullDuplex()) {
-        Serial.print("FULL_DUPLEX");
-      }
-      Serial.print(":");
+      //if (ETH.fullDuplex()) {
+      //  Serial.print("FULL_DUPLEX");
+      //}
+      //Serial.print(":");
       Serial.print(ETH.linkSpeed());
       Serial.println("Mbps");
       //eth_connected = true;
@@ -550,30 +643,36 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
     res->println("<form action=\"/action_page.php\">");
     res->println("<label for=\"modo\">Modo de configuración IP:</label>");
     res->println("<select id=\"modo\" name=\"modo\" onChange=\"funcion()\">");
-    res->println("<option value=\"DHCP\">DHCP</option>");
-    res->println("<option selected value=\"IP Fija\">IP Fija</option>");
+    if(preferences.getChar("modo",0)==IP_FIJA){
+      res->println("<option value=\"DHCP\">DHCP</option>");
+      res->println("<option selected value=\"IP Fija\">IP Fija</option>");
+    }else{
+      res->println("<option selected value=\"DHCP\">DHCP</option>");
+      res->println("<option value=\"IP Fija\">IP Fija</option>");
+    } 
+
     res->println("</select>");
     res->println("</form>");
     res->println("<script>");
     res->println("function funcion() {var x = document.getElementById(\"modo\").value;if(x==\"DHCP\"){document.getElementById(\"configuracion_boxes\").style.display=\"none\";}else{document.getElementById(\"configuracion_boxes\").style.display=\"block\";}}</script>");
-    res->println("<form style=\"display:none\" id=\"configuracion_boxes\" action=\"/conf\">");
+    res->println("<form style=\"display:none\" id=\"configuracion_boxes\" action=\"/conf_post\" method=\"POST\">");
     res->println("<fieldset style=\"width:240px\">");
     res->println("<legend>Configuración Estática:</legend>");
     res->println("<label for=\"fname\">Dirección IP:</label><br>");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input1\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input2\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input3\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input4\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip1\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip2\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip3\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip4\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<br><label for=\"fname\">Mascara de Subred:</label><br>");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input5\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input6\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input7\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input8\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg1\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<br><label for=\"fname\">Puerta de Enlace predeterminada:</label><br>");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input9\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input10\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input11\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"input12\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm1\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm2\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm3\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm4\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<br><br>");
     res->println("<input type=\"submit\" value=\"Aceptar\">");
 
@@ -590,6 +689,48 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
 
 
 }
+
+
+void handleConfPost(HTTPRequest * req, HTTPResponse * res) {
+
+
+ // The echo callback will return the request body as response body.
+
+  // We use text/plain for the response
+  res->setHeader("Content-Type","text/plain");
+
+  // Stream the incoming request body to the response body
+  // Theoretically, this should work for every request size.
+  byte buffer[256];
+  char *bufferChar;
+  // HTTPReqeust::requestComplete can be used to check whether the
+  // body has been parsed completely.
+  while(!(req->requestComplete())) {
+    // HTTPRequest::readBytes provides access to the request body.
+    // It requires a buffer, the max buffer length and it will return
+    // the amount of bytes that have been written to the buffer.
+    size_t s = req->readBytes(buffer, 256);
+    bufferChar=(char *) malloc(s+1);
+    for(int i=0;i<s;i++){
+      bufferChar[i]= (char) buffer[i];
+      Serial.print(bufferChar[i]);
+    }
+    Serial.println("");
+    bufferChar[s]='\0';
+    // The response does not only implement the Print interface to
+    // write character data to the response but also the write function
+    // to write binary data to the response.
+    res->write(buffer, s);
+  }
+  char *parametros=NULL;
+  parametros=strtok(bufferChar,"&");
+  while(parametros!=NULL){
+    Serial.println(parametros);
+    parametros= strtok(NULL,"&");
+  }
+  free(bufferChar);
+}
+
 
 void handle404(HTTPRequest * req, HTTPResponse * res) {
   Serial.println("Entro a la handle404");
