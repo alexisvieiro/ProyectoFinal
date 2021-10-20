@@ -20,8 +20,8 @@
 
 //Ethernet y SNMP
 static boolean connected = false;
-static byte RemoteIP[4] = {192, 168, 0, 90}; // The IP address of the host that will receive the trap
-
+//static byte RemoteIP[4] = {192, 168, 0, 90}; // The IP address of the host that will receive the trap
+byte RemoteIP[4];
 //Sensor Puertas
 static uint32_t periodoLecturaPuertas=0;
 #define ABIERTA 0
@@ -65,6 +65,7 @@ void handle404(HTTPRequest * req, HTTPResponse * res);
 void handleConf(HTTPRequest * req, HTTPResponse * res);
 void handleConfIPFija(HTTPRequest * req, HTTPResponse * res);
 void handleConfIPDHCP(HTTPRequest * req, HTTPResponse * res);
+void handleConfIPSNMP(HTTPRequest * req, HTTPResponse * res);
 
 //Middlewares (verifican que estes logueado y tengas permisos de navegar en distintas URLs)
 void middlewareAuthentication(HTTPRequest * req, HTTPResponse * res, std::function<void()> next);
@@ -126,7 +127,10 @@ void setup(){
   ipm[1]=preferences.getChar("ipm2",0);
   ipm[2]=preferences.getChar("ipm3",0);
   ipm[3]=preferences.getChar("ipm4",0);
-  
+  RemoteIP[0] = (byte) preferences.getChar("ipsnmp1",0);
+  RemoteIP[1] = (byte) preferences.getChar("ipsnmp2",0);
+  RemoteIP[2] = (byte) preferences.getChar("ipsnmp3",0);
+  RemoteIP[3] = (byte) preferences.getChar("ipsnmp4",0);
   modo=preferences.getChar("modo",0);
 
   Serial.println("");
@@ -251,6 +255,8 @@ void setup(){
     ResourceNode * nodeConf     = new ResourceNode("/conf", "GET", &handleConf);
     ResourceNode * nodeConfIPFija = new ResourceNode("/conf_ipfija", "POST", &handleConfIPFija);
     ResourceNode * nodeConfIPDHCP = new ResourceNode("/conf_ipdhcp", "GET", &handleConfIPDHCP);
+    ResourceNode * nodeConfIPSNMP = new ResourceNode("/conf_ipsnmp", "POST", &handleConfIPSNMP);
+    
     // Add the nodes to the server
     secureServer->registerNode(nodeRoot);
     secureServer->registerNode(nodeInternal);
@@ -259,8 +265,11 @@ void setup(){
     secureServer->registerNode(nodeConf);
     secureServer->registerNode(nodeConfIPFija);
     secureServer->registerNode(nodeConfIPDHCP);
+    secureServer->registerNode(nodeConfIPSNMP);
+        
     // The path is ignored for the default node.
     secureServer->setDefaultNode(node404);
+    
     // middleware (First we check the identity, then we see what the user is allowed to do)
     secureServer->addMiddleware(&middlewareAuthentication);
     secureServer->addMiddleware(&middlewareAuthorization);
@@ -505,7 +514,7 @@ void middlewareAuthentication(HTTPRequest * req, HTTPResponse * res, std::functi
 
       // Small error text on the response document. In a real-world scenario, you
       // shouldn't display the login information on this page, of course ;-)
-      res->println("401. Unauthorized (try admin/secret or user/test)");
+      res->println("401 - Sin Autorizacion");
 
       // NO CALL TO next() here, as the authentication failed.
       // -> The code above did handle the request already.
@@ -531,13 +540,13 @@ void middlewareAuthorization(HTTPRequest * req, HTTPResponse * res, std::functio
 
   // Check that only logged-in users may get to the internal area (All URLs starting with /internal)
   // Only a simple example, more complicated configuration is up to you.
-  if (username == "" && req->getRequestString().substr(0,9) == "/conf") {
+  if (username == "" && req->getRequestString().substr(0,9) == "/") {
     // Same as the deny-part in middlewareAuthentication()
     res->setStatusCode(401);
     res->setStatusText("Unauthorized");
     res->setHeader("Content-Type", "text/plain");
     res->setHeader("WWW-Authenticate", "Basic realm=\"ESP32 privileged area\"");
-    res->println("401. Unauthorized (try admin/secret or user/test)");
+    res->println("401 - Sin Autorizacion");
 
     // No call denies access to protected handler function.
   } else {
@@ -642,29 +651,29 @@ void handleRoot(HTTPRequest * req, HTTPResponse * res) {
   res->println("<html>");
   res->println("<head><title>SNMP HUB </title></head>");
   res->println("<body>");
-  res->println("<h1>Pagina principal!</h1>");
-  res->println("<p>Chachara.</p>");
+  res->println("Bienvenido, ");
+  res->printStd(req->getHeader(HEADER_USERNAME));
+  Serial.println("Entro a la handleConf");
   res->println("<p>Ir a: <a href=\"/conf\">Configuracion</a></p>");
   res->println("</body>");
   res->println("</html>");
 }
 
 void handleConf(HTTPRequest * req, HTTPResponse * res) {
-  res->println("Bienvenido, ");
-  res->printStd(req->getHeader(HEADER_USERNAME));
+
   Serial.println("Entro a la handleConf");
 
 
-  std::string header = "<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>";
-  std::string footer = "</body></html>";
 
-  // Checking permissions can not only be done centrally in the middleware function but also in the actual request handler.
-  // This would be handy if you provide an API with lists of resources, but access rights are defined object-based.
+
   if (req->getHeader(HEADER_GROUP) == "ADMIN") {
     res->setStatusCode(200);
     res->setStatusText("OK");
     res->setHeader("Content-Type", "text/html; charset=utf8");
-    res->printStd(header);
+
+    res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
+      res->println("Bienvenido, ");
+  res->printStd(req->getHeader(HEADER_USERNAME));
     res->println("<form action=\"/action_page.php\">");
     res->println("<label for=\"modo\">Modo de configuración IP:</label>");
     res->println("<select id=\"modo\" name=\"modo\" onChange=\"funcion()\">");
@@ -718,7 +727,7 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
     res->println("<br></fieldset><br>");
     res->println("<input type=\"submit\" value=\"Aceptar\"></form>");
 
-    //HTML para form de dhcp
+    //Botón Aceptar para DHCP
     if(preferences.getChar("modo",0)==IP_FIJA){
       res->println("<form style=\"display:none\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
     }else{
@@ -726,18 +735,39 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
     }
     res->println("<input type=\"submit\" value=\"Aceptar\" />");
     res->println("</form>");
+
+
+
+
+    res->println("<form style=\"display:block\" id=\"configuracion_snmp\" action=\"/conf_ipsnmp\" method=\"POST\">");
+    res->println("<fieldset style=\"width:240px\">");
+    res->println("<legend>Servidor SNMP de Traps:</legend>");
+    res->println("<label for=\"fname\">Dirección IP:</label><br>");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp1\" type=\"number\" min=\"1\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp2\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp3\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp4\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<br></fieldset><br>");
+    res->println("<input type=\"submit\" value=\"Aceptar\"></form>");
+
+
     
 
-    //res->println("<p><a href=\"/internal\">Go back</a></p>");
+    //Botón Volver
+    res->println("<form id=\"configuracion_volver\" action=\"/\" method=\"GET\">");
+    res->println("<input type=\"submit\" value=\"Volver\" />");
+    res->println("</form>");
+    res->println("</body></html>");
 
   } else {
-    res->printStd(header);
+
+    res->println("<!DOCTYPE html><html><head><title>SNMP HUB</title></head><body>");
     res->setStatusCode(403);
     res->setStatusText("Unauthorized");
-    res->println("<p><strong>403 Unauthorized</strong> You have no power here!</p>");
+    res->println("403 - Sin Autorizacion");
+    res->println("</body></html>");
   }
 
-  res->printStd(footer);
 
 
 }
@@ -908,6 +938,87 @@ void handleConfIPDHCP(HTTPRequest * req, HTTPResponse * res) {
   preferences.putChar("modo",IP_DHCP);
   delay(2000);
   ESP.restart();
+}
+
+
+
+void handleConfIPSNMP(HTTPRequest * req, HTTPResponse * res) {
+
+
+
+// The echo callback will return the request body as response body.
+  char ipsnmp[4];
+  // We use text/plain for the response
+  res->setHeader("Content-Type","text/plain");
+
+  // Stream the incoming request body to the response body
+  // Theoretically, this should work for every request size.
+  byte buffer[256];
+  char *bufferChar;
+  // HTTPReqeust::requestComplete can be used to check whether the
+  // body has been parsed completely.
+  while(!(req->requestComplete())) {
+    // HTTPRequest::readBytes provides access to the request body.
+    // It requires a buffer, the max buffer length and it will return
+    // the amount of bytes that have been written to the buffer.
+    size_t s = req->readBytes(buffer, 256);
+    bufferChar=(char *) malloc(s+1);
+    for(int i=0;i<s;i++){
+      bufferChar[i]= (char) buffer[i];
+      Serial.print(bufferChar[i]);
+    }
+    Serial.println("");
+    bufferChar[s]='\0';
+    // The response does not only implement the Print interface to
+    // write character data to the response but also the write function
+    // to write binary data to the response.
+    res->write(buffer, s);
+  }
+  char *parametro=NULL;
+  parametro=strtok(bufferChar,"&");
+  while(parametro!=NULL){
+    //Serial.println(parametro);
+    
+    
+    if(!strncmp(parametro,"ipsnmp1=",8)){
+      Serial.print("El parametro ipsnmp1 es igual a ");
+      ipsnmp[0]=(char) atoi((parametro+ sizeof(char)*8));
+      Serial.println((int) ipsnmp[0]); 
+    }
+
+    if(!strncmp(parametro,"ipsnmp2=",8)){
+      Serial.print("El parametro ipsnmp2 es igual a ");
+      ipsnmp[1]=(char) atoi((parametro+ sizeof(char)*8));
+      Serial.println((int) ipsnmp[1]); 
+    }
+
+    if(!strncmp(parametro,"ipsnmp3=",8)){
+      Serial.print("El parametro ipsnmp3 es igual a ");
+      ipsnmp[2]=(char) atoi((parametro+ sizeof(char)*8));
+      Serial.println((int)  ipsnmp[2]); 
+    }
+
+
+    if(!strncmp(parametro,"ipsnmp4=",8)){
+      Serial.print("El parametro ipsnmp4 es igual a ");
+      ipsnmp[3]=(char) atoi((parametro+ sizeof(char)*8));
+      Serial.println((int) ipsnmp[3]); 
+    }
+    
+    parametro= strtok(NULL,"&");
+  }
+  free(bufferChar);
+
+  preferences.putChar("ipsnmp1",ipsnmp[0]);
+  preferences.putChar("ipsnmp2",ipsnmp[1]);
+  preferences.putChar("ipsnmp3",ipsnmp[2]);
+  preferences.putChar("ipsnmp4",ipsnmp[3]);
+
+  RemoteIP[0] = (byte) ipsnmp[0];
+  RemoteIP[1] = (byte) ipsnmp[1];
+  RemoteIP[2] = (byte) ipsnmp[2];
+  RemoteIP[3] = (byte) ipsnmp[3];
+
 }
 
 
