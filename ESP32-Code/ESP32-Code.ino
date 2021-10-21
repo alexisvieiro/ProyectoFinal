@@ -651,9 +651,46 @@ void handleRoot(HTTPRequest * req, HTTPResponse * res) {
   res->println("<html>");
   res->println("<head><title>SNMP HUB </title></head>");
   res->println("<body>");
-  res->println("Bienvenido, ");
+  res->println("Bienvenido,");
   res->printStd(req->getHeader(HEADER_USERNAME));
   Serial.println("Entro a la handleConf");
+
+
+
+  res->println("<br><fieldset style=\"width:240px\">");
+  res->println("<legend>Estado de Sensores:</legend>");
+  
+  if(UltimoEstado[0]==ABIERTA){
+    res->println("<label for=\"fname\">Estado Puerta 1: ABIERTA</label><br>");
+  }else{
+    res->println("<label for=\"fname\">Estado Puerta 1: CERRADA</label><br>");  
+  }
+
+  if(UltimoEstado[1]==ABIERTA){
+    res->println("<label for=\"fname\">Estado Puerta 2: ABIERTA</label><br>");
+  }else{
+    res->println("<label for=\"fname\">Estado Puerta 2: CERRADA</label><br>");  
+  }
+
+  if(UltimoEstado[2]==ABIERTA){
+    res->println("<label for=\"fname\">Estado Puerta 3: ABIERTA</label><br>");
+  }else{
+    res->println("<label for=\"fname\">Estado Puerta 3: CERRADA</label><br>");  
+  }
+
+  if(UltimoEstado[3]==ABIERTA){
+    res->println("<label for=\"fname\">Estado Puerta 4: ABIERTA</label><br>");
+  }else{
+    res->println("<label for=\"fname\">Estado Puerta 4: CERRADA</label><br>");  
+  }
+
+  res->println("<label for=\"fname\">Temperatura de Sensor: ");
+  res->println(temperaturaC);
+  res->println("</label>");
+  
+  res->println("</fieldset>");
+
+
   res->println("<p>Ir a: <a href=\"/conf\">Configuracion</a></p>");
   res->println("</body>");
   res->println("</html>");
@@ -663,20 +700,20 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
 
   Serial.println("Entro a la handleConf");
 
-
-
-
   if (req->getHeader(HEADER_GROUP) == "ADMIN") {
     res->setStatusCode(200);
     res->setStatusText("OK");
     res->setHeader("Content-Type", "text/html; charset=utf8");
 
     res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
-      res->println("Bienvenido, ");
-  res->printStd(req->getHeader(HEADER_USERNAME));
+    res->println("Bienvenido, ");
+    res->printStd(req->getHeader(HEADER_USERNAME));
     res->println("<form action=\"/action_page.php\">");
+    res->println("<br><fieldset style=\"width:280px\">");
+    res->println("<legend>HUB SNMP:</legend>");
     res->println("<label for=\"modo\">Modo de configuración IP:</label>");
     res->println("<select id=\"modo\" name=\"modo\" onChange=\"funcion()\">");
+    
     if(preferences.getChar("modo",0)==IP_FIJA){
       res->println("<option value=\"DHCP\">DHCP</option>");
       res->println("<option selected value=\"IP Fija\">IP Fija</option>");
@@ -706,9 +743,6 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
     }else{
       res->println("<form style=\"display:none\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
     } 
-    
-    res->println("<fieldset style=\"width:240px\">");
-    res->println("<legend>Configuración Estática:</legend>");
     res->println("<label for=\"fname\">Dirección IP:</label><br>");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip1\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip2\" type=\"number\" min=\"0\" max=\"255\">");
@@ -724,31 +758,36 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<br></fieldset><br>");
-    res->println("<input type=\"submit\" value=\"Aceptar\"></form>");
-
+    res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
+    ////--------------------------////
+    
     //Botón Aceptar para DHCP
     if(preferences.getChar("modo",0)==IP_FIJA){
       res->println("<form style=\"display:none\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
     }else{
       res->println("<form style=\"display:block\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
     }
-    res->println("<input type=\"submit\" value=\"Aceptar\" />");
+    res->println("<br><input type=\"submit\" value=\"Aceptar\" />");
     res->println("</form>");
+    res->println("</fieldset><br>");
+    ////--------------------------////
+
+
 
 
 
 
     res->println("<form style=\"display:block\" id=\"configuracion_snmp\" action=\"/conf_ipsnmp\" method=\"POST\">");
-    res->println("<fieldset style=\"width:240px\">");
+    res->println("<fieldset style=\"width:280px\">");
     res->println("<legend>Servidor SNMP de Traps:</legend>");
     res->println("<label for=\"fname\">Dirección IP:</label><br>");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp1\" type=\"number\" min=\"1\" max=\"255\">");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp2\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp3\" type=\"number\" min=\"0\" max=\"255\">");
     res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp4\" type=\"number\" min=\"0\" max=\"255\">");
+    res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
     res->println("<br></fieldset><br>");
-    res->println("<input type=\"submit\" value=\"Aceptar\"></form>");
+    
 
 
     
