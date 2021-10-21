@@ -696,6 +696,8 @@ void handleRoot(HTTPRequest * req, HTTPResponse * res) {
   res->println("</html>");
 }
 
+
+
 void handleConf(HTTPRequest * req, HTTPResponse * res) {
 
   Serial.println("Entro a la handleConf");
@@ -709,7 +711,7 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
     res->println("Bienvenido, ");
     res->printStd(req->getHeader(HEADER_USERNAME));
     res->println("<form action=\"/action_page.php\">");
-    res->println("<br><fieldset style=\"width:280px\">");
+    res->println("<fieldset style=\"width:280px\">");
     res->println("<legend>HUB SNMP:</legend>");
     res->println("<label for=\"modo\">Modo de configuración IP:</label>");
     res->println("<select id=\"modo\" name=\"modo\" onChange=\"funcion()\">");
@@ -744,20 +746,60 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
       res->println("<form style=\"display:none\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
     } 
     res->println("<label for=\"fname\">Dirección IP:</label><br>");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip1\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip2\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip3\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip4\" type=\"number\" min=\"0\" max=\"255\">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip1\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char)preferences.getChar("ip1",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip2\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char)preferences.getChar("ip2",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip3\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ip3",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip4\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ip4",0)));
+    res->println(">");
+    
     res->println("<br><label for=\"fname\">Mascara de Subred:</label><br>");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm1\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm2\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm3\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm4\" type=\"number\" min=\"0\" max=\"255\">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm1\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipm1",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm2\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char)preferences.getChar("ipm2",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm3\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipm3",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm4\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipm4",0)));
+    res->println(">");
+    
     res->println("<br><label for=\"fname\">Puerta de Enlace predeterminada:</label><br>");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg1\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg1\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipg1",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char)preferences.getChar("ipg2",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipg3",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipg4",0)));
+    res->println(">");
+
+    
     res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
     ////--------------------------////
     
@@ -781,10 +823,23 @@ void handleConf(HTTPRequest * req, HTTPResponse * res) {
     res->println("<fieldset style=\"width:280px\">");
     res->println("<legend>Servidor SNMP de Traps:</legend>");
     res->println("<label for=\"fname\">Dirección IP:</label><br>");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp1\" type=\"number\" min=\"1\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp2\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp3\" type=\"number\" min=\"0\" max=\"255\">");
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp4\" type=\"number\" min=\"0\" max=\"255\">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp1\" type=\"number\" min=\"1\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipsnmp1",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp2\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipsnmp2",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp3\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipsnmp3",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp4\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipsnmp4",0)));
+    res->println(">");
+    
     res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
     res->println("<br></fieldset><br>");
     
@@ -818,7 +873,7 @@ void handleConfIPFija(HTTPRequest * req, HTTPResponse * res) {
  // The echo callback will return the request body as response body.
   char ip[4],ipg[4],ipm[4];
   // We use text/plain for the response
-  res->setHeader("Content-Type","text/plain");
+
 
   // Stream the incoming request body to the response body
   // Theoretically, this should work for every request size.
@@ -826,6 +881,7 @@ void handleConfIPFija(HTTPRequest * req, HTTPResponse * res) {
   char *bufferChar;
   // HTTPReqeust::requestComplete can be used to check whether the
   // body has been parsed completely.
+  if (req->getHeader(HEADER_GROUP) == "ADMIN") {
   while(!(req->requestComplete())) {
     // HTTPRequest::readBytes provides access to the request body.
     // It requires a buffer, the max buffer length and it will return
@@ -841,7 +897,7 @@ void handleConfIPFija(HTTPRequest * req, HTTPResponse * res) {
     // The response does not only implement the Print interface to
     // write character data to the response but also the write function
     // to write binary data to the response.
-    res->write(buffer, s);
+    //res->write(buffer, s);
   }
   char *parametro=NULL;
   parametro=strtok(bufferChar,"&");
@@ -935,7 +991,7 @@ void handleConfIPFija(HTTPRequest * req, HTTPResponse * res) {
 
 
 
-    //Modo 0= dhcp, Modo 1= IP fija
+  //Modo 0= dhcp, Modo 1= IP fija
   Serial.println("IP Fija, reiniciando");
   preferences.putChar("ip1",ip[0]);
   preferences.putChar("ip2",ip[1]);
@@ -954,8 +1010,163 @@ void handleConfIPFija(HTTPRequest * req, HTTPResponse * res) {
 
   
   preferences.putChar("modo",IP_FIJA);
-  delay(2000);
+  
+  res->setStatusCode(200);
+  res->setStatusText("OK");
+  res->setHeader("Content-Type", "text/html; charset=utf8");
+
+res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
+    res->println("Bienvenido, ");
+    res->printStd(req->getHeader(HEADER_USERNAME));
+    res->println("<form action=\"/action_page.php\">");
+    res->println("<fieldset style=\"width:280px\">");
+    res->println("<legend>HUB SNMP:</legend>");
+    res->println("<label for=\"modo\">Modo de configuración IP:</label>");
+    res->println("<select id=\"modo\" name=\"modo\" onChange=\"funcion()\">");
+    
+    if(preferences.getChar("modo",0)==IP_FIJA){
+      res->println("<option value=\"DHCP\">DHCP</option>");
+      res->println("<option selected value=\"IP Fija\">IP Fija</option>");
+    }else{
+      res->println("<option selected value=\"DHCP\">DHCP</option>");
+      res->println("<option value=\"IP Fija\">IP Fija</option>");
+    } 
+
+    res->println("</select>");
+    res->println("</form>");
+    res->println("<script>");
+    res->println("function funcion() {");
+    res->println("var x = document.getElementById(\"modo\").value;");
+    res->println("if(x==\"DHCP\"){");
+    res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"none\";");
+    res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"block\";");
+    res->println("}else{");
+    res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"block\";");
+    res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"none\";");
+    res->println("}}</script>");
+
+
+    
+    //HTML para form de ip fija
+    if(preferences.getChar("modo",0)==IP_FIJA){
+      res->println("<form style=\"display:block\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
+    }else{
+      res->println("<form style=\"display:none\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
+    } 
+    res->println("<label for=\"fname\">Dirección IP:</label><br>");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip1\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char)preferences.getChar("ip1",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip2\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char)preferences.getChar("ip2",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip3\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ip3",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip4\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ip4",0)));
+    res->println(">");
+    
+    res->println("<br><label for=\"fname\">Mascara de Subred:</label><br>");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm1\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipm1",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm2\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char)preferences.getChar("ipm2",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm3\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipm3",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm4\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipm4",0)));
+    res->println(">");
+    
+    res->println("<br><label for=\"fname\">Puerta de Enlace predeterminada:</label><br>");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg1\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipg1",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char)preferences.getChar("ipg2",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipg3",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipg4",0)));
+    res->println(">");
+
+    
+    res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
+    ////--------------------------////
+    
+    //Botón Aceptar para DHCP
+    if(preferences.getChar("modo",0)==IP_FIJA){
+      res->println("<form style=\"display:none\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
+    }else{
+      res->println("<form style=\"display:block\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
+    }
+    res->println("<br><input type=\"submit\" value=\"Aceptar\" />");
+    res->println("</form>");
+    res->println("</fieldset><br>");
+    ////--------------------------////
+
+
+
+
+
+
+    res->println("<form style=\"display:block\" id=\"configuracion_snmp\" action=\"/conf_ipsnmp\" method=\"POST\">");
+    res->println("<fieldset style=\"width:280px\">");
+    res->println("<legend>Servidor SNMP de Traps:</legend>");
+    res->println("<label for=\"fname\">Dirección IP:</label><br>");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp1\" type=\"number\" min=\"1\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipsnmp1",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp2\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipsnmp2",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp3\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipsnmp3",0)));
+    res->println(">");
+    
+    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp4\" type=\"number\" min=\"0\" max=\"255\" value=");
+    res->println(int((unsigned char) preferences.getChar("ipsnmp4",0)));
+    res->println(">");
+    
+    res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
+    res->println("<br></fieldset><br>");
+    
+
+
+    
+
+    //Botón Volver
+    res->println("<form id=\"configuracion_volver\" action=\"/\" method=\"GET\">");
+    res->println("<input type=\"submit\" value=\"Volver\" />");
+    res->println("</form>");
+    res->println("</body></html>");
+
+  
+  delay(10000);
   ESP.restart();
+  }else{
+    //no admin
+  }
 
 }
 
