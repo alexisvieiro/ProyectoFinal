@@ -1,226 +1,112 @@
-//Ethernet
+#include "ServerHandler.h"
 #include <ETH.h>
 
-//Sensores
-#include <OneWire.h>
-#include <DallasTemperature.h>
 
-//SNMP
-#include "Agentuino.h"
-#include "MIB.h"
-#include "Variable.h"
-
-//Webserver
-#include <functional>
-#include <HTTPSServer.hpp>
-#include <SSLCert.hpp>
-#include <HTTPRequest.hpp>
-#include <HTTPResponse.hpp>
-#include <Preferences.h>
-
-//Ethernet y SNMP
-static boolean connected = false;
-//static byte RemoteIP[4] = {192, 168, 0, 90}; // The IP address of the host that will receive the trap
-byte RemoteIP[4];
-//Sensor Puertas
-static uint32_t periodoLecturaPuertas=0;
-#define ABIERTA 0
-#define CERRADA 1
-#define PinPuerta1 32
-#define PinPuerta2 33
-#define PinPuerta3 14
-#define PinPuerta4 16
-static int PuertaEstado[4];
-static int UltimoEstado[4];
-
-//Sensor Temperatura
-static uint32_t periodoLecturaTemperatura=0;
-const int oneWireBus = 13; 
-OneWire oneWire(oneWireBus);
-DallasTemperature sensors(&oneWire);
-
-
-//WebServer
-#define HEADER_USERNAME "X-USERNAME"
-#define HEADER_GROUP    "X-GROUP"
-#define IP_FIJA 1
-#define IP_DHCP 0
-using namespace httpsserver;
+extern int PuertaEstado[4];
+extern int UltimoEstado[4];
+char ip[4],ipm[4],ipg[4],modo;
 HTTPSServer * secureServer;
 SSLCert * cert;
-
-//Guarda en flash:
-//Configuración de ESP32
-//Certificado y Key para HTTPs
 Preferences preferences;
+byte RemoteIP[4];
+static bool BootESP32=0;
 
+void ServerLoop(){
+    secureServer->loop();
+    if (BootESP32==1){
+      delay(2000);
+      ESP.restart();
+    }
+}
 
-//Funciones de URLs
-void handleRoot(HTTPRequest * req, HTTPResponse * res);
-void handleInternalPage(HTTPRequest * req, HTTPResponse * res);
-void handleAdminPage(HTTPRequest * req, HTTPResponse * res);
-void handlePublicPage(HTTPRequest * req, HTTPResponse * res);
-void handle404(HTTPRequest * req, HTTPResponse * res);
-void handleConf(HTTPRequest * req, HTTPResponse * res);
-void handleConfIPFija(HTTPRequest * req, HTTPResponse * res);
-void handleConfIPDHCP(HTTPRequest * req, HTTPResponse * res);
-void handleConfIPSNMP(HTTPRequest * req, HTTPResponse * res);
+void ServerStart(){
 
-//Middlewares (verifican que estes logueado y tengas permisos de navegar en distintas URLs)
-void middlewareAuthentication(HTTPRequest * req, HTTPResponse * res, std::function<void()> next);
-void middlewareAuthorization(HTTPRequest * req, HTTPResponse * res, std::function<void()> next);
+    Serial.println("Starting server...");
+    secureServer->start();
+    if (secureServer->isRunning()) {
+    Serial.println("Server ready.");
+    }
+}
 
-void setup(){
-    //Inicialización Serie
-    Serial.begin(115200);
-
+void ServerInit(){
+    
+    //------------------------------------------------Certificado HTTPS---------------------------------------------------------------------//
     preferences.begin("ip", false);
-    //Certificado y Key
     size_t pkLen = preferences.getBytesLength("PK");
     size_t certLen = preferences.getBytesLength("cert");
 
-     if (pkLen && certLen) {
+    if (pkLen && certLen) {
       uint8_t *pkBuffer = new uint8_t[pkLen];
       preferences.getBytes("PK", pkBuffer, pkLen);
-      
       uint8_t *certBuffer = new uint8_t[certLen];
       preferences.getBytes("cert", certBuffer, certLen);
-  
       cert = new SSLCert(certBuffer, certLen, pkBuffer, pkLen);
-      
     } else {
-    Serial.println("Creating certificate.");
-    cert = new SSLCert();
-    int createCertResult = createSelfSignedCert(*cert,KEYSIZE_2048,"CN=esp32hub.local,O=Ericnet,C=DE","20190101000000","20300101000000");
+      Serial.println("Creating certificate.");
+      cert = new SSLCert();
+      int createCertResult = createSelfSignedCert(*cert,KEYSIZE_2048,"CN=esp32hub.local,O=Ericnet,C=DE","20190101000000","20300101000000");
   
-    if (createCertResult != 0) {
-      Serial.printf("Cerating certificate failed. Error Code = 0x%02X, check SSLCert.hpp for details", createCertResult);
-      while(true) delay(500);
-    }
-    Serial.println("Creating the certificate was successful");
-    preferences.putBytes("PK", (uint8_t *)cert->getPKData(), cert->getPKLength());
-    preferences.putBytes("cert", (uint8_t *)cert->getCertData(), cert->getCertLength());  
-  
+      if (createCertResult != 0) {
+        Serial.printf("Cerating certificate failed. Error Code = 0x%02X, check SSLCert.hpp for details", createCertResult);
+        while(true) delay(500);
+      } 
+
+      Serial.println("Creating the certificate was successful");
+      preferences.putBytes("PK", (uint8_t *)cert->getPKData(), cert->getPKLength());  //Guardo PK del Certificado creado
+      preferences.putBytes("cert", (uint8_t *)cert->getCertData(), cert->getCertLength());  //Guardo Certificado creado
     }    
-    //HTTPSServer::HTTPSServer(SSLCert * cert, const uint16_t port, const uint8_t maxConnections, const in_addr_t bindAddress)
     secureServer = new HTTPSServer(cert);
+    //------------------------------------------------Fin-Certificado-HTTPS---------------------------------------------------------------------//
 
 
 
-  //IP fija o por DHCP
-  char ip[4],ipm[4],ipg[4];
-  char modo;
+    ServerIP();    //Configuración de IP (DHCP o Fija)
+    ServerPaths(); //Configuración de los URL del servidor HTTPS
+    ServerStart(); //Declaración DE URLs y comienzo del servidor HTTPS
+
+}
 
 
-  ip[0]=preferences.getChar("ip1",0);
-  ip[1]=preferences.getChar("ip2",0);
-  ip[2]=preferences.getChar("ip3",0);
-  ip[3]=preferences.getChar("ip4",0);
-  
-  ipg[0]=preferences.getChar("ipg1",0);
-  ipg[1]=preferences.getChar("ipg2",0);
-  ipg[2]=preferences.getChar("ipg3",0);
-  ipg[3]=preferences.getChar("ipg4",0);
-  
-  ipm[0]=preferences.getChar("ipm1",0);
-  ipm[1]=preferences.getChar("ipm2",0);
-  ipm[2]=preferences.getChar("ipm3",0);
-  ipm[3]=preferences.getChar("ipm4",0);
-  RemoteIP[0] = (byte) preferences.getChar("ipsnmp1",0);
-  RemoteIP[1] = (byte) preferences.getChar("ipsnmp2",0);
-  RemoteIP[2] = (byte) preferences.getChar("ipsnmp3",0);
-  RemoteIP[3] = (byte) preferences.getChar("ipsnmp4",0);
-  modo=preferences.getChar("modo",0);
+void ServerIP(){
 
-  Serial.println("");
-  Serial.println("");
-  Serial.println("-------------------------------");
-  Serial.print("IP leida de las preferences: ");
-  Serial.print((uint8_t) ip[0]);
-  Serial.print(".");
-  Serial.print((uint8_t) ip[1]);
-  Serial.print(".");
-  Serial.print((uint8_t) ip[2]);
-  Serial.print(".");
-  Serial.print((uint8_t) ip[3]);
-  Serial.println("");  
+  //----------------------------------------------Lectura de parametros de las configuraciónes IP---------------------------------------------//
 
-  Serial.print("IP Gateway leida de las preferences: ");
-  Serial.print((uint8_t) ipg[0]);
-  Serial.print(".");
-  Serial.print((uint8_t) ipg[1]);
-  Serial.print(".");
-  Serial.print((uint8_t) ipg[2]);
-  Serial.print(".");
-  Serial.println  ((uint8_t) ipg[3]);
+    //IP del HUB
+    ip[0]=preferences.getChar("ip1",0);
+    ip[1]=preferences.getChar("ip2",0);
+    ip[2]=preferences.getChar("ip3",0);
+    ip[3]=preferences.getChar("ip4",0);
+    //IP del Gateway
+    ipg[0]=preferences.getChar("ipg1",0);
+    ipg[1]=preferences.getChar("ipg2",0);
+    ipg[2]=preferences.getChar("ipg3",0);
+    ipg[3]=preferences.getChar("ipg4",0);
+    //Mascara de subred
+    ipm[0]=preferences.getChar("ipm1",0);
+    ipm[1]=preferences.getChar("ipm2",0);
+    ipm[2]=preferences.getChar("ipm3",0);
+    ipm[3]=preferences.getChar("ipm4",0);
+    //IP del servidor SNMP
+    RemoteIP[0] = (byte) preferences.getChar("ipsnmp1",0);
+    RemoteIP[1] = (byte) preferences.getChar("ipsnmp2",0);
+    RemoteIP[2] = (byte) preferences.getChar("ipsnmp3",0);
+    RemoteIP[3] = (byte) preferences.getChar("ipsnmp4",0);
+    //Modo (0 para DHCP, 1 para IP Fija)
+    modo=preferences.getChar("modo",0);
 
-
-  Serial.print("IP Mask leida de las preferences: ");
-  Serial.print((uint8_t) ipm[0]);
-  Serial.print(".");
-  Serial.print((uint8_t) ipm[1]);
-  Serial.print(".");
-  Serial.print((uint8_t) ipm[2]);
-  Serial.print(".");
-  Serial.print((uint8_t) ipm[3]);
-  Serial.println("");  
-  
-  Serial.println("-------------------------------");
-  Serial.println("");
-  Serial.println("");
- 
-  
-  
-  
-  if (!ip[0] && !ip[1] && !ip[2] && !ip[3] && !modo){
-
-
-    //Modo 0= dhcp, Modo 1= IP fija
-    Serial.println("IP por DHCP, primer inicio.");
-    preferences.putChar("ip1",0);
-    preferences.putChar("ip2",0);
-    preferences.putChar("ip3",0);
-    preferences.putChar("ip4",0);
-    preferences.putChar("modo",IP_DHCP);
-    
-  }
-
-
-
-    
-    
-    //Inicialización Pullups Puertas
-    //pinMode(PinPuerta1, INPUT);
-    pinMode(PinPuerta1, INPUT_PULLUP);
-    pinMode(PinPuerta2, INPUT_PULLUP);
-    pinMode(PinPuerta3, INPUT_PULLUP);
-    pinMode(PinPuerta4, INPUT_PULLUP);
-
-    //Puerta1
-    PuertaEstado[0]=digitalRead(PinPuerta1);
-    UltimoEstado[0]=PuertaEstado[0];
-
-    //Puerta2
-    PuertaEstado[1]=digitalRead(PinPuerta2);
-    UltimoEstado[1]=PuertaEstado[1];
-
-    //Puerta3
-    PuertaEstado[2]=digitalRead(PinPuerta3);
-    UltimoEstado[2]=PuertaEstado[2];
-
-    //Puerta4
-    PuertaEstado[3]=digitalRead(PinPuerta4);
-    UltimoEstado[3]=PuertaEstado[3];   
-
-    //Inicialización Ethernet
-    WiFi.onEvent(WiFiEvent);
-    ETH.begin();
-    while(!connected){
-      delay(500);
+    if (!ip[0] && !ip[1] && !ip[2] && !ip[3] && !modo){ //Primer inicio
+      Serial.println("IP por DHCP, primer inicio.");
+      preferences.putChar("ip1",192);
+      preferences.putChar("ip2",168);
+      preferences.putChar("ip3",1);
+      preferences.putChar("ip4",99);
+      preferences.putChar("modo",IP_FIJA);
     }
+  //---------------------------------------Fin de Lectura de parametros de las configuraciónes IP-------------------------------------------//
+  
 
-
-  if(modo== IP_FIJA){
+  //----------------------------------------------Seteo de parametros de las configuraciónes IP---------------------------------------------//
+    if(modo== IP_FIJA){
     
     Serial.print("Modo: ");
     Serial.println("IP Fija");
@@ -231,21 +117,21 @@ void setup(){
     if (!ETH.config(local_IP, gateway, subnet,dns)) {
     Serial.println("STA Fallo al configurar");
     }
-    //Modo 1 == FIJA
   }else{
+    Serial.print("Modo: ");
     Serial.println("IP por DHCP");
-    //Modo 1 == DHCP
+ 
   }
-     
+  //-------------------------------------------Fin de Seteo de parametros de las configuraciónes IP------------------------------------------//  
+
+}
 
 
 
 
+void ServerPaths(){
 
-
-  
-
-    // The ResourceNode links URL and HTTP method to a handler function
+    //Declaración de URLs del servidor HTTPS
     ResourceNode * nodeRoot     = new ResourceNode("/", "GET", &handleRoot);
     ResourceNode * nodeInternal = new ResourceNode("/internal", "GET", &handleInternalPage);
     ResourceNode * nodeAdmin    = new ResourceNode("/internal/admin", "GET", &handleAdminPage);
@@ -255,7 +141,7 @@ void setup(){
     ResourceNode * nodeConfIPFija = new ResourceNode("/conf_ipfija", "POST", &handleConfIPFija);
     ResourceNode * nodeConfIPDHCP = new ResourceNode("/conf_ipdhcp", "GET", &handleConfIPDHCP);
     ResourceNode * nodeConfIPSNMP = new ResourceNode("/conf_ipsnmp", "POST", &handleConfIPSNMP);
-    
+
     // Add the nodes to the server
     secureServer->registerNode(nodeRoot);
     secureServer->registerNode(nodeInternal);
@@ -273,185 +159,10 @@ void setup(){
     secureServer->addMiddleware(&middlewareAuthentication);
     secureServer->addMiddleware(&middlewareAuthorization);
 
-    Serial.println("Starting server...");
-    secureServer->start();
-    if (secureServer->isRunning()) {
-    Serial.println("Server ready.");
-    }
-    
-    //Inicialización SNMP
-    api_status = Agentuino.begin();
-    if (api_status == SNMP_API_STAT_SUCCESS) {
-        Agentuino.onPduReceive(pduReceived);
-        delay(10);
-        Serial.println("Agente SNMP inicializado");
-        return;
-    }else{
-        delay(10);
-        Serial.println("Agente SNMP no inicializado");
-    }
-/*
-    //Para la lectura datos
-    periodoLecturaPuertas=millis();
-    periodoLecturaTemperatura=periodoLecturaPuertas;
-    periodoLecturaRAM=periodoLecturaPuertas;*/
-   
-}
 
-
-
-void loop() {
-
-    //Agentuino.listen();
-    //SensadoPuertas();
-    //SensadoTemperatura();
-    //SensadoInterno();
-    secureServer->loop();
-    delay(1);
-}
-
-void SensadoInterno(){
-   //Lectura de system up time
-    if (millis() - prevMillis > 1000) {
-        prevMillis += 1000;
-        locUpTime += 100;
-    }
-
-    //Lectura RAM
-    if(millis()  - periodoLecturaRAM > 60000){
-      periodoLecturaRAM = millis();
-      freeHeap=(ESP.getFreeHeap());
-      Serial.print("Free Heap: ");
-      Serial.println(freeHeap);
-    }
 
 }
 
-void SensadoTemperatura(){
-
-      //Lectura ds18b20
-      if(millis()>(periodoLecturaTemperatura+3000)){
-      periodoLecturaTemperatura=millis();
-      sensors.requestTemperatures(); 
-      temperaturaC = round(sensors.getTempCByIndex(0));
-      if(temperaturaC==-127){
-        temperaturaC=0;
-      }
-      Serial.print("Temperatura sobrescrita: ");
-      Serial.println(temperaturaC);
-
-    }
-}
-
-
-void SensadoPuertas(){
-
-
-    if(millis()-periodoLecturaPuertas>1000){
-      periodoLecturaPuertas=millis();
-
-      
-        //Puerta1
-        PuertaEstado[0]=digitalRead(PinPuerta1);
-        Serial.print("Puerta1: ");
-        Serial.println(PuertaEstado[0]);
-        if(PuertaEstado[0]==ABIERTA && UltimoEstado[0]==CERRADA){
-            Serial.println("Send TRAP: Puerta1 Abierta");
-            Agentuino.Trap("Puerta1 Abierta", RemoteIP, locUpTime);
-            UltimoEstado[0]=PuertaEstado[0];
-        }else if(PuertaEstado[0]==CERRADA && UltimoEstado[0]==ABIERTA){
-            Serial.println("Send TRAP: Puerta1 Cerrada");
-            Agentuino.Trap("Puerta1 Cerrada", RemoteIP, locUpTime);
-            UltimoEstado[0]=PuertaEstado[0];
-        }
-  
-      
-        //Puerta2
-        PuertaEstado[1]=digitalRead(PinPuerta2);
-        Serial.print("Puerta2: ");
-        Serial.println(PuertaEstado[1]);
-        if(PuertaEstado[1]==ABIERTA && UltimoEstado[1]==CERRADA){
-            Serial.println("Send TRAP: Puerta2 Abierta");
-            Agentuino.Trap("Puerta2 Abierta", RemoteIP, locUpTime);
-            UltimoEstado[1]=PuertaEstado[1];
-        }else if(PuertaEstado[1]==CERRADA && UltimoEstado[1]==ABIERTA){
-            Serial.println("Send TRAP: Puerta2 Cerrada");
-            Agentuino.Trap("Puerta2 Cerrada", RemoteIP, locUpTime);
-            UltimoEstado[1]=PuertaEstado[1];
-        }
-
-
-        //Puerta3
-        PuertaEstado[2]=digitalRead(PinPuerta3);
-        Serial.print("Puerta3: ");
-        Serial.println(PuertaEstado[2]);
-        if(PuertaEstado[2]==ABIERTA && UltimoEstado[2]==CERRADA){
-            Serial.println("Send TRAP: Puerta3 Abierta");
-            Agentuino.Trap("Puerta3 Abierta", RemoteIP, locUpTime);
-            UltimoEstado[2]=PuertaEstado[2];
-        }else if(PuertaEstado[2]==CERRADA && UltimoEstado[2]==ABIERTA){
-            Serial.println("Send TRAP: Puerta3 Cerrada");
-            Agentuino.Trap("Puerta3 Cerrada", RemoteIP, locUpTime);
-            UltimoEstado[2]=PuertaEstado[2];
-        }
-
-
-        //Puerta4
-        PuertaEstado[3]=digitalRead(PinPuerta4);
-        Serial.print("Puerta4: ");
-        Serial.println(PuertaEstado[3]);
-        if(PuertaEstado[3]==ABIERTA && UltimoEstado[3]==CERRADA){
-            Serial.println("Send TRAP: Puerta4 Abierta");
-            Agentuino.Trap("Puerta4 Abierta", RemoteIP, locUpTime);
-            UltimoEstado[3]=PuertaEstado[3];
-        }else if(PuertaEstado[3]==CERRADA && UltimoEstado[3]==ABIERTA){
-            Serial.println("Send TRAP: Puerta4 Cerrada");
-            Agentuino.Trap("Puerta4 Cerrada", RemoteIP, locUpTime);
-            UltimoEstado[3]=PuertaEstado[3];
-        }
-        
-    }
-}
-
-void WiFiEvent(WiFiEvent_t event){
-  switch (event) {
-    case SYSTEM_EVENT_ETH_START:
-      Serial.println("ETH Iniciado");
-      //set eth hostname here
-      ETH.setHostname("esp32-ethernet");
-      break;
-    case SYSTEM_EVENT_ETH_CONNECTED:
-      Serial.println("ETH Conectado");
-      break;
-    case SYSTEM_EVENT_ETH_GOT_IP:
-      //Serial.print("MAC: ");
-      //Serial.println(ETH.macAddress());
-      Serial.print("IP: ");
-      Serial.println(ETH.localIP());
-      //if (ETH.fullDuplex()) {
-      //  Serial.print("FULL_DUPLEX");
-      //}
-      //Serial.print(":");
-      Serial.print(ETH.linkSpeed());
-      Serial.println("Mbps");
-      //eth_connected = true;
-      connected = true;
-      break;
-    case SYSTEM_EVENT_ETH_DISCONNECTED:
-      Serial.println("ETH Desconectado");
-      //eth_connected = false;
-      connected = false;
-      break;
-    case SYSTEM_EVENT_ETH_STOP:
-      Serial.println("ETH Parado");
-      //eth_connected = false;
-      connected = false;
-      break;
-    default:
-      break;
-  }
-  
-}
 
 
 
@@ -1161,8 +872,7 @@ res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><m
     res->println("</body></html>");
 
   
-  delay(10000);
-  ESP.restart();
+    BootESP32=1;
   }else{
     //no admin
   }
@@ -1185,8 +895,8 @@ void handleConfIPDHCP(HTTPRequest * req, HTTPResponse * res) {
 
   Serial.println("IP por DHCP, reiniciando");
   preferences.putChar("modo",IP_DHCP);
-  delay(2000);
-  ESP.restart();
+  BootESP32=1;
+
 }
 
 
@@ -1283,3 +993,5 @@ void handle404(HTTPRequest * req, HTTPResponse * res) {
   res->println("<body><h1>404 Not Found</h1><p>Lo solicitado no fue encontrado en el servidor.</p></body>");
   res->println("</html>");
 }
+
+
