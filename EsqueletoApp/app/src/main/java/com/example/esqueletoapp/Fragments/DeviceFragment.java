@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -75,6 +76,8 @@ public class DeviceFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
         rclHostList = view.findViewById(R.id.listDevices1);
         swRefreshLayout = view.findViewById(R.id.swipeRefreshLayout1);
 
@@ -82,11 +85,27 @@ public class DeviceFragment extends Fragment {
         String sToken = userData.getString("Token",null);
         String sURL = userData.getString("URL", null);
 
+        deviceSampleAdapter = new DeviceSampleAdapter(sampleItemArrayList, getActivity());
+
         rclHostList.setHasFixedSize(true);
         rclHostList.setLayoutManager(new LinearLayoutManager(getContext()));
         rclHostList.addItemDecoration
                 (new DividerItemDecoration(getContext(),DividerItemDecoration.VERTICAL));
 
+        LoadData(sToken,sURL);
+
+
+        swRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                LoadData(sToken,sURL);
+                swRefreshLayout.setRefreshing(false);
+            }
+        });
+
+    }
+
+    void LoadData(String sToken, String sURL){
         hostHandler = new Handler(Looper.getMainLooper());
         OkHttpClient client = new OkHttpClient().newBuilder().build();
         MediaType mediaType = MediaType.parse("application/json");
@@ -123,8 +142,8 @@ public class DeviceFragment extends Fragment {
                         }
                         if(jsonResponse.has("result")){
                             JSONArray jsonResult = jsonResponse.optJSONArray("result");
-                            deviceSampleAdapter = new DeviceSampleAdapter(sampleItemArrayList, getActivity());
                             rclHostList.setAdapter(deviceSampleAdapter);
+                            sampleItemArrayList.clear();
                             for (int i=0; i<jsonResult.length(); i++){
                                 String sHost = jsonResult.optJSONObject(i).optString("host");
                                 sampleItemArrayList.add(new DeviceSampleItem(sHost));
@@ -134,17 +153,5 @@ public class DeviceFragment extends Fragment {
                 });
             }
         });
-
-
-        swRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                swRefreshLayout.setRefreshing(false);
-                DeviceFragment deviceFragment = new DeviceFragment();
-                getActivity().getSupportFragmentManager().beginTransaction()
-                        .detach(deviceFragment).attach(deviceFragment).commit();
-            }
-        });
-
     }
 }

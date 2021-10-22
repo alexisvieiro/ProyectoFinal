@@ -2,6 +2,7 @@ package com.example.esqueletoapp.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,12 +49,10 @@ public class MenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
         rclDeviceList = findViewById(R.id.listDevices);
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
-
-        /*if(swipeRefreshLayout.isRefreshing()){
-            Toast.makeText(this,"cargando",Toast.LENGTH_SHORT).show();
-        }*/
 
         SharedPreferences userData = getSharedPreferences("UserData", MODE_PRIVATE);
         String sToken = userData.getString("Token",null);

@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
@@ -57,6 +58,7 @@ public class NewDashboardItemFragment extends Fragment {
     private String[] sHostIDs;
     private String[] sItemList;
     private String[] sItemIDList;
+    private String[] sItemUnitList;
 
     public NewDashboardItemFragment() {
         // Required empty public constructor
@@ -78,6 +80,8 @@ public class NewDashboardItemFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
         spinnerHost = view.findViewById(R.id.spinnerGetHost);
         spinnerItem = view.findViewById(R.id.spinnerGetItem);
@@ -152,10 +156,10 @@ public class NewDashboardItemFragment extends Fragment {
                     OkHttpClient clientItem = new OkHttpClient().newBuilder().build();
                     MediaType mediaTypeItem = MediaType.parse("application/json");
                     RequestBody bodyItem = RequestBody.create("{\n   \"jsonrpc\": \"2.0\",\n   \"method\":" +
-                                    " \"item.get\",\n   \"params\": {\n       \"output\": [\"name\",\"value_type\"],\n       " +
+                                    " \"item.get\",\n   \"params\": {\n       \"output\": [\"name\",\"value_type\",\"units\"],\n       " +
                                     "\"hostids\": \"" +
                                     sHostIDs[position-1] +
-                                    "\",\n       \"filter\": {\n           \"value_type\": \"0\"\n       },\n       " +
+                                    "\",\n       \"filter\": {\n           \"value_type\": [\"0\",\"3\"]\n       },\n       " +
                                     "\"sortfield\": \"name\",\n       \"sortorder\": \"DESC\"\n   },\n   \"id\": 1,\n   " +
                                     "\"auth\": \"" +
                                     sToken+"\"\n}\n"
@@ -190,10 +194,12 @@ public class NewDashboardItemFragment extends Fragment {
                                         JSONArray jsonResultItem = jsonResponseItem.optJSONArray("result");
                                         sItemList = new String[jsonResultItem.length()];
                                         sItemIDList = new String[jsonResultItem.length()];
+                                        sItemUnitList = new String[jsonResultItem.length()];
                                         for (int i=0; i<jsonResultItem.length(); i++){
                                             if(jsonResultItem.optJSONObject(i).has("name")){
                                                 sItemList[i] = jsonResultItem.optJSONObject(i).optString("name");
                                                 sItemIDList[i] = jsonResultItem.optJSONObject(i).optString("itemid");
+                                                sItemUnitList[i] = jsonResultItem.optJSONObject(i).optString("units");
                                             }
                                         }
                                         ArrayAdapter<String> dataAdapter =  new ArrayAdapter<String>
@@ -223,13 +229,20 @@ public class NewDashboardItemFragment extends Fragment {
                     String sDashboardHostName = userData.getString("HostNames", null);
                     String sDashboardItemName = userData.getString("ItemNames", null);
                     String sDashboardItemID = userData.getString("ItemIDs", null);
+                    String sDashboardItemUnit = userData.getString("ItemUnits", null);
 
                     Integer pos = spinnerItem.getSelectedItemPosition();
 
-                    if ((sDashboardItemName==null)&&(sDashboardHostName==null)&&(sDashboardItemID==null)){
+                    if (sItemUnitList[pos].equals("")){
+                        sItemUnitList[pos]="No units";
+                    }
+
+                    if ((sDashboardItemName==null)&&(sDashboardHostName==null)&&
+                            (sDashboardItemID==null)&&(sDashboardItemUnit==null)){
                         sDashboardItemName = spinnerItem.getSelectedItem().toString();
                         sDashboardHostName = spinnerHost.getSelectedItem().toString();
                         sDashboardItemID = sItemIDList[pos];
+                        sDashboardItemUnit = sItemUnitList[pos];
                     }else{
                         sDashboardItemName = sDashboardItemName+","+spinnerItem.getSelectedItem().toString();
                         sDashboardHostName = sDashboardHostName+","+spinnerHost.getSelectedItem().toString();
@@ -242,9 +255,10 @@ public class NewDashboardItemFragment extends Fragment {
                     editor.putString("HostNames", sDashboardHostName);
                     editor.putString("ItemNames", sDashboardItemName);
                     editor.putString("ItemIDs", sDashboardItemID);
+                    editor.putString("ItemUnits", sDashboardItemUnit);
                     editor.commit();
 
-                    Snackbar.make(getView(),"Nuevo item agregado al tablero",Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(getView(),"Nuevo ítem agregado al tablero",Snackbar.LENGTH_LONG).show();
                     getActivity().getSupportFragmentManager().popBackStack();
                 }else{
                     Snackbar.make(getView(),"No ha seleccionado host",Snackbar.LENGTH_LONG).show();
