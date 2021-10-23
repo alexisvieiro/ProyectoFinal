@@ -16,5 +16,5 @@ void SNMPInit(){
 
 
 void SNMPLoop(){
-//Agentuino.listen();
+  Agentuino.listen();
 }

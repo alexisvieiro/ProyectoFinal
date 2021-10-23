@@ -41,11 +41,11 @@ void SensorsInit(){
     PuertaEstado[3]=digitalRead(PinPuerta4);
     UltimoEstado[3]=PuertaEstado[3];   
 
-    /*
+    
     //Para la lectura datos
     periodoLecturaPuertas=millis();
     periodoLecturaTemperatura=periodoLecturaPuertas;
-    periodoLecturaRAM=periodoLecturaPuertas;*/
+    periodoLecturaRAM=periodoLecturaPuertas;
 }
 
 
@@ -62,7 +62,7 @@ void SensadoInterno(){
     //Lectura RAM
     if(millis()  - periodoLecturaRAM > 10000){
       periodoLecturaRAM = millis();
-      freeHeap=(ESP.getFreeHeap());
+      usedHeap=(1- ((float)ESP.getFreeHeap()/(float)ESP.getHeapSize()))*100;
     }
 }
 
@@ -88,8 +88,8 @@ void SensadoPuertas(){
 
         //Puerta1
         PuertaEstado[0]=digitalRead(PinPuerta1);
-        Serial.print("Puerta1: ");
-        Serial.println(PuertaEstado[0]);
+        //Serial.print("Puerta1: ");
+        //Serial.println(PuertaEstado[0]);
         if(PuertaEstado[0]==ABIERTA && UltimoEstado[0]==CERRADA){
             Serial.println("Send TRAP: Puerta1 Abierta");
             Agentuino.Trap("Puerta1 Abierta", RemoteIP, locUpTime);
@@ -102,8 +102,8 @@ void SensadoPuertas(){
   
         //Puerta2
         PuertaEstado[1]=digitalRead(PinPuerta2);
-        Serial.print("Puerta2: ");
-        Serial.println(PuertaEstado[1]);
+        //Serial.print("Puerta2: ");
+        //Serial.println(PuertaEstado[1]);
         if(PuertaEstado[1]==ABIERTA && UltimoEstado[1]==CERRADA){
             Serial.println("Send TRAP: Puerta2 Abierta");
             Agentuino.Trap("Puerta2 Abierta", RemoteIP, locUpTime);
@@ -116,8 +116,8 @@ void SensadoPuertas(){
 
         //Puerta3
         PuertaEstado[2]=digitalRead(PinPuerta3);
-        Serial.print("Puerta3: ");
-        Serial.println(PuertaEstado[2]);
+        //Serial.print("Puerta3: ");
+        //Serial.println(PuertaEstado[2]);
         if(PuertaEstado[2]==ABIERTA && UltimoEstado[2]==CERRADA){
             Serial.println("Send TRAP: Puerta3 Abierta");
             Agentuino.Trap("Puerta3 Abierta", RemoteIP, locUpTime);
@@ -130,8 +130,8 @@ void SensadoPuertas(){
 
         //Puerta4
         PuertaEstado[3]=digitalRead(PinPuerta4);
-        Serial.print("Puerta4: ");
-        Serial.println(PuertaEstado[3]);
+        //Serial.print("Puerta4: ");
+        //Serial.println(PuertaEstado[3]);
         if(PuertaEstado[3]==ABIERTA && UltimoEstado[3]==CERRADA){
             Serial.println("Send TRAP: Puerta4 Abierta");
             Agentuino.Trap("Puerta4 Abierta", RemoteIP, locUpTime);

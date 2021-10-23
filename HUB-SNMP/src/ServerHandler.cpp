@@ -9,13 +9,15 @@ HTTPSServer * secureServer;
 SSLCert * cert;
 Preferences preferences;
 byte RemoteIP[4];
-static bool BootESP32=0;
+static bool CambiarIPESP32=0;
 
 void ServerLoop(){
     secureServer->loop();
-    if (BootESP32==1){
-      delay(2000);
-      ESP.restart();
+    if (CambiarIPESP32==1){
+      delay(5000);
+      Serial.println("Reconfigurando ETH.config()");
+      ServerIP();
+      CambiarIPESP32=0;
     }
 }
 
@@ -57,7 +59,6 @@ void ServerInit(){
     }    
     secureServer = new HTTPSServer(cert);
     //------------------------------------------------Fin-Certificado-HTTPS---------------------------------------------------------------------//
-
 
 
     ServerIP();    //Configuración de IP (DHCP o Fija)
@@ -120,6 +121,9 @@ void ServerIP(){
   }else{
     Serial.print("Modo: ");
     Serial.println("IP por DHCP");
+    if (!ETH.config(0u,0u,0u,0u)) {
+    Serial.println("STA Fallo al configurar");
+    }
  
   }
   //-------------------------------------------Fin de Seteo de parametros de las configuraciónes IP------------------------------------------//  
@@ -133,107 +137,79 @@ void ServerPaths(){
 
     //Declaración de URLs del servidor HTTPS
     ResourceNode * nodeRoot     = new ResourceNode("/", "GET", &handleRoot);
-    ResourceNode * nodeInternal = new ResourceNode("/internal", "GET", &handleInternalPage);
-    ResourceNode * nodeAdmin    = new ResourceNode("/internal/admin", "GET", &handleAdminPage);
-    ResourceNode * nodePublic   = new ResourceNode("/public", "GET", &handlePublicPage);
     ResourceNode * node404      = new ResourceNode("", "GET", &handle404);
     ResourceNode * nodeConf     = new ResourceNode("/conf", "GET", &handleConf);
     ResourceNode * nodeConfIPFija = new ResourceNode("/conf_ipfija", "POST", &handleConfIPFija);
     ResourceNode * nodeConfIPDHCP = new ResourceNode("/conf_ipdhcp", "GET", &handleConfIPDHCP);
     ResourceNode * nodeConfIPSNMP = new ResourceNode("/conf_ipsnmp", "POST", &handleConfIPSNMP);
 
-    // Add the nodes to the server
+    // Los agrego al servidor
     secureServer->registerNode(nodeRoot);
-    secureServer->registerNode(nodeInternal);
-    secureServer->registerNode(nodeAdmin);
-    secureServer->registerNode(nodePublic);
     secureServer->registerNode(nodeConf);
     secureServer->registerNode(nodeConfIPFija);
     secureServer->registerNode(nodeConfIPDHCP);
     secureServer->registerNode(nodeConfIPSNMP);
-        
-    // The path is ignored for the default node.
+    // Agrego el default (Error 404)
     secureServer->setDefaultNode(node404);
     
-    // middleware (First we check the identity, then we see what the user is allowed to do)
+    // Antes de cargar la página, verifico si esta identificado
     secureServer->addMiddleware(&middlewareAuthentication);
     secureServer->addMiddleware(&middlewareAuthorization);
-
-
 
 }
 
 
-
-
-
-
-
 void middlewareAuthentication(HTTPRequest * req, HTTPResponse * res, std::function<void()> next) {
-  Serial.print("Request: ");
-  for(int i=0;i<req->getRequestString().length();i++){
-    Serial.print(req->getRequestString()[i]);
-  }
-  Serial.println("");
-  Serial.println("Entro a la middlewareAuthentication");
-  // Unset both headers to discard any value from the client
-  // This prevents authentication bypass by a client that just sets X-USERNAME
-  req->setHeader(HEADER_USERNAME, "");
-  req->setHeader(HEADER_GROUP, "");
 
-  // Get login information from request
-  // If you use HTTP Basic Auth, you can retrieve the values from the request.
-  // The return values will be empty strings if the user did not provide any data,
-  // or if the format of the Authorization header is invalid (eg. no Basic Method
-  // for Authorization, or an invalid Base64 token)
-  std::string reqUsername = req->getBasicAuthUser();
-  std::string reqPassword = req->getBasicAuthPassword();
 
-  // If the user entered login information, we will check it
-  if (reqUsername.length() > 0 && reqPassword.length() > 0) {
-
-    // _Very_ simple hardcoded user database to check credentials and assign the group
-    bool authValid = true;
-    std::string group = "";
-    if (reqUsername == "Admin" && reqPassword == "secret") {
-      group = "ADMIN";
-    } else if (reqUsername == "user" && reqPassword == "test") {
-      group = "USER";
-    } else {
-      authValid = false;
+    //Info de Debug
+    Serial.print("Request: ");
+    for(int i=0;i<req->getRequestString().length();i++){
+      Serial.print(req->getRequestString()[i]);
     }
+    //Info de Debug
+    Serial.println("");
+    Serial.println("Entro a la middlewareAuthentication");
+    
+    // Limpio los headers de los usuarios para evitar falsas autenticaciones
+    req->setHeader(HEADER_USERNAME, "");
+    req->setHeader(HEADER_GROUP, "");
 
-    // If authentication was successful
-    if (authValid) {
-      // set custom headers and delegate control
-      req->setHeader(HEADER_USERNAME, reqUsername);
-      req->setHeader(HEADER_GROUP, group);
+    // Tomo la informacion del login a través del request.
+    std::string reqUsername = req->getBasicAuthUser();
+    std::string reqPassword = req->getBasicAuthPassword();
 
-      // The user tried to authenticate and was successful
-      // -> We proceed with this request.
+    // Si el usuario ingreso datos de login
+    if (reqUsername.length() > 0 && reqPassword.length() > 0) {
+
+      bool authValid = true;
+      std::string group = "";
+      if (reqUsername == "Admin" && reqPassword == "secret") {
+        group = "ADMIN";
+      }  else {
+        authValid = false;
+      }
+
+      
+      if (authValid) {
+        // Si se autenticó bien:
+        // Fijo los headers del usuario Admin identificado
+        req->setHeader(HEADER_USERNAME, reqUsername);
+        req->setHeader(HEADER_GROUP, group);
+        next();
+      } else {
+        // Si no se autenticó bien:
+        res->setStatusCode(401);
+        res->setStatusText("Sin Autorizacion");
+        res->setHeader("Content-Type", "text/plain");
+        //Provoco la ventana de login
+        res->setHeader("WWW-Authenticate", "Basic realm=\"ESP32 privileged area\"");
+        res->println("401 - Sin Autorizacion");
+      }
+    } else {
+      // No intentó autenticarse
       next();
-    } else {
-      // Display error page
-      res->setStatusCode(401);
-      res->setStatusText("Unauthorized");
-      res->setHeader("Content-Type", "text/plain");
-
-      // This should trigger the browser user/password dialog, and it will tell
-      // the client how it can authenticate
-      res->setHeader("WWW-Authenticate", "Basic realm=\"ESP32 privileged area\"");
-
-      // Small error text on the response document. In a real-world scenario, you
-      // shouldn't display the login information on this page, of course ;-)
-      res->println("401 - Sin Autorizacion");
-
-      // NO CALL TO next() here, as the authentication failed.
-      // -> The code above did handle the request already.
     }
-  } else {
-    // No attempt to authenticate
-    // -> Let the request pass through by calling next()
-    next();
-  }
 }
 
 /**
@@ -244,739 +220,692 @@ void middlewareAuthentication(HTTPRequest * req, HTTPResponse * res, std::functi
  * This example only prevents unauthorized access to every ResourceNode stored under an /internal/... path.
  */
 void middlewareAuthorization(HTTPRequest * req, HTTPResponse * res, std::function<void()> next) {
-  Serial.println("Entro a la middlewareAuthorization");
-  // Get the username (if any)
-  std::string username = req->getHeader(HEADER_USERNAME);
 
-  // Check that only logged-in users may get to the internal area (All URLs starting with /internal)
-  // Only a simple example, more complicated configuration is up to you.
-  if (username == "" && req->getRequestString().substr(0,9) == "/") {
-    // Same as the deny-part in middlewareAuthentication()
-    res->setStatusCode(401);
-    res->setStatusText("Unauthorized");
-    res->setHeader("Content-Type", "text/plain");
-    res->setHeader("WWW-Authenticate", "Basic realm=\"ESP32 privileged area\"");
-    res->println("401 - Sin Autorizacion");
-
-    // No call denies access to protected handler function.
-  } else {
-    // Everything else will be allowed, so we call next()
-    next();
-  }
+    Serial.println("Entro a la middlewareAuthorization");
+    // Me traigo el usuario ingresado previamente
+    std::string username = req->getHeader(HEADER_USERNAME);
+    
+    // Chequeo que solo los usuarios logueados puedan descargar las paginas (Para los URLs comenzados con /)
+    if (username == "" && req->getRequestString().substr(0,9) == "/") {
+      res->setStatusCode(401);
+      res->setStatusText("Sin Autorizacion");
+      res->setHeader("Content-Type", "text/html; charset=utf8");
+      res->setHeader("WWW-Authenticate", "Basic realm=\"ESP32 privileged area\"");
+      res->println("<!DOCTYPE html><html><head><title>SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head>");
+      res->println("<body>");
+      res->println("401 - Sin Autorizacion");
+      res->println("</body></html>");
+    
+    } else {
+      next();
+    }
 }
 
-// This is the internal page. It will greet the user with
-// a personalized message and - if the user is in the ADMIN group -
-// provide a link to the admin interface.
-void handleInternalPage(HTTPRequest * req, HTTPResponse * res) {
-  Serial.println("Entro a la handleInternalPage");
-  // Header
-  res->setStatusCode(200);
-  res->setStatusText("OK");
-  res->setHeader("Content-Type", "text/html; charset=utf8");
 
-  // Write page
-  res->println("<!DOCTYPE html>");
-  res->println("<html>");
-  res->println("<head>");
-  res->println("<title>Internal Area</title>");
-  res->println("</head>");
-  res->println("<body>");
 
-  // Personalized greeting
-  res->print("<h1>Hello ");
-  // We can safely use the header value, this area is only accessible if it's
-  // set (the middleware takes care of this)
-  res->printStd(req->getHeader(HEADER_USERNAME));
-  res->print("!</h1>");
-
-  res->println("<p>Welcome to the internal area. Congratulations on successfully entering your password!</p>");
-
-  // The "admin area" will only be shown if the correct group has been assigned in the authenticationMiddleware
-  if (req->getHeader(HEADER_GROUP) == "ADMIN") {
-    res->println("<div style=\"border:1px solid red;margin: 20px auto;padding:10px;background:#ff8080\">");
-    res->println("<h2>You are an administrator</h2>");
-    res->println("<p>You are allowed to access the admin page:</p>");
-    res->println("<p><a href=\"/internal/admin\">Go to secret admin page</a></p>");
-    res->println("</div>");
-  }
-
-  // Link to the root page
-  res->println("<p><a href=\"/\">Go back home</a></p>");
-  res->println("</body>");
-  res->println("</html>");
-}
-
-void handleAdminPage(HTTPRequest * req, HTTPResponse * res) {
-  Serial.println("Entro a la handleAdminPage");
-  // Headers
-  res->setHeader("Content-Type", "text/html; charset=utf8");
-
-  std::string header = "<!DOCTYPE html><html><head><title>Secret Admin Page</title></head><body><h1>Secret Admin Page</h1>";
-  std::string footer = "</body></html>";
-
-  // Checking permissions can not only be done centrally in the middleware function but also in the actual request handler.
-  // This would be handy if you provide an API with lists of resources, but access rights are defined object-based.
-  if (req->getHeader(HEADER_GROUP) == "ADMIN") {
-    res->setStatusCode(200);
-    res->setStatusText("OK");
-    res->printStd(header);
-    res->println("<div style=\"border:1px solid red;margin: 20px auto;padding:10px;background:#ff8080\">");
-    res->println("<h1>Congratulations</h1>");
-    res->println("<p>You found the secret administrator page!</p>");
-    res->println("<p><a href=\"/internal\">Go back</a></p>");
-    res->println("</div>");
-  } else {
-    res->printStd(header);
-    res->setStatusCode(403);
-    res->setStatusText("Unauthorized");
-    res->println("<p><strong>403 Unauthorized</strong> You have no power here!</p>");
-  }
-
-  res->printStd(footer);
-}
-
-// Just a simple page for demonstration, very similar to the root page.
-void handlePublicPage(HTTPRequest * req, HTTPResponse * res) {
-  Serial.println("Entro a la handlePublicPage");
-  res->setHeader("Content-Type", "text/html");
-  res->println("<!DOCTYPE html>");
-  res->println("<html>");
-  res->println("<head><title>Hello World!</title></head>");
-  res->println("<body>");
-  res->println("<h1>Hello World!</h1>");
-  res->print("<p>Your server is running for ");
-  res->print((int)(millis()/1000), DEC);
-  res->println(" seconds.</p>");
-  res->println("<p><a href=\"/\">Go back</a></p>");
-  res->println("</body>");
-  res->println("</html>");
-}
-
-// For details on the implementation of the hanlder functions, refer to the Static-Page example.
+// Handler del URL https://<IP>/
 void handleRoot(HTTPRequest * req, HTTPResponse * res) {
-  Serial.println("Entro a la handleRoot");
-  res->setHeader("Content-Type", "text/html");
-  res->println("<!DOCTYPE html>");
-  res->println("<html>");
-  res->println("<head><title>SNMP HUB </title></head>");
-  res->println("<body>");
-  res->println("Bienvenido,");
-  res->printStd(req->getHeader(HEADER_USERNAME));
-  Serial.println("Entro a la handleConf");
+
+    Serial.println("Entro a la handleRoot");
+
+    if (req->getHeader(HEADER_GROUP) == "ADMIN") {
+      //------------------------------------------------------HTML para encabezado y bienvenida---------------------------------------------------//
+      res->setStatusCode(200);
+      res->setStatusText("OK");  
+      res->setHeader("Content-Type", "text/html; charset=utf8");
+      res->println("<!DOCTYPE html><html><head><title>SNMP HUB </title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
+      res->println("<body>");
+      res->println("Bienvenido,");
+      res->printStd(req->getHeader(HEADER_USERNAME));
+      //---------------------------------------------------Fin HTML para encabezado y bienvenida---------------------------------------------------//
+
+      //----------------------------------------------------HTML para información de ESP32 HUB---------------------------------------------------//
+      res->println("<br><br><fieldset style=\"width:280px\">");
+      res->println("<legend>Estado de HUB SNMP:</legend>");
+      res->println("<label for=\"fname\">Tiempo de encendido: ");
+      int hs,ms,ss;
+      hs= (locUpTime/100)/3600;
+      ms= ((locUpTime/100)- hs*60)/60;
+      ss= (locUpTime/100) - hs*3600 - ms*60;
+      res->println((String) hs);
+      res->println("h ");
+      res->println((String)ms);
+      res->println("m ");
+      res->println((String)ss);
+      res->println("s ");
+      res->println("</label><br>");
+      res->println("<label for=\"fname\">Uso de memoria RAM: ");
+      res->println((1- ((float)ESP.getFreeHeap()/(float)ESP.getHeapSize()))*100);
+      res->println("%");
+      res->println("</label>");
+      res->println("</fieldset>");
+      //----------------------------------------------------HTML para información de ESP32 HUB----------------------------------------------------//
 
 
+      //------------------------------------------------------HTML para información de Sensores----------------------------------------------------//
+      res->println("<br><fieldset style=\"width:280px\">");
+      res->println("<legend>Estado de Sensores:</legend>");
+      if(UltimoEstado[0]==ABIERTA){
+        res->println("<label for=\"fname\">Estado Puerta 1: ABIERTA</label><br>");
+      }else{
+        res->println("<label for=\"fname\">Estado Puerta 1: CERRADA</label><br>");  
+      }
 
-  res->println("<br><fieldset style=\"width:240px\">");
-  res->println("<legend>Estado de Sensores:</legend>");
-  
-  if(UltimoEstado[0]==ABIERTA){
-    res->println("<label for=\"fname\">Estado Puerta 1: ABIERTA</label><br>");
-  }else{
-    res->println("<label for=\"fname\">Estado Puerta 1: CERRADA</label><br>");  
-  }
+      if(UltimoEstado[1]==ABIERTA){
+        res->println("<label for=\"fname\">Estado Puerta 2: ABIERTA</label><br>");
+      }else{
+        res->println("<label for=\"fname\">Estado Puerta 2: CERRADA</label><br>");  
+      }
 
-  if(UltimoEstado[1]==ABIERTA){
-    res->println("<label for=\"fname\">Estado Puerta 2: ABIERTA</label><br>");
-  }else{
-    res->println("<label for=\"fname\">Estado Puerta 2: CERRADA</label><br>");  
-  }
+      if(UltimoEstado[2]==ABIERTA){
+        res->println("<label for=\"fname\">Estado Puerta 3: ABIERTA</label><br>");
+      }else{
+        res->println("<label for=\"fname\">Estado Puerta 3: CERRADA</label><br>");  
+      }
 
-  if(UltimoEstado[2]==ABIERTA){
-    res->println("<label for=\"fname\">Estado Puerta 3: ABIERTA</label><br>");
-  }else{
-    res->println("<label for=\"fname\">Estado Puerta 3: CERRADA</label><br>");  
-  }
+      if(UltimoEstado[3]==ABIERTA){
+        res->println("<label for=\"fname\">Estado Puerta 4: ABIERTA</label><br>");
+      }else{
+        res->println("<label for=\"fname\">Estado Puerta 4: CERRADA</label><br>");  
+      }
 
-  if(UltimoEstado[3]==ABIERTA){
-    res->println("<label for=\"fname\">Estado Puerta 4: ABIERTA</label><br>");
-  }else{
-    res->println("<label for=\"fname\">Estado Puerta 4: CERRADA</label><br>");  
-  }
+      res->println("<label for=\"fname\">Temperatura de Sensor: ");
+      res->println(temperaturaC);
+      res->println("</label>");
+      res->println("</fieldset>");
+      //------------------------------------------------------HTML para información de Sensores------------------------------------------------------//
+      res->println("<p>Ir a: <a href=\"/conf\">Configuracion</a></p>");
+      res->println("</body></html>");
 
-  res->println("<label for=\"fname\">Temperatura de Sensor: ");
-  res->println(temperaturaC);
-  res->println("</label>");
-  
-  res->println("</fieldset>");
+    }else{
 
-
-  res->println("<p>Ir a: <a href=\"/conf\">Configuracion</a></p>");
-  res->println("</body>");
-  res->println("</html>");
+      //--------------------------------------------------------HTML para usuarios sin permiso---------------------------------------------------------------------//
+      res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
+      res->setStatusCode(403);
+      res->setStatusText("Sin Autorización");
+      res->println("403 - Sin Autorizacion");
+      res->println("</body></html>");
+      //--------------------------------------------------------Fin HTML para usuarios sin permiso----------------------------------------------------------------//
+    }
 }
 
 
-
+// Handler del URL https://<IP>/conf/
 void handleConf(HTTPRequest * req, HTTPResponse * res) {
 
-  Serial.println("Entro a la handleConf");
+    Serial.println("Entro a la handleConf");
 
-  if (req->getHeader(HEADER_GROUP) == "ADMIN") {
-    res->setStatusCode(200);
-    res->setStatusText("OK");
-    res->setHeader("Content-Type", "text/html; charset=utf8");
-
-    res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
-    res->println("Bienvenido, ");
-    res->printStd(req->getHeader(HEADER_USERNAME));
-    res->println("<form action=\"/action_page.php\">");
-    res->println("<fieldset style=\"width:280px\">");
-    res->println("<legend>HUB SNMP:</legend>");
-    res->println("<label for=\"modo\">Modo de configuración IP:</label>");
-    res->println("<select id=\"modo\" name=\"modo\" onChange=\"funcion()\">");
-    
-    if(preferences.getChar("modo",0)==IP_FIJA){
-      res->println("<option value=\"DHCP\">DHCP</option>");
-      res->println("<option selected value=\"IP Fija\">IP Fija</option>");
-    }else{
-      res->println("<option selected value=\"DHCP\">DHCP</option>");
-      res->println("<option value=\"IP Fija\">IP Fija</option>");
-    } 
-
-    res->println("</select>");
-    res->println("</form>");
-    res->println("<script>");
-    res->println("function funcion() {");
-    res->println("var x = document.getElementById(\"modo\").value;");
-    res->println("if(x==\"DHCP\"){");
-    res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"none\";");
-    res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"block\";");
-    res->println("}else{");
-    res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"block\";");
-    res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"none\";");
-    res->println("}}</script>");
+    if (req->getHeader(HEADER_GROUP) == "ADMIN") {
+      //------------------------------------------------------HTML para encabezado y bienvenida---------------------------------------------------//
+      res->setStatusCode(200);
+      res->setStatusText("OK");
+      res->setHeader("Content-Type", "text/html; charset=utf8");
+      res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head>");
+      res->println("<body>");
+      res->println("Bienvenido, ");
+      res->printStd(req->getHeader(HEADER_USERNAME));
+      //------------------------------------------------------Fin HTML para encabezado y bienvenida-------------------------------------------------//
 
 
-    
-    //HTML para form de ip fija
-    if(preferences.getChar("modo",0)==IP_FIJA){
-      res->println("<form style=\"display:block\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
-    }else{
-      res->println("<form style=\"display:none\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
-    } 
-    res->println("<label for=\"fname\">Dirección IP:</label><br>");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip1\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char)preferences.getChar("ip1",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip2\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char)preferences.getChar("ip2",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip3\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ip3",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip4\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ip4",0)));
-    res->println(">");
-    
-    res->println("<br><label for=\"fname\">Mascara de Subred:</label><br>");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm1\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipm1",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm2\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char)preferences.getChar("ipm2",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm3\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipm3",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm4\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipm4",0)));
-    res->println(">");
-    
-    res->println("<br><label for=\"fname\">Puerta de Enlace predeterminada:</label><br>");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg1\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipg1",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char)preferences.getChar("ipg2",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipg3",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipg4",0)));
-    res->println(">");
+      //------------------------------------------------------HTML para elegir si es por DHCP o IP FIja---------------------------------------------------//
+      res->println("<form action=\"/action_page.php\">");
+      res->println("<fieldset style=\"width:280px\">");
+      res->println("<legend>HUB SNMP:</legend>");
+      res->println("<label for=\"modo\">Modo de configuración IP:</label>");
+      res->println("<select id=\"modo\" name=\"modo\" onChange=\"funcion()\">");
 
-    
-    res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
-    ////--------------------------////
-    
-    //Botón Aceptar para DHCP
-    if(preferences.getChar("modo",0)==IP_FIJA){
-      res->println("<form style=\"display:none\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
-    }else{
-      res->println("<form style=\"display:block\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
+      if(preferences.getChar("modo",0)==IP_FIJA){
+        res->println("<option value=\"DHCP\">DHCP</option>");
+        res->println("<option selected value=\"IP Fija\">IP Fija</option>");
+      }else{
+        res->println("<option selected value=\"DHCP\">DHCP</option>");
+        res->println("<option value=\"IP Fija\">IP Fija</option>");
+      } 
+      res->println("</select>");
+      res->println("</form>");
+      res->println("<script>");
+      res->println("function funcion() {");
+      res->println("var x = document.getElementById(\"modo\").value;");
+      res->println("if(x==\"DHCP\"){");
+      res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"none\";");
+      res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"block\";");
+      res->println("}else{");
+      res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"block\";");
+      res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"none\";");
+      res->println("}}</script>");
+      //------------------------------------------------------Fin HTML para elegir si es por DHCP o IP FIja---------------------------------------------------//
+
+
+      //---------------------------------------------------HTML para solicitar la configuracion de IP/Mascara/Gateway-------------------------------------------//
+      if(preferences.getChar("modo",0)==IP_FIJA){
+        res->println("<form style=\"display:block\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
+      }else{
+        res->println("<form style=\"display:none\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
+      } 
+      res->println("<label for=\"fname\">Dirección IP:</label><br>");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip1\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char)preferences.getChar("ip1",0)));
+      res->println(">"); 
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip2\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char)preferences.getChar("ip2",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip3\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ip3",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip4\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ip4",0)));
+      res->println(">");
+      res->println("<br><label for=\"fname\">Mascara de Subred:</label><br>");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm1\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipm1",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm2\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char)preferences.getChar("ipm2",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm3\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipm3",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm4\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipm4",0)));
+      res->println(">");
+      res->println("<br><label for=\"fname\">Puerta de Enlace predeterminada:</label><br>");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg1\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipg1",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char)preferences.getChar("ipg2",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipg3",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipg4",0)));
+      res->println(">");
+      res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
+      //------------------------------------------------Fin HTML para solicitar la configuracion de IP/Mascara/Gateway-------------------------------------------//
+
+
+      //-----------------------------------------------------HTML para configurar el ESP32 con IP por DHCP--------------------------------------------------------//
+      if(preferences.getChar("modo",0)==IP_FIJA){
+        res->println("<form style=\"display:none\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
+      }else{
+        res->println("<form style=\"display:block\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
+      }
+      res->println("<br><input type=\"submit\" value=\"Aceptar\" />");
+      res->println("</form>");
+      res->println("</fieldset><br>");
+      //-----------------------------------------------------Fin HTML para configurar el ESP32 con IP por DHCP----------------------------------------------------//
+
+
+      //---------------------------------------------------HTML para solicitar la configuracion de IP del servidor SNMP-------------------------------------------//
+      res->println("<form style=\"display:block\" id=\"configuracion_snmp\" action=\"/conf_ipsnmp\" method=\"POST\">");
+      res->println("<fieldset style=\"width:280px\">");
+      res->println("<legend>Servidor SNMP de Traps:</legend>");
+      res->println("<label for=\"fname\">Dirección IP:</label><br>");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp1\" type=\"number\" min=\"1\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipsnmp1",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp2\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipsnmp2",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp3\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipsnmp3",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp4\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipsnmp4",0)));
+      res->println(">");
+      res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
+      res->println("<br></fieldset><br>");
+      //------------------------------------------------Fin HTML para solicitar la configuracion de IP del servidor SNMP-------------------------------------------//
+
+
+      //---------------------------------------------------HTML para boton volver (hacia https://<IP>/------------------------------------------------------------//
+      res->println("<form id=\"configuracion_volver\" action=\"/\" method=\"GET\">");
+      res->println("<input type=\"submit\" value=\"Volver\" />");
+      res->println("</form>");
+      res->println("</body></html>");
+      //---------------------------------------------------Fin  HTML para boton volver (hacia https://<IP>/--------------------------------------------------------//
+
+    } else {
+      //--------------------------------------------------------HTML para usuarios sin permiso---------------------------------------------------------------------//
+      res->println("<!DOCTYPE html><html><head><title>SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
+      res->setStatusCode(403);
+      res->setStatusText("Sin Autorización");
+      res->println("403 - Sin Autorizacion");
+      res->println("</body></html>");
+      //--------------------------------------------------------FIN HTML para usuarios sin permiso------------------------------------------------------------------//
+
     }
-    res->println("<br><input type=\"submit\" value=\"Aceptar\" />");
-    res->println("</form>");
-    res->println("</fieldset><br>");
-    ////--------------------------////
-
-
-
-
-
-
-    res->println("<form style=\"display:block\" id=\"configuracion_snmp\" action=\"/conf_ipsnmp\" method=\"POST\">");
-    res->println("<fieldset style=\"width:280px\">");
-    res->println("<legend>Servidor SNMP de Traps:</legend>");
-    res->println("<label for=\"fname\">Dirección IP:</label><br>");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp1\" type=\"number\" min=\"1\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipsnmp1",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp2\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipsnmp2",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp3\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipsnmp3",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp4\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipsnmp4",0)));
-    res->println(">");
-    
-    res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
-    res->println("<br></fieldset><br>");
-    
-
-
-    
-
-    //Botón Volver
-    res->println("<form id=\"configuracion_volver\" action=\"/\" method=\"GET\">");
-    res->println("<input type=\"submit\" value=\"Volver\" />");
-    res->println("</form>");
-    res->println("</body></html>");
-
-  } else {
-
-    res->println("<!DOCTYPE html><html><head><title>SNMP HUB</title></head><body>");
-    res->setStatusCode(403);
-    res->setStatusText("Unauthorized");
-    res->println("403 - Sin Autorizacion");
-    res->println("</body></html>");
-  }
-
-
-
 }
 
 
 void handleConfIPFija(HTTPRequest * req, HTTPResponse * res) {
 
+    byte buffer[256]; //buffer para guardar el request
+    char *bufferChar; //puntero para contener el request recibido, pero casteado a char
+    char *parametro=NULL; //puntero para el strtok
 
- // The echo callback will return the request body as response body.
-  char ip[4],ipg[4],ipm[4];
-  // We use text/plain for the response
+    if (req->getHeader(HEADER_GROUP) == "ADMIN") {
 
-
-  // Stream the incoming request body to the response body
-  // Theoretically, this should work for every request size.
-  byte buffer[256];
-  char *bufferChar;
-  // HTTPReqeust::requestComplete can be used to check whether the
-  // body has been parsed completely.
-  if (req->getHeader(HEADER_GROUP) == "ADMIN") {
-  while(!(req->requestComplete())) {
-    // HTTPRequest::readBytes provides access to the request body.
-    // It requires a buffer, the max buffer length and it will return
-    // the amount of bytes that have been written to the buffer.
     size_t s = req->readBytes(buffer, 256);
     bufferChar=(char *) malloc(s+1);
+    //casteo el buffer a char
     for(int i=0;i<s;i++){
       bufferChar[i]= (char) buffer[i];
-      Serial.print(bufferChar[i]);
-    }
-    Serial.println("");
+      }
+
     bufferChar[s]='\0';
-    // The response does not only implement the Print interface to
-    // write character data to the response but also the write function
-    // to write binary data to the response.
-    //res->write(buffer, s);
-  }
-  char *parametro=NULL;
-  parametro=strtok(bufferChar,"&");
-  while(parametro!=NULL){
-    //Serial.println(parametro);
+    
+    while(!(req->requestComplete())) req->readBytes(buffer, 256); //descarto el resto si hubiese
     
     
-    if(!strncmp(parametro,"ip1=",4)){
-      Serial.print("El parametro ip1 es igual a ");
-      ip[0]=(char) atoi((parametro+ sizeof(char)*4));
-      Serial.println(ip[0]); 
+    //--------------------------------------------Divido el Request en sus diferentes partes--------------------------//
+    parametro=strtok(bufferChar,"&");
+    while(parametro!=NULL){
+
+      if(!strncmp(parametro,"ip1=",4)){
+        //Serial.print("El parametro ip1 es igual a ");
+        ip[0]=(char) atoi((parametro+ sizeof(char)*4));
+        //Serial.println(ip[0]); 
+      }
+
+      if(!strncmp(parametro,"ip2=",4)){
+        //Serial.print("El parametro ip2 es igual a ");
+        ip[1]=(char) atoi((parametro+ sizeof(char)*4));
+        //Serial.println(ip[1]); 
+      }
+
+      if(!strncmp(parametro,"ip3=",4)){
+        //Serial.print("El parametro ip3 es igual a ");
+        ip[2]=(char) atoi((parametro+ sizeof(char)*4));
+        //Serial.println(ip[2]); 
+      }
+
+      if(!strncmp(parametro,"ip4=",4)){
+        //Serial.print("El parametro ip4 es igual a ");
+        ip[3]=(char) atoi((parametro+ sizeof(char)*4));
+        //Serial.println(ip[3]); 
+      }
+
+      if(!strncmp(parametro,"ipm1=",5)){
+        //Serial.print("El parametro ipm1 es igual a ");
+        ipm[0]=(char) atoi((parametro+ sizeof(char)*5));
+        //Serial.println(ipm[0]); 
+      }
+
+      if(!strncmp(parametro,"ipm2=",5)){
+        //Serial.print("El parametro ipm2 es igual a ");
+        ipm[1]=(char) atoi((parametro+ sizeof(char)*5));
+        //Serial.println(ipm[1]); 
+      }
+
+      if(!strncmp(parametro,"ipm3=",5)){
+        //Serial.print("El parametro ipm3 es igual a ");
+        ipm[2]=(char) atoi((parametro+ sizeof(char)*5));
+        //Serial.println(ipm[2]); 
+      }
+
+      if(!strncmp(parametro,"ipm4=",5)){
+        //Serial.print("El parametro ipm4 es igual a ");
+        ipm[3]=(char) atoi((parametro+ sizeof(char)*5));
+        //Serial.println(ipm[3]); 
+      }
+
+      if(!strncmp(parametro,"ipg1=",5)){
+        //Serial.print("El parametro ipg1 es igual a ");
+        ipg[0]=(char) atoi((parametro+ sizeof(char)*5));
+        //Serial.println(ipg[0]); 
+      }
+
+      if(!strncmp(parametro,"ipg2=",5)){
+        //Serial.print("El parametro ipg2 es igual a ");
+        ipg[1]=(char) atoi((parametro+ sizeof(char)*5));
+        //Serial.println(ipg[1]); 
+      }
+
+      if(!strncmp(parametro,"ipg3=",5)){
+        //Serial.print("El parametro ipg3 es igual a ");
+        ipg[2]=(char) atoi((parametro+ sizeof(char)*5));
+        //Serial.println(ipg[2]); 
+      }
+
+      if(!strncmp(parametro,"ipg4=",5)){
+        //Serial.print("El parametro ipg4 es igual a ");
+        ipg[3]=(char) atoi((parametro+ sizeof(char)*5));
+        //Serial.println(ipg[3]); 
+      }
+
+      parametro= strtok(NULL,"&");
     }
 
-    if(!strncmp(parametro,"ip2=",4)){
-      Serial.print("El parametro ip2 es igual a ");
-      ip[1]=(char) atoi((parametro+ sizeof(char)*4));
-      Serial.println(ip[1]); 
-    }
-
-    if(!strncmp(parametro,"ip3=",4)){
-      Serial.print("El parametro ip3 es igual a ");
-      ip[2]=(char) atoi((parametro+ sizeof(char)*4));
-      Serial.println(ip[2]); 
-    }
+    free(bufferChar);
+    //--------------------------------------Fin de Divido el Request en sus diferentes partes--------------------------//
 
 
-    if(!strncmp(parametro,"ip4=",4)){
-      Serial.print("El parametro ip4 es igual a ");
-      ip[3]=(char) atoi((parametro+ sizeof(char)*4));
-      Serial.println(ip[3]); 
-    }
+    //codigo de chequeo de errores de datos ingrados por usuario
 
 
-    if(!strncmp(parametro,"ipm1=",5)){
-      Serial.print("El parametro ipm1 es igual a ");
-      ipm[0]=(char) atoi((parametro+ sizeof(char)*5));
-      Serial.println(ipm[0]); 
-    }
-
-    if(!strncmp(parametro,"ipm2=",5)){
-      Serial.print("El parametro ipm2 es igual a ");
-      ipm[1]=(char) atoi((parametro+ sizeof(char)*5));
-      Serial.println(ipm[1]); 
-    }
-
-    if(!strncmp(parametro,"ipm3=",5)){
-      Serial.print("El parametro ipm3 es igual a ");
-      ipm[2]=(char) atoi((parametro+ sizeof(char)*5));
-      Serial.println(ipm[2]); 
-    }
-
-
-    if(!strncmp(parametro,"ipm4=",5)){
-      Serial.print("El parametro ipm4 es igual a ");
-      ipm[3]=(char) atoi((parametro+ sizeof(char)*5));
-      Serial.println(ipm[3]); 
-    }
+    //----------------------------------Guardo la información de la IP ingresada por el usuario------------------------//
+    preferences.putChar("ip1",ip[0]);
+    preferences.putChar("ip2",ip[1]);
+    preferences.putChar("ip3",ip[2]);
+    preferences.putChar("ip4",ip[3]);
+    preferences.putChar("ipg1",ipg[0]);
+    preferences.putChar("ipg2",ipg[1]);
+    preferences.putChar("ipg3",ipg[2]);
+    preferences.putChar("ipg4",ipg[3]);
+    preferences.putChar("ipm1",ipm[0]);
+    preferences.putChar("ipm2",ipm[1]);
+    preferences.putChar("ipm3",ipm[2]);
+    preferences.putChar("ipm4",ipm[3]);
+    preferences.putChar("modo",IP_FIJA);
+    CambiarIPESP32=1;
+    //-----------------------------Fin de Guardo la información de la IP ingresada por el usuario------------------------//
 
 
-
-
-    if(!strncmp(parametro,"ipg1=",5)){
-      Serial.print("El parametro ipg1 es igual a ");
-      ipg[0]=(char) atoi((parametro+ sizeof(char)*5));
-      Serial.println(ipg[0]); 
-    }
-
-    if(!strncmp(parametro,"ipg2=",5)){
-      Serial.print("El parametro ipg2 es igual a ");
-      ipg[1]=(char) atoi((parametro+ sizeof(char)*5));
-      Serial.println(ipg[1]); 
-    }
-
-    if(!strncmp(parametro,"ipg3=",5)){
-      Serial.print("El parametro ipg3 es igual a ");
-      ipg[2]=(char) atoi((parametro+ sizeof(char)*5));
-      Serial.println(ipg[2]); 
-    }
-
-
-    if(!strncmp(parametro,"ipg4=",5)){
-      Serial.print("El parametro ipg4 es igual a ");
-      ipg[3]=(char) atoi((parametro+ sizeof(char)*5));
-      Serial.println(ipg[3]); 
-    }
-
-   
-    parametro= strtok(NULL,"&");
-  }
-  free(bufferChar);
-
-
-
-  //Modo 0= dhcp, Modo 1= IP fija
-  Serial.println("IP Fija, reiniciando");
-  preferences.putChar("ip1",ip[0]);
-  preferences.putChar("ip2",ip[1]);
-  preferences.putChar("ip3",ip[2]);
-  preferences.putChar("ip4",ip[3]);
-  
-  preferences.putChar("ipg1",ipg[0]);
-  preferences.putChar("ipg2",ipg[1]);
-  preferences.putChar("ipg3",ipg[2]);
-  preferences.putChar("ipg4",ipg[3]);
-  
-  preferences.putChar("ipm1",ipm[0]);
-  preferences.putChar("ipm2",ipm[1]);
-  preferences.putChar("ipm3",ipm[2]);
-  preferences.putChar("ipm4",ipm[3]);
-
-  
-  preferences.putChar("modo",IP_FIJA);
-  
-  res->setStatusCode(200);
-  res->setStatusText("OK");
-  res->setHeader("Content-Type", "text/html; charset=utf8");
-
-res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
-    res->println("Bienvenido, ");
-    res->printStd(req->getHeader(HEADER_USERNAME));
-    res->println("<form action=\"/action_page.php\">");
-    res->println("<fieldset style=\"width:280px\">");
-    res->println("<legend>HUB SNMP:</legend>");
-    res->println("<label for=\"modo\">Modo de configuración IP:</label>");
-    res->println("<select id=\"modo\" name=\"modo\" onChange=\"funcion()\">");
+    //------------------------------------------------------HTML para encabezado y bienvenida---------------------------------------------------//
+    res->setStatusCode(200);
+    res->setStatusText("OK");
+    res->setHeader("Content-Type", "text/html; charset=utf8");
+    res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head>");
+    res->println("<body>");
+    //------------------------------------------------------Fin HTML para encabezado y bienvenida-------------------------------------------------//
     
-    if(preferences.getChar("modo",0)==IP_FIJA){
-      res->println("<option value=\"DHCP\">DHCP</option>");
-      res->println("<option selected value=\"IP Fija\">IP Fija</option>");
+   //----------------------------------------------------HTML para mensaje de confirmación en verde-----------------------------------------------//
+    res->println("<div class=\"alert\">");
+    res->println("<span class=\"closebtn\" onclick=\"this.parentElement.style.display='none';\">&times;</span>");
+    res->println("IP Fija configurada correctamente. Ingrese con su nueva IP.");
+    res->println("</div> ");
+    res->println("<style>");
+    res->println(".alert {padding: 20px; display:inline-block; background-color: #00fc4c; color: white; margin-bottom: 15px;}");
+    res->println(".closebtn { margin-left: 15px; color: white; font-weight: bold; float: right; font-size: 22px; line-height: 20px; cursor: pointer; transition: 0.3s;}");
+    res->println(".closebtn:hover {color: black;} ");
+    res->println("</style>");
+    //--------------------------------------------------Fin HTML para mensaje de confirmación en verde-----------------------------------------------//
+
     }else{
-      res->println("<option selected value=\"DHCP\">DHCP</option>");
-      res->println("<option value=\"IP Fija\">IP Fija</option>");
-    } 
-
-    res->println("</select>");
-    res->println("</form>");
-    res->println("<script>");
-    res->println("function funcion() {");
-    res->println("var x = document.getElementById(\"modo\").value;");
-    res->println("if(x==\"DHCP\"){");
-    res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"none\";");
-    res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"block\";");
-    res->println("}else{");
-    res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"block\";");
-    res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"none\";");
-    res->println("}}</script>");
-
-
-    
-    //HTML para form de ip fija
-    if(preferences.getChar("modo",0)==IP_FIJA){
-      res->println("<form style=\"display:block\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
-    }else{
-      res->println("<form style=\"display:none\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
-    } 
-    res->println("<label for=\"fname\">Dirección IP:</label><br>");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip1\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char)preferences.getChar("ip1",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip2\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char)preferences.getChar("ip2",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip3\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ip3",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip4\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ip4",0)));
-    res->println(">");
-    
-    res->println("<br><label for=\"fname\">Mascara de Subred:</label><br>");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm1\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipm1",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm2\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char)preferences.getChar("ipm2",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm3\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipm3",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm4\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipm4",0)));
-    res->println(">");
-    
-    res->println("<br><label for=\"fname\">Puerta de Enlace predeterminada:</label><br>");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg1\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipg1",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char)preferences.getChar("ipg2",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipg3",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipg4",0)));
-    res->println(">");
-
-    
-    res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
-    ////--------------------------////
-    
-    //Botón Aceptar para DHCP
-    if(preferences.getChar("modo",0)==IP_FIJA){
-      res->println("<form style=\"display:none\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
-    }else{
-      res->println("<form style=\"display:block\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
+      //--------------------------------------------------------HTML para usuarios sin permiso---------------------------------------------------------------------//
+      res->println("<!DOCTYPE html><html><head><title>SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
+      res->setStatusCode(403);
+      res->setStatusText("Sin Autorización");
+      res->println("403 - Sin Autorizacion");
+      res->println("</body></html>");
+      //--------------------------------------------------------FIN HTML para usuarios sin permiso------------------------------------------------------------------//
     }
-    res->println("<br><input type=\"submit\" value=\"Aceptar\" />");
-    res->println("</form>");
-    res->println("</fieldset><br>");
-    ////--------------------------////
-
-
-
-
-
-
-    res->println("<form style=\"display:block\" id=\"configuracion_snmp\" action=\"/conf_ipsnmp\" method=\"POST\">");
-    res->println("<fieldset style=\"width:280px\">");
-    res->println("<legend>Servidor SNMP de Traps:</legend>");
-    res->println("<label for=\"fname\">Dirección IP:</label><br>");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp1\" type=\"number\" min=\"1\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipsnmp1",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp2\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipsnmp2",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp3\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipsnmp3",0)));
-    res->println(">");
-    
-    res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp4\" type=\"number\" min=\"0\" max=\"255\" value=");
-    res->println(int((unsigned char) preferences.getChar("ipsnmp4",0)));
-    res->println(">");
-    
-    res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
-    res->println("<br></fieldset><br>");
-    
-
-
-    
-
-    //Botón Volver
-    res->println("<form id=\"configuracion_volver\" action=\"/\" method=\"GET\">");
-    res->println("<input type=\"submit\" value=\"Volver\" />");
-    res->println("</form>");
-    res->println("</body></html>");
-
-  
-    BootESP32=1;
-  }else{
-    //no admin
-  }
 
 }
 
 
-
-
 void handleConfIPDHCP(HTTPRequest * req, HTTPResponse * res) {
 
-  res->setHeader("Content-Type", "text/html");
-  res->println("<!DOCTYPE html>");
-  res->println("<html>");
-  res->println("<head><title>DHCP</title></head>");
-  res->println("<body><h1>DHCP</h1></body>");
-  res->println("</html>");
+    Serial.println("Entro a la handleConf");
 
+    if (req->getHeader(HEADER_GROUP) == "ADMIN") {
+      preferences.putChar("modo",IP_DHCP);
+      CambiarIPESP32=1;
 
+      //------------------------------------------------------HTML para encabezado y bienvenida---------------------------------------------------//
+      res->setStatusCode(200);
+      res->setStatusText("OK");
+      res->setHeader("Content-Type", "text/html; charset=utf8");
+      res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head>");
+      res->println("<body>");
+      //------------------------------------------------------Fin HTML para encabezado y bienvenida-------------------------------------------------//
 
-  Serial.println("IP por DHCP, reiniciando");
-  preferences.putChar("modo",IP_DHCP);
-  BootESP32=1;
+      //----------------------------------------------------HTML para mensaje de confirmación en verde-----------------------------------------------//
+      res->println("<div class=\"alert\">");
+      res->println("<span class=\"closebtn\" onclick=\"this.parentElement.style.display='none';\">&times;</span>");
+      res->println("IP por DHCP configurado correctamente. Ingrese con su nueva IP.");
+      res->println("</div> ");
+      res->println("<style>");
+      res->println(".alert {padding: 20px; display:inline-block; background-color: #00fc4c; color: white; margin-bottom: 15px;}");
+      res->println(".closebtn { margin-left: 15px; color: white; font-weight: bold; float: right; font-size: 22px; line-height: 20px; cursor: pointer; transition: 0.3s;}");
+      res->println(".closebtn:hover {color: black;} ");
+      res->println("</style>");
+      //--------------------------------------------------Fin HTML para mensaje de confirmación en verde-----------------------------------------------//
+      
+      //------------------------------------------------------Fin HTML para encabezado y bienvenida-------------------------------------------------//
 
+    } else {
+      //--------------------------------------------------------HTML para usuarios sin permiso---------------------------------------------------------------------//
+      res->println("<!DOCTYPE html><html><head><title>SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
+      res->setStatusCode(403);
+      res->setStatusText("Sin Autorización");
+      res->println("403 - Sin Autorizacion");
+      res->println("</body></html>");
+      //--------------------------------------------------------FIN HTML para usuarios sin permiso------------------------------------------------------------------//
+
+    }
+    
 }
 
 
 
 void handleConfIPSNMP(HTTPRequest * req, HTTPResponse * res) {
 
+    Serial.println("Entro a la handleConfIPSNMP");
+    byte buffer[256]; //buffer para guardar el request
+    char *bufferChar; //puntero para contener el request recibido, pero casteado a char
+    char *parametro=NULL; //puntero para el strtok
+    char ipsnmp[4]={0,0,0,0};
 
-
-// The echo callback will return the request body as response body.
-  char ipsnmp[4];
-  // We use text/plain for the response
-  res->setHeader("Content-Type","text/plain");
-
-  // Stream the incoming request body to the response body
-  // Theoretically, this should work for every request size.
-  byte buffer[256];
-  char *bufferChar;
-  // HTTPReqeust::requestComplete can be used to check whether the
-  // body has been parsed completely.
-  while(!(req->requestComplete())) {
-    // HTTPRequest::readBytes provides access to the request body.
-    // It requires a buffer, the max buffer length and it will return
-    // the amount of bytes that have been written to the buffer.
+    if (req->getHeader(HEADER_GROUP) == "ADMIN") {
+    
     size_t s = req->readBytes(buffer, 256);
     bufferChar=(char *) malloc(s+1);
+    //casteo el buffer a char
     for(int i=0;i<s;i++){
       bufferChar[i]= (char) buffer[i];
-      Serial.print(bufferChar[i]);
+      //Serial.print(bufferChar[i]);
     }
-    Serial.println("");
+    //Serial.println("");
     bufferChar[s]='\0';
-    // The response does not only implement the Print interface to
-    // write character data to the response but also the write function
-    // to write binary data to the response.
-    res->write(buffer, s);
-  }
-  char *parametro=NULL;
-  parametro=strtok(bufferChar,"&");
-  while(parametro!=NULL){
-    //Serial.println(parametro);
+      
+    while(!(req->requestComplete())) req->readBytes(buffer, 256); //descarto el resto si hubiese
+
+    //--------------------------------------------Divido el Request en sus diferentes partes--------------------------//
+    parametro=strtok(bufferChar,"&");
+    while(parametro!=NULL){
+
+      if(!strncmp(parametro,"ipsnmp1=",8)){
+        //Serial.print("El parametro ipsnmp1 es igual a ");
+        ipsnmp[0]=(char) atoi((parametro+ sizeof(char)*8));
+        //Serial.println((int) ipsnmp[0]); 
+      }
+
+      if(!strncmp(parametro,"ipsnmp2=",8)){
+        //Serial.print("El parametro ipsnmp2 es igual a ");
+        ipsnmp[1]=(char) atoi((parametro+ sizeof(char)*8));
+        //Serial.println((int) ipsnmp[1]); 
+      }
+
+      if(!strncmp(parametro,"ipsnmp3=",8)){
+        //Serial.print("El parametro ipsnmp3 es igual a ");
+        ipsnmp[2]=(char) atoi((parametro+ sizeof(char)*8));
+        //Serial.println((int)  ipsnmp[2]); 
+      }
+
+      if(!strncmp(parametro,"ipsnmp4=",8)){
+        //Serial.print("El parametro ipsnmp4 es igual a ");
+        ipsnmp[3]=(char) atoi((parametro+ sizeof(char)*8));
+        //Serial.println((int) ipsnmp[3]); 
+      }
+      parametro= strtok(NULL,"&");
+      
+      
+    }
+
+    free(bufferChar);
+    //------------------------------------------Fin de Divido el Request en sus diferentes partes--------------------------//
+   
+
+    //codigo de chequeo de errores de datos ingrados por usuario
+
+
+
+
+    //----------------------------------Guardo la información de la IP ingresada por el usuario------------------------//
+    preferences.putChar("ipsnmp1",ipsnmp[0]);
+    preferences.putChar("ipsnmp2",ipsnmp[1]);
+    preferences.putChar("ipsnmp3",ipsnmp[2]);
+    preferences.putChar("ipsnmp4",ipsnmp[3]);
+
+    RemoteIP[0] = (byte) ipsnmp[0];
+    RemoteIP[1] = (byte) ipsnmp[1];
+    RemoteIP[2] = (byte) ipsnmp[2];
+    RemoteIP[3] = (byte) ipsnmp[3];
+    //-----------------------------Fin de Guardo la información de la IP ingresada por el usuario------------------------//
+
+
+    //------------------------------------------------------HTML para encabezado y bienvenida---------------------------------------------------//
+    res->setStatusCode(200);
+    res->setStatusText("OK");
+    res->setHeader("Content-Type", "text/html; charset=utf8");
+    res->println("<!DOCTYPE html><html><head><title>Configuracion SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head>");
+    res->println("<body>");
+    //------------------------------------------------------Fin HTML para encabezado y bienvenida-------------------------------------------------//    
     
+
+    //----------------------------------------------------HTML para mensaje de confirmación en verde-----------------------------------------------//
+    res->println("<br><div class=\"alert\">");
+    res->println("<span class=\"closebtn\" onclick=\"this.parentElement.style.display='none';\">&times;</span>");
+    res->println("IP del Servidor configurada correctamente.");
+    res->println("</div> ");
+    res->println("<style>");
+    res->println(".alert {padding: 20px; display:inline-block; background-color: #00fc4c; color: white; margin-bottom: 15px;}");
+    res->println(".closebtn { margin-left: 15px; color: white; font-weight: bold; float: right; font-size: 22px; line-height: 20px; cursor: pointer; transition: 0.3s;}");
+    res->println(".closebtn:hover {color: black;} ");
+    res->println("</style>");
+    //--------------------------------------------------Fin HTML para mensaje de confirmación en verde-----------------------------------------------//
     
-    if(!strncmp(parametro,"ipsnmp1=",8)){
-      Serial.print("El parametro ipsnmp1 es igual a ");
-      ipsnmp[0]=(char) atoi((parametro+ sizeof(char)*8));
-      Serial.println((int) ipsnmp[0]); 
+    //------------------------------------------------------HTML para elegir si es por DHCP o IP FIja---------------------------------------------------//
+      res->println("<form action=\"/action_page.php\">");
+      res->println("<fieldset style=\"width:280px\">");
+      res->println("<legend>HUB SNMP:</legend>");
+      res->println("<label for=\"modo\">Modo de configuración IP:</label>");
+      res->println("<select id=\"modo\" name=\"modo\" onChange=\"funcion()\">");
+
+      if(preferences.getChar("modo",0)==IP_FIJA){
+        res->println("<option value=\"DHCP\">DHCP</option>");
+        res->println("<option selected value=\"IP Fija\">IP Fija</option>");
+      }else{
+        res->println("<option selected value=\"DHCP\">DHCP</option>");
+        res->println("<option value=\"IP Fija\">IP Fija</option>");
+      } 
+      res->println("</select>");
+      res->println("</form>");
+      res->println("<script>");
+      res->println("function funcion() {");
+      res->println("var x = document.getElementById(\"modo\").value;");
+      res->println("if(x==\"DHCP\"){");
+      res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"none\";");
+      res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"block\";");
+      res->println("}else{");
+      res->println("document.getElementById(\"configuracion_ipfija\").style.display=\"block\";");
+      res->println("document.getElementById(\"configuracion_ipdhcp\").style.display=\"none\";");
+      res->println("}}</script>");
+      //------------------------------------------------------Fin HTML para elegir si es por DHCP o IP FIja---------------------------------------------------//
+
+
+      //---------------------------------------------------HTML para solicitar la configuracion de IP/Mascara/Gateway-------------------------------------------//
+      if(preferences.getChar("modo",0)==IP_FIJA){
+        res->println("<form style=\"display:block\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
+      }else{
+        res->println("<form style=\"display:none\" id=\"configuracion_ipfija\" action=\"/conf_ipfija\" method=\"POST\">");
+      } 
+      res->println("<label for=\"fname\">Dirección IP:</label><br>");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip1\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char)preferences.getChar("ip1",0)));
+      res->println(">"); 
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip2\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char)preferences.getChar("ip2",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip3\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ip3",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ip4\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ip4",0)));
+      res->println(">");
+      res->println("<br><label for=\"fname\">Mascara de Subred:</label><br>");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm1\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipm1",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm2\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char)preferences.getChar("ipm2",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm3\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipm3",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipm4\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipm4",0)));
+      res->println(">");
+      res->println("<br><label for=\"fname\">Puerta de Enlace predeterminada:</label><br>");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg1\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipg1",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg2\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char)preferences.getChar("ipg2",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg3\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipg3",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipg4\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipg4",0)));
+      res->println(">");
+      res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
+      //------------------------------------------------Fin HTML para solicitar la configuracion de IP/Mascara/Gateway-------------------------------------------//
+
+
+      //-----------------------------------------------------HTML para configurar el ESP32 con IP por DHCP--------------------------------------------------------//
+      if(preferences.getChar("modo",0)==IP_FIJA){
+        res->println("<form style=\"display:none\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
+      }else{
+        res->println("<form style=\"display:block\" id=\"configuracion_ipdhcp\" action=\"/conf_ipdhcp\" method=\"GET\">");
+      }
+      res->println("<br><input type=\"submit\" value=\"Aceptar\" />");
+      res->println("</form>");
+      res->println("</fieldset><br>");
+      //-----------------------------------------------------Fin HTML para configurar el ESP32 con IP por DHCP----------------------------------------------------//
+
+
+      //---------------------------------------------------HTML para solicitar la configuracion de IP del servidor SNMP-------------------------------------------//
+      res->println("<form style=\"display:block\" id=\"configuracion_snmp\" action=\"/conf_ipsnmp\" method=\"POST\">");
+      res->println("<fieldset style=\"width:280px\">");
+      res->println("<legend>Servidor SNMP de Traps:</legend>");
+      res->println("<label for=\"fname\">Dirección IP:</label><br>");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp1\" type=\"number\" min=\"1\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipsnmp1",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp2\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipsnmp2",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp3\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipsnmp3",0)));
+      res->println(">");
+      res->println("<input required style=\"width:45px; height:15px; font-size:12px;\" maxlength=\"3\" name=\"ipsnmp4\" type=\"number\" min=\"0\" max=\"255\" value=");
+      res->println(int((unsigned char) preferences.getChar("ipsnmp4",0)));
+      res->println(">");
+      res->println("<br><br><input type=\"submit\" value=\"Aceptar\"></form>");
+      res->println("<br></fieldset><br>");
+      //------------------------------------------------Fin HTML para solicitar la configuracion de IP del servidor SNMP-------------------------------------------//
+
+
+      //---------------------------------------------------HTML para boton volver (hacia https://<IP>/------------------------------------------------------------//
+      res->println("<form id=\"configuracion_volver\" action=\"/\" method=\"GET\">");
+      res->println("<input type=\"submit\" value=\"Volver\" />");
+      res->println("</form>");
+      res->println("</body></html>");
+      //---------------------------------------------------Fin  HTML para boton volver (hacia https://<IP>/--------------------------------------------------------//
+
+    }else{
+      //--------------------------------------------------------HTML para usuarios sin permiso---------------------------------------------------------------------//
+      res->println("<!DOCTYPE html><html><head><title>SNMP HUB</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>");
+      res->setStatusCode(403);
+      res->setStatusText("Sin Autorización");
+      res->println("403 - Sin Autorizacion");
+      res->println("</body></html>");
+      //--------------------------------------------------------FIN HTML para usuarios sin permiso------------------------------------------------------------------//
     }
-
-    if(!strncmp(parametro,"ipsnmp2=",8)){
-      Serial.print("El parametro ipsnmp2 es igual a ");
-      ipsnmp[1]=(char) atoi((parametro+ sizeof(char)*8));
-      Serial.println((int) ipsnmp[1]); 
-    }
-
-    if(!strncmp(parametro,"ipsnmp3=",8)){
-      Serial.print("El parametro ipsnmp3 es igual a ");
-      ipsnmp[2]=(char) atoi((parametro+ sizeof(char)*8));
-      Serial.println((int)  ipsnmp[2]); 
-    }
-
-
-    if(!strncmp(parametro,"ipsnmp4=",8)){
-      Serial.print("El parametro ipsnmp4 es igual a ");
-      ipsnmp[3]=(char) atoi((parametro+ sizeof(char)*8));
-      Serial.println((int) ipsnmp[3]); 
-    }
-    
-    parametro= strtok(NULL,"&");
-  }
-  free(bufferChar);
-
-  preferences.putChar("ipsnmp1",ipsnmp[0]);
-  preferences.putChar("ipsnmp2",ipsnmp[1]);
-  preferences.putChar("ipsnmp3",ipsnmp[2]);
-  preferences.putChar("ipsnmp4",ipsnmp[3]);
-
-  RemoteIP[0] = (byte) ipsnmp[0];
-  RemoteIP[1] = (byte) ipsnmp[1];
-  RemoteIP[2] = (byte) ipsnmp[2];
-  RemoteIP[3] = (byte) ipsnmp[3];
 
 }
 

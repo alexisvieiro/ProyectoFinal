@@ -14,8 +14,12 @@
 #define HEADER_GROUP    "X-GROUP"
 #define IP_FIJA 1
 #define IP_DHCP 0
+
+#ifndef ABIERTA
 #define ABIERTA 1
 #define CERRADA 0
+#endif
+
 
 
 using namespace httpsserver;

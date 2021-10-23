@@ -1,5 +1,7 @@
-#define ABIERTA 0
-#define CERRADA 1
+#ifndef ABIERTA
+#define ABIERTA 1
+#define CERRADA 0
+#endif
 #define PinPuerta1 32
 #define PinPuerta2 33
 #define PinPuerta3 14
