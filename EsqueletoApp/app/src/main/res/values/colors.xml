@@ -19,4 +19,6 @@
 
     <color name="dashboard_item_background">#FF81C784</color>
     <color name="dashboard_delete_background">#FF00600F</color>
+
+    <color name="host_item_background">#FF81D4FA</color>
 </resources>

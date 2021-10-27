@@ -122,8 +122,8 @@ public class DashboardItemFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 long presentTime = System.currentTimeMillis()/1000;
-                //long pastTime = SetTimeFrom(position);
-                long pastTime = SetTimeFrom(7);
+                long pastTime = SetTimeFrom(position);
+                //long pastTime = SetTimeFrom(7);
                 mHandler = new Handler(Looper.getMainLooper());
                 OkHttpClient client = new OkHttpClient().newBuilder().build();
                 MediaType mediaType = MediaType.parse("application/json");

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.esqueletoapp.Activities.MenuActivity;
 import com.example.esqueletoapp.Fragments.DashboardFragment;
 import com.example.esqueletoapp.Fragments.DeviceFragment;
+import com.example.esqueletoapp.Fragments.HostFragment;
 import com.example.esqueletoapp.Models.DeviceSampleItem;
 import com.example.esqueletoapp.R;
 
@@ -57,9 +58,9 @@ public class DeviceSampleAdapter extends RecyclerView.Adapter<DeviceSampleAdapte
             public void onClick(View v) {
                 AppCompatActivity activity = (AppCompatActivity)v.getContext();
                 if(deviceSampleItemData.getsDeviceName().equals("Hosts")){
-                    DeviceFragment deviceFragment = new DeviceFragment();
+                    HostFragment hostFragment = new HostFragment();
                     activity.getSupportFragmentManager().beginTransaction().
-                            replace(R.id.constraintMenu,deviceFragment).
+                            replace(R.id.constraintMenu,hostFragment).
                             addToBackStack(null).commit();
                 }if(deviceSampleItemData.getsDeviceName().equals("Tablero")){
                     DashboardFragment dashboardFragment = new DashboardFragment();
