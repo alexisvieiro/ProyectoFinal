@@ -33,7 +33,7 @@ void handleConf(HTTPRequest * req, HTTPResponse * res);
 void handleConfIPFija(HTTPRequest * req, HTTPResponse * res);
 void handleConfIPDHCP(HTTPRequest * req, HTTPResponse * res);
 void handleConfIPSNMP(HTTPRequest * req, HTTPResponse * res);
-
+void handlePassword(HTTPRequest * req, HTTPResponse * res);
 
 void middlewareAuthentication(HTTPRequest * req, HTTPResponse * res, std::function<void()> next);
 void middlewareAuthorization(HTTPRequest * req, HTTPResponse * res, std::function<void()> next);
