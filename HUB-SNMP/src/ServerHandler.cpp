@@ -385,7 +385,7 @@ void handleRoot(HTTPRequest * req, HTTPResponse * res) {
       res->println("</fieldset>");
       //------------------------------------------------------HTML para información de Sensores------------------------------------------------------//
       res->println("<p>Ir a: <a href=\"/conf\">Configuracion de IPs</a></p>");
-      res->println("<br><p>Ir a: <a href=\"/password\">Configuracion de claves</a></p>");
+      //res->println("<br><p>Ir a: <a href=\"/password\">Configuracion de claves</a></p>");
       res->println("</body></html>");
 
     }else{
