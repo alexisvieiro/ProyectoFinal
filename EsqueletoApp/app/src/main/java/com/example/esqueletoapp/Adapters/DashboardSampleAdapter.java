@@ -61,6 +61,7 @@ public class DashboardSampleAdapter extends RecyclerView.Adapter<DashboardSample
                         String sDashboardItemName = userData.getString("ItemNames", null);
                         String sDashboardItemID = userData.getString("ItemIDs", null);
                         String sDashboardItemUnit = userData.getString("ItemUnits", null);
+                        String sDashboardItemValueType = userData.getString("ValueType", null);
 
                         sDashboardItemName = DeleteSection(sDashboardItemName,holder.getAdapterPosition(),
                                 getItemCount()-1);
@@ -70,12 +71,15 @@ public class DashboardSampleAdapter extends RecyclerView.Adapter<DashboardSample
                                 getItemCount()-1);
                         sDashboardItemUnit = DeleteSection(sDashboardItemUnit,holder.getAdapterPosition(),
                                 getItemCount()-1);
+                        sDashboardItemValueType = DeleteSection(sDashboardItemValueType,holder.getAdapterPosition(),
+                                getItemCount()-1);
 
                         SharedPreferences.Editor editor = userData.edit();
                         editor.putString("HostNames", sDashboardHostName);
                         editor.putString("ItemNames", sDashboardItemName);
                         editor.putString("ItemIDs", sDashboardItemID);
                         editor.putString("ItemUnits", sDashboardItemUnit);
+                        editor.putString("ValueType", sDashboardItemValueType);
                         editor.commit();
 
                         sampleDataList.remove(holder.getAdapterPosition());

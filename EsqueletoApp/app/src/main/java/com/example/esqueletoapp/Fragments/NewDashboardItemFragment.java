@@ -59,6 +59,7 @@ public class NewDashboardItemFragment extends Fragment {
     private String[] sItemList;
     private String[] sItemIDList;
     private String[] sItemUnitList;
+    private String[] sItemValueType;
 
     public NewDashboardItemFragment() {
         // Required empty public constructor
@@ -195,11 +196,13 @@ public class NewDashboardItemFragment extends Fragment {
                                         sItemList = new String[jsonResultItem.length()];
                                         sItemIDList = new String[jsonResultItem.length()];
                                         sItemUnitList = new String[jsonResultItem.length()];
+                                        sItemValueType = new String[jsonResultItem.length()];
                                         for (int i=0; i<jsonResultItem.length(); i++){
                                             if(jsonResultItem.optJSONObject(i).has("name")){
                                                 sItemList[i] = jsonResultItem.optJSONObject(i).optString("name");
                                                 sItemIDList[i] = jsonResultItem.optJSONObject(i).optString("itemid");
                                                 sItemUnitList[i] = jsonResultItem.optJSONObject(i).optString("units");
+                                                sItemValueType[i] = jsonResultItem.optJSONObject(i).optString("value_type");
                                             }
                                         }
                                         ArrayAdapter<String> dataAdapter =  new ArrayAdapter<String>
@@ -230,6 +233,7 @@ public class NewDashboardItemFragment extends Fragment {
                     String sDashboardItemName = userData.getString("ItemNames", null);
                     String sDashboardItemID = userData.getString("ItemIDs", null);
                     String sDashboardItemUnit = userData.getString("ItemUnits", null);
+                    String sDashboardItemValueType = userData.getString("ValueType", null);
 
                     Integer pos = spinnerItem.getSelectedItemPosition();
 
@@ -238,15 +242,19 @@ public class NewDashboardItemFragment extends Fragment {
                     }
 
                     if ((sDashboardItemName==null)&&(sDashboardHostName==null)&&
-                            (sDashboardItemID==null)&&(sDashboardItemUnit==null)){
+                            (sDashboardItemID==null)&&(sDashboardItemUnit==null)&&
+                            (sDashboardItemValueType==null)){
                         sDashboardItemName = spinnerItem.getSelectedItem().toString();
                         sDashboardHostName = spinnerHost.getSelectedItem().toString();
                         sDashboardItemID = sItemIDList[pos];
                         sDashboardItemUnit = sItemUnitList[pos];
+                        sDashboardItemValueType = sItemValueType[pos];
                     }else{
                         sDashboardItemName = sDashboardItemName+","+spinnerItem.getSelectedItem().toString();
                         sDashboardHostName = sDashboardHostName+","+spinnerHost.getSelectedItem().toString();
                         sDashboardItemID = sDashboardItemID+","+sItemIDList[pos];
+                        sDashboardItemUnit = sDashboardItemUnit+","+sItemUnitList[pos];
+                        sDashboardItemValueType = sDashboardItemValueType+","+sItemValueType[pos];
                     }
 
                     sDashboardItemName = TrimString(sDashboardItemName);
@@ -256,6 +264,7 @@ public class NewDashboardItemFragment extends Fragment {
                     editor.putString("ItemNames", sDashboardItemName);
                     editor.putString("ItemIDs", sDashboardItemID);
                     editor.putString("ItemUnits", sDashboardItemUnit);
+                    editor.putString("ValueType", sDashboardItemValueType);
                     editor.commit();
 
                     Snackbar.make(getView(),"Nuevo ítem agregado al tablero",Snackbar.LENGTH_LONG).show();

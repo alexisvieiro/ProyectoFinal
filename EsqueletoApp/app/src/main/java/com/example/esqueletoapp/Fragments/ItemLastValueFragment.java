@@ -20,10 +20,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.esqueletoapp.Adapters.DeviceSampleAdapter;
-import com.example.esqueletoapp.Adapters.HostSampleAdapter;
-import com.example.esqueletoapp.Models.DeviceSampleItem;
-import com.example.esqueletoapp.Models.HostSampleItem;
+import com.example.esqueletoapp.Adapters.ItemSampleAdapter;
+import com.example.esqueletoapp.Models.ItemSampleItem;
 import com.example.esqueletoapp.R;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -42,30 +40,33 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class HostFragment extends Fragment {
-    private RecyclerView rclHostList;
+public class ItemLastValueFragment extends Fragment {
+    private String sHostID;
+    private String sAppName;
+    private RecyclerView rclLastValueList;
     private SwipeRefreshLayout swRefreshLayout;
-    private Handler hostHandler;
+    private Handler lastValueHandler;
     private String sMessage;
     private JSONObject jsonResponse;
-    private HostSampleAdapter hostSampleAdapter;
-    private ArrayList<HostSampleItem> sampleItemArrayList = new ArrayList<>();
+    private ItemSampleAdapter itemSampleAdapter;
+    private ArrayList<ItemSampleItem> sampleItemArrayList = new ArrayList<>();
 
-    public HostFragment() {
+    public ItemLastValueFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sHostID = getArguments().getString("HostID");
+        sAppName = getArguments().getString("AppName");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_host, container, false);
+        return inflater.inflate(R.layout.fragment_item_last_value, container, false);
     }
 
     @Override
@@ -74,22 +75,21 @@ public class HostFragment extends Fragment {
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
-        rclHostList = view.findViewById(R.id.listHosts);
-        swRefreshLayout = view.findViewById(R.id.swipeHostRefresh);
+        rclLastValueList = view.findViewById(R.id.lastValueList);
+        swRefreshLayout = view.findViewById(R.id.swipeLastValueRefresh);
 
         SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String sToken = userData.getString("Token",null);
         String sURL = userData.getString("URL", null);
 
-        hostSampleAdapter = new HostSampleAdapter(sampleItemArrayList, getActivity());
+        itemSampleAdapter = new ItemSampleAdapter(sampleItemArrayList,getActivity());
 
-        rclHostList.setHasFixedSize(true);
-        rclHostList.setLayoutManager(new LinearLayoutManager(getContext()));
-        rclHostList.addItemDecoration
+        rclLastValueList.setHasFixedSize(true);
+        rclLastValueList.setLayoutManager(new LinearLayoutManager(getContext()));
+        rclLastValueList.addItemDecoration
                 (new DividerItemDecoration(getContext(),DividerItemDecoration.VERTICAL));
 
         LoadData(sToken,sURL);
-
 
         swRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -98,18 +98,26 @@ public class HostFragment extends Fragment {
                 swRefreshLayout.setRefreshing(false);
             }
         });
-
     }
 
-    void LoadData(String sToken, String sURL){
-        hostHandler = new Handler(Looper.getMainLooper());
+    void LoadData (String sToken, String sURL){
+        lastValueHandler = new Handler(Looper.getMainLooper());
         OkHttpClient client = new OkHttpClient().newBuilder().build();
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create("{\n   \"jsonrpc\": \"2.0\",\n   \"method\": \"host.get\"," +
-                        "\n   \"params\": {\n       \"output\": [\n           \"hostid\",\n           \"host\"\n" +
-                        "       ], \"sortfield\": \"host\",\"sortorder\": \"ASC\"" +
-                        "\n   },\n   \"id\": 1,\n   \"auth\": \"" +
-                        sToken + "\"\n}\n"
+        RequestBody body = RequestBody.create("{\n" +
+                        "   \"jsonrpc\": \"2.0\",\n" +
+                        "   \"method\": \"item.get\",\n" +
+                        "   \"params\": {\n" +
+                        "       \"output\": [\"itemid\",\"type\"," +
+                        "       \"hostid\",\"name\",\"value_type\", \"templateid\"," +
+                        "       \"description\",\"lastvalue\",\"lastclock\",\"units\"," +
+                        "       \"lastns\",\"logtimefmt\"],\n" +
+                        "       \"hostids\": \""+ sHostID +"\",\n" +
+                        "       \"application\": \""+ sAppName +"\"\n" +
+                        "   },\n" +
+                        "  \"id\": 1,\n" +
+                        "  \"auth\": \""+ sToken +"\"\n" +
+                        "}\n"
                 , mediaType);
         Request request = new Request.Builder().url("http://"+sURL+"/zabbix/api_jsonrpc.php")
                 .method("POST", body).addHeader("Content-Type","application/json")
@@ -118,7 +126,7 @@ public class HostFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 sMessage = e.toString();
-                hostHandler.post(new Runnable() {
+                lastValueHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         Snackbar.make(getView(),sMessage,Snackbar.LENGTH_LONG).show();
@@ -129,7 +137,7 @@ public class HostFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 sMessage = response.body().string();
-                hostHandler.post(new Runnable() {
+                lastValueHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -139,12 +147,19 @@ public class HostFragment extends Fragment {
                         }
                         if(jsonResponse.has("result")){
                             JSONArray jsonResult = jsonResponse.optJSONArray("result");
-                            rclHostList.setAdapter(hostSampleAdapter);
+                            rclLastValueList.setAdapter(itemSampleAdapter);
                             sampleItemArrayList.clear();
-                            for (int i=0; i<jsonResult.length(); i++){
-                                String sHost = jsonResult.optJSONObject(i).optString("host");
-                                String sHostID = jsonResult.optJSONObject(i).optString("hostid");
-                                sampleItemArrayList.add(new HostSampleItem(sHost,sHostID));
+                            for (int i=0; i<jsonResult.length();i++){
+                                String sItemName = jsonResult.optJSONObject(i).optString("name");
+                                String sLastValue = jsonResult.optJSONObject(i).optString
+                                        ("lastvalue");
+                                String sItemUnits = jsonResult.optJSONObject(i).optString("units");
+                                String sLastCheck = jsonResult.optJSONObject(i).optString
+                                        ("lastclock");
+                                String sDescription = jsonResult.optJSONObject(i).optString
+                                        ("description");
+                                sampleItemArrayList.add(new ItemSampleItem
+                                        (sItemName,sLastValue,sItemUnits,sLastCheck,sDescription));
                             }
                         }
                     }

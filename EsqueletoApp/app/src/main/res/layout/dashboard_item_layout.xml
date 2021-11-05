@@ -43,7 +43,6 @@
                 android:id="@+id/view"
                 android:layout_width="275dp"
                 android:layout_height="1dp"
-                android:layout_below="@id/textItemName"
                 android:background="@color/black"
                 app:layout_constraintBottom_toTopOf="@+id/textHostName"
                 app:layout_constraintEnd_toEndOf="parent"

@@ -111,11 +111,13 @@ public class DashboardItemFragment extends Fragment {
         String sURL = userData.getString("URL", null);
         String sDashboardItemID = userData.getString("ItemIDs", null);
         String sDashboardItemUnit = userData.getString("ItemUnits", null);
+        String sDashboardItemValueType = userData.getString("ValueType", null);
         String[] arrayIDs = sDashboardItemID.split(",");
         String[] arrayUnits = sDashboardItemUnit.split(",");
+        String[] arrayValueType = sDashboardItemValueType.split(",");
         String sItemID = arrayIDs[iPosition];
         String sItemUnit = arrayUnits[iPosition];
-
+        String sValueType = arrayValueType[iPosition];
         graphView.getGridLabelRenderer().setVerticalAxisTitle(sItemUnit);
 
         spinnerTimeWindow.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -123,29 +125,18 @@ public class DashboardItemFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 long presentTime = System.currentTimeMillis()/1000;
                 long pastTime = SetTimeFrom(position);
-                //long pastTime = SetTimeFrom(7);
                 mHandler = new Handler(Looper.getMainLooper());
                 OkHttpClient client = new OkHttpClient().newBuilder().build();
                 MediaType mediaType = MediaType.parse("application/json");
                 RequestBody body = RequestBody.create("{\n   \"jsonrpc\": \"2.0\",\n   " +
                                 "\"method\": \"history.get\",\n   \"params\": {\n       \"output\": " +
-                                "\"extend\",\n       \"history\": 0,\n       \"itemids\": \"" +
+                                "\"extend\",\n       \"history\": "+ sValueType +",\n       \"itemids\": \"" +
                                 sItemID + "\",\n       \"time_from\": " +
                                 pastTime + ",\n \"time_till\": " + presentTime + ",\n" +
                                 "       \"sortfield\": \"clock\"," + "\n       \"sortorder\": \"ASC\"\n" +
                                 "   },\n   \"id\": 1," + "\n   \"auth\": \"" +
                                 sToken + "\"\n}\n"
                         , mediaType);
-                /*RequestBody body = RequestBody.create("{\n   \"jsonrpc\": \"2.0\",\n   " +
-                                "\"method\": \"history.get\",\n   \"params\": {\n       \"output\": " +
-                                "\"extend\",\n       \"history\": 0,\n       \"itemids\": \"" +
-                                sItemID + "\",\n       \"time_from\": " +
-                                pastTime + ",\n \"time_till\": " + presentTime + ",\n" +
-                                "       \"sortfield\": \"clock\"," + "\n       \"sortorder\": \"ASC\",\n" +
-                                "\"limit\":180"+
-                                "   },\n   \"id\": 1," + "\n   \"auth\": \"" +
-                                sToken + "\"\n}\n"
-                        , mediaType);*/
                 Request request = new Request.Builder().url("http://"+sURL+"/zabbix/api_jsonrpc.php")
                         .method("POST", body).addHeader("Content-Type","application/json")
                         .build();
@@ -173,39 +164,44 @@ public class DashboardItemFragment extends Fragment {
                                     Log.e("Parsing","Could not parse malformed JSON: \"" + sMessage + "\"");
                                 }if(jsonResponse.has("result")){
                                     JSONArray jsonResult = jsonResponse.optJSONArray("result");
-                                    sTime = new String[jsonResult.length()];
-                                    Float[] fValue = new Float[jsonResult.length()];
-                                    DataPoint[] dataPoints= new DataPoint[jsonResult.length()];
-                                    for (int i=0;i<jsonResult.length();i++){
-                                        sTime[i] = jsonResult.optJSONObject(i).optString("clock");
-                                        fValue[i] = Float.valueOf(jsonResult.optJSONObject(i).optString("value"));
-                                        dataPoints[i]= new DataPoint(i,fValue[i]);
-                                    }
-                                    series.resetData(dataPoints);
-                                    graphView.addSeries(series);
-                                    graphView.getViewport().setXAxisBoundsManual(true);
-                                    graphView.getViewport().setMinX(0);
-                                    graphView.getViewport().setMaxX(jsonResult.length()-1);
-                                    graphView.onDataChanged(false,false);
-                                    sTime=DateParser(sTime);
-                                    StaticLabelsFormatter staticLabelsFormatter = new StaticLabelsFormatter(graphView);
-                                    staticLabelsFormatter.setHorizontalLabels(sTime);
-                                    graphView.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
-                                    graphView.getGridLabelRenderer().setNumHorizontalLabels(2);
-                                    graphView.getGridLabelRenderer().setLabelHorizontalHeight(50);
-                                    graphView.getGridLabelRenderer().setHorizontalLabelsAngle(15);
-                                    graphView.getViewport().setScrollable(true);
-                                    graphView.getViewport().setScalable(true);
-
-                                    series.setOnDataPointTapListener(new OnDataPointTapListener() {
-                                        @Override
-                                        public void onTap(Series series, DataPointInterface dataPoint) {
-                                            String msg = dataPoint.getY()+" at "+sTime[(int)dataPoint.getX()];
-                                            Toast toast = Toast.makeText(getActivity(),msg,Toast.LENGTH_SHORT);
-                                            toast.setGravity(Gravity.CENTER,0,0);
-                                            toast.show();
+                                    if (jsonResult.length()!=0){
+                                        sTime = new String[jsonResult.length()];
+                                        Float[] fValue = new Float[jsonResult.length()];
+                                        DataPoint[] dataPoints= new DataPoint[jsonResult.length()];
+                                        for (int i=0;i<jsonResult.length();i++){
+                                            sTime[i] = jsonResult.optJSONObject(i).optString("clock");
+                                            fValue[i] = Float.valueOf(jsonResult.optJSONObject(i).optString("value"));
+                                            dataPoints[i]= new DataPoint(i,fValue[i]);
                                         }
-                                    });
+                                        series.resetData(dataPoints);
+                                        graphView.addSeries(series);
+                                        graphView.getViewport().setXAxisBoundsManual(true);
+                                        graphView.getViewport().setMinX(0);
+                                        graphView.getViewport().setMaxX(jsonResult.length()-1);
+                                        graphView.onDataChanged(false,false);
+                                        sTime=DateParser(sTime);
+                                        StaticLabelsFormatter staticLabelsFormatter = new StaticLabelsFormatter(graphView);
+                                        staticLabelsFormatter.setHorizontalLabels(sTime);
+                                        graphView.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
+                                        graphView.getGridLabelRenderer().setNumHorizontalLabels(2);
+                                        graphView.getGridLabelRenderer().setLabelHorizontalHeight(50);
+                                        graphView.getGridLabelRenderer().setHorizontalLabelsAngle(15);
+                                        graphView.getViewport().setScrollable(true);
+                                        graphView.getViewport().setScalable(true);
+
+                                        series.setOnDataPointTapListener(new OnDataPointTapListener() {
+                                            @Override
+                                            public void onTap(Series series, DataPointInterface dataPoint) {
+                                                String msg = dataPoint.getY()+" at "+sTime[(int)dataPoint.getX()];
+                                                Toast toast = Toast.makeText(getActivity(),msg,Toast.LENGTH_SHORT);
+                                                toast.setGravity(Gravity.CENTER,0,0);
+                                                toast.show();
+                                            }
+                                        });
+                                    }else{
+                                        Snackbar.make(getView(),"No hay datos para mostrar",Snackbar.LENGTH_LONG)
+                                                .show();
+                                    }
                                 }
                             }
                         });

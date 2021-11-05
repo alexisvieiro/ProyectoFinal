@@ -11,19 +11,19 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.esqueletoapp.Activities.MenuActivity;
-import com.example.esqueletoapp.Fragments.ItemGroupFragment;
+import com.example.esqueletoapp.Fragments.ItemLastValueFragment;
 import com.example.esqueletoapp.Models.HostSampleItem;
+import com.example.esqueletoapp.Models.ItemGroupSampleItem;
 import com.example.esqueletoapp.R;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
-public class HostSampleAdapter extends RecyclerView.Adapter<HostSampleAdapter.SampleHolder>{
-    private ArrayList<HostSampleItem> sampleDataList;
+public class ItemGroupSampleAdapter extends
+        RecyclerView.Adapter<ItemGroupSampleAdapter.SampleHolder> {
+    private ArrayList<ItemGroupSampleItem> sampleDataList;
     private Context c;
 
-    public HostSampleAdapter(ArrayList<HostSampleItem> sampleDataList, Context c){
+    public ItemGroupSampleAdapter(ArrayList<ItemGroupSampleItem> sampleDataList, Context c){
         this.sampleDataList = sampleDataList;
         this.c = c;
     }
@@ -32,26 +32,28 @@ public class HostSampleAdapter extends RecyclerView.Adapter<HostSampleAdapter.Sa
     @Override
     public SampleHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View MainItemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.host_item_layout, parent, false);
+                .inflate(R.layout.item_group_item_layout, parent,false);
         return new SampleHolder(MainItemView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull SampleHolder holder, int position) {
-        final HostSampleItem hostSampleItemData;
-        hostSampleItemData = sampleDataList.get(position);
-        String sHostID = hostSampleItemData.getsHostID();
-        holder.setHostName(hostSampleItemData.getsHostName());
+        final ItemGroupSampleItem itemGroupSampleItemData;
+        itemGroupSampleItemData = sampleDataList.get(position);
+        String sHostID = itemGroupSampleItemData.getsHostID();
+        String sAppName = itemGroupSampleItemData.getsAppName();
+        holder.setItemGroupName(sAppName);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ItemGroupFragment itemGroupFragment = new ItemGroupFragment();
+                ItemLastValueFragment itemLastValueFragment = new ItemLastValueFragment();
                 Bundle bundle = new Bundle();
-                bundle.putString("ItemGroupID", sHostID);
-                itemGroupFragment.setArguments(bundle);
+                bundle.putString("HostID", sHostID);
+                bundle.putString("AppName", sAppName);
+                itemLastValueFragment.setArguments(bundle);
                 ((MenuActivity)c).getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.constraintMenu, itemGroupFragment)
+                        .replace(R.id.constraintMenu,itemLastValueFragment)
                         .addToBackStack(null).commit();
             }
         });
@@ -64,16 +66,17 @@ public class HostSampleAdapter extends RecyclerView.Adapter<HostSampleAdapter.Sa
 
     public class SampleHolder extends RecyclerView.ViewHolder{
         private View view;
-        private TextView txtHostName;
+        private TextView txtItemGroupName;
 
         public SampleHolder(View itemView){
             super(itemView);
             this.view = itemView;
         }
 
-        public void setHostName(String sHostName){
-            txtHostName = view.findViewById(R.id.textHostMenuName);
-            txtHostName.setText(sHostName);
+        public void setItemGroupName(String sItemGroupName){
+            txtItemGroupName = view.findViewById(R.id.textItemGroupMenuName);
+            txtItemGroupName.setSelected(true);
+            txtItemGroupName.setText(sItemGroupName);
         }
     }
 }
