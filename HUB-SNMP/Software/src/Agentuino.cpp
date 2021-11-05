@@ -1,5 +1,4 @@
 
-#include "Streaming.h"
 #include "Agentuino.h"
 #include <WiFiUdp.h>
 WiFiUDP Udp;
@@ -723,7 +722,7 @@ void pduReceived() {
             } else {
                 // response packet from get-request - ardTemperature1
                 //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, ardTemperature1);
-                status = pdu.VALUE.encode(SNMP_SYNTAX_INT, (int32_t) freeHeap);
+                status = pdu.VALUE.encode(SNMP_SYNTAX_INT, (int32_t) usedHeap);
                 //Serial.println("Temperatura mandada");
                 //mando temperatura
                 pdu.type = SNMP_PDU_RESPONSE;

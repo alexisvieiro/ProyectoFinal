@@ -13,5 +13,5 @@ extern char locLocation[20];                                                    
 extern int32_t locServices;   
 extern byte my_IP_address[4];                                                   // arduino IP address
 extern int temperaturaC;
-extern long freeHeap;
+extern long usedHeap;
 #endif
