@@ -697,15 +697,15 @@ void pduReceived() {
             }
             //
 
-        }else if (strcmp_P(oid, ardTemperature1) == 0) {
-            // handle ardTemperature1 (set/get) requests
+        }else if (strcmp_P(oid, esp32Temperature1) == 0) {
+            // handle esp32Temperature1 (set/get) requests
             if (pdu.type == SNMP_PDU_SET) {
                 // response packet from set-request - object is read-only
                 pdu.type = SNMP_PDU_RESPONSE;
                 pdu.error = SNMP_ERR_READ_ONLY;
             } else {
-                // response packet from get-request - ardTemperature1
-                //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, ardTemperature1);
+                // response packet from get-request - esp32Temperature1
+                //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, esp32Temperature1);
                 status = pdu.VALUE.encode(SNMP_SYNTAX_INT, temperaturaC);
                 //Serial.println("Temperatura mandada");
                 //mando temperatura
@@ -713,30 +713,85 @@ void pduReceived() {
                 pdu.error = status;
             }
             //
-          }else if (strcmp_P(oid, ardFreeHeap) == 0) {
-            // handle ardTemperature1 (set/get) requests
+          }else if (strcmp_P(oid, esp32FreeHeap) == 0) {
+            // handle esp32FreeHeap (set/get) requests
             if (pdu.type == SNMP_PDU_SET) {
                 // response packet from set-request - object is read-only
                 pdu.type = SNMP_PDU_RESPONSE;
                 pdu.error = SNMP_ERR_READ_ONLY;
             } else {
-                // response packet from get-request - ardTemperature1
-                //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, ardTemperature1);
+                // response packet from get-request - esp32FreeHeap
+                //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, esp32FreeHeap);
                 status = pdu.VALUE.encode(SNMP_SYNTAX_INT, (int32_t) usedHeap);
-                //Serial.println("Temperatura mandada");
-                //mando temperatura
+                //Serial.println("ESP32 heap mandada");
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = status;
+            }
+             }else if (strcmp_P(oid, esp32Door1) == 0) {
+            // handle esp32Door1 (set/get) requests
+            if (pdu.type == SNMP_PDU_SET) {
+                // response packet from set-request - object is read-only
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = SNMP_ERR_READ_ONLY;
+            } else {
+                // response packet from get-request - esp32Door1
+                //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, esp32Door1);
+                status = pdu.VALUE.encode(SNMP_SYNTAX_INT, (int32_t) UltimoEstado[0]);
+                //Serial.println("ESP32 esp32Door1 mandada");
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = status;
+            }
+             }else if (strcmp_P(oid, esp32Door2) == 0) {
+            // handle esp32Door2 (set/get) requests
+            if (pdu.type == SNMP_PDU_SET) {
+                // response packet from set-request - object is read-only
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = SNMP_ERR_READ_ONLY;
+            } else {
+                // response packet from get-request - esp32Door2
+                //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, esp32Door2);
+                status = pdu.VALUE.encode(SNMP_SYNTAX_INT, (int32_t) UltimoEstado[1]);
+                //Serial.println("ESP32 esp32Door2 mandada");
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = status;
+            }
+             }else if (strcmp_P(oid, esp32Door3) == 0) {
+            // handle esp32Door3 (set/get) requests
+            if (pdu.type == SNMP_PDU_SET) {
+                // response packet from set-request - object is read-only
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = SNMP_ERR_READ_ONLY;
+            } else {
+                // response packet from get-request - esp32Door3
+                //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, esp32Door3);
+                status = pdu.VALUE.encode(SNMP_SYNTAX_INT, (int32_t) UltimoEstado[2]);
+                //Serial.println("ESP32 esp32Door3 mandada");
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = status;
+            }
+             }else if (strcmp_P(oid, esp32Door4) == 0) {
+            // handle esp32Door4 (set/get) requests
+            if (pdu.type == SNMP_PDU_SET) {
+                // response packet from set-request - object is read-only
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = SNMP_ERR_READ_ONLY;
+            } else {
+                // response packet from get-request - esp32Door4
+                //status = pdu.VALUE.encode(SNMP_SYNTAX_INT, esp32Door4);
+                status = pdu.VALUE.encode(SNMP_SYNTAX_INT, (int32_t) UltimoEstado[3]);
+                //Serial.println("ESP32 esp32Door4 mandada");
                 pdu.type = SNMP_PDU_RESPONSE;
                 pdu.error = status;
             }
             //
-        } else {
-            // oid does not exist
+            } else {
+                // oid does not exist
+                //
+                // response packet - object not found
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = SNMP_ERR_NO_SUCH_NAME;
+            }
             //
-            // response packet - object not found
-            pdu.type = SNMP_PDU_RESPONSE;
-            pdu.error = SNMP_ERR_NO_SUCH_NAME;
-        }
-        //
 
         Agentuino.responsePdu(&pdu);
 

@@ -31,8 +31,13 @@ const char sysServices[] PROGMEM = "1.3.6.1.2.1.1.7.0"; // read-only  (Integer)
 // .iso.org.dod.internet.private (.1.3.6.1.4)
 // .iso.org.dod.internet.private.enterprises (.1.3.6.1.4.1)
 // .iso.org.dod.internet.private.enterprises.arduino (.1.3.6.1.4.1.36582)
-const char ardTemperature1[] PROGMEM = "1.3.6.1.4.1.36582.0"; // read-only  (Integer)
-const char ardFreeHeap[] PROGMEM = "1.3.6.1.4.1.36582.1"; // read-only  (Integer)
+const char esp32Temperature1[] PROGMEM = "1.3.6.1.4.1.36582.0"; // read-only  (Integer)
+const char esp32FreeHeap[] PROGMEM = "1.3.6.1.4.1.36582.1"; // read-only  (Integer)
+const char esp32Door1[] PROGMEM = "1.3.6.1.4.1.36582.2"; // read-only  (Integer)
+const char esp32Door2[] PROGMEM = "1.3.6.1.4.1.36582.3"; // read-only  (Integer)
+const char esp32Door3[] PROGMEM = "1.3.6.1.4.1.36582.4"; // read-only  (Integer)
+const char esp32Door4[] PROGMEM = "1.3.6.1.4.1.36582.5"; // read-only  (Integer)
+
 //
 //        
 #endif
