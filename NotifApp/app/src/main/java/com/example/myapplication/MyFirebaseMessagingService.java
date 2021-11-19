@@ -22,25 +22,29 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("Token", token);
         editor.apply();
-        //Guardo TOKEN nuevo/actualizado
+        Log.d("TokenNotif", "cambio el token");
+        //Dar aviso que cambió el token para reenviar el correo
     }
 
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
-        // TODO(developer): Handle FCM messages here.
-        Log.d("TokenNotif", "From: " + remoteMessage.getFrom());
+
+
+
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d("TokenNotif", "Message data payload: " + remoteMessage.getData());
-
+            //se puede ignorar esto, es por si queres mandar mas datos que no se muestran en la propia notificacion
         }
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d("TokenNotif", "Message Notification Body: " + remoteMessage.getNotification().getBody());
+
+            Log.d("TokenNotif", "Message Notification Title: " + remoteMessage.getNotification().getTitle());
         }
 
 
