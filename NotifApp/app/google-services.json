@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "390128096258",
+    "project_id": "notifiapp-zabbix",
+    "storage_bucket": "notifiapp-zabbix.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:390128096258:android:543cdbfefe2f8ef737831b",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "390128096258-ihmttfqrm60v2j2jg672ltluvq0o6vcv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbmRa-8H2H_YlI8zZEmTBFlk5c4_qs0sc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "390128096258-ihmttfqrm60v2j2jg672ltluvq0o6vcv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
