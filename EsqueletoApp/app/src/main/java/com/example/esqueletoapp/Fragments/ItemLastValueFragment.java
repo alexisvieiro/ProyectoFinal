@@ -1,11 +1,13 @@
 package com.example.esqueletoapp.Fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -15,10 +17,13 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.example.esqueletoapp.Adapters.ItemSampleAdapter;
 import com.example.esqueletoapp.Models.ItemSampleItem;
@@ -45,6 +50,7 @@ public class ItemLastValueFragment extends Fragment {
     private String sAppName;
     private RecyclerView rclLastValueList;
     private SwipeRefreshLayout swRefreshLayout;
+    private EditText edtSearchLastValue;
     private Handler lastValueHandler;
     private String sMessage;
     private JSONObject jsonResponse;
@@ -77,6 +83,7 @@ public class ItemLastValueFragment extends Fragment {
 
         rclLastValueList = view.findViewById(R.id.lastValueList);
         swRefreshLayout = view.findViewById(R.id.swipeLastValueRefresh);
+        edtSearchLastValue = view.findViewById(R.id.textSearchLastValue);
 
         SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String sToken = userData.getString("Token",null);
@@ -98,6 +105,16 @@ public class ItemLastValueFragment extends Fragment {
                 swRefreshLayout.setRefreshing(false);
             }
         });
+    }
+
+    private void Filter(String text){
+        ArrayList<ItemSampleItem> filteredList = new ArrayList<>();
+        for (ItemSampleItem item : sampleItemArrayList){
+            if (item.getsItemName().toLowerCase().contains(text.toLowerCase())){
+                filteredList.add(item);
+            }
+        }
+        itemSampleAdapter.filterList(filteredList);
     }
 
     void LoadData (String sToken, String sURL){
@@ -149,17 +166,45 @@ public class ItemLastValueFragment extends Fragment {
                             JSONArray jsonResult = jsonResponse.optJSONArray("result");
                             rclLastValueList.setAdapter(itemSampleAdapter);
                             sampleItemArrayList.clear();
-                            for (int i=0; i<jsonResult.length();i++){
-                                String sItemName = jsonResult.optJSONObject(i).optString("name");
-                                String sLastValue = jsonResult.optJSONObject(i).optString
-                                        ("lastvalue");
-                                String sItemUnits = jsonResult.optJSONObject(i).optString("units");
-                                String sLastCheck = jsonResult.optJSONObject(i).optString
-                                        ("lastclock");
-                                String sDescription = jsonResult.optJSONObject(i).optString
-                                        ("description");
-                                sampleItemArrayList.add(new ItemSampleItem
-                                        (sItemName,sLastValue,sItemUnits,sLastCheck,sDescription));
+                            if(jsonResult.length()==0){
+                                AlertDialog.Builder alertItemsNotFound = new AlertDialog.Builder(getContext());
+                                alertItemsNotFound.setMessage("No hay ítems asignados al application seleccionado");
+                                alertItemsNotFound.setNeutralButton("Regresar", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        getActivity().getSupportFragmentManager().popBackStack();
+                                    }
+                                });
+                                alertItemsNotFound.show();
+                            }else{
+                                for (int i=0; i<jsonResult.length();i++){
+                                    String sItemName = jsonResult.optJSONObject(i).optString("name");
+                                    String sLastValue = jsonResult.optJSONObject(i).optString
+                                            ("lastvalue");
+                                    String sItemUnits = jsonResult.optJSONObject(i).optString("units");
+                                    String sLastCheck = jsonResult.optJSONObject(i).optString
+                                            ("lastclock");
+                                    String sDescription = jsonResult.optJSONObject(i).optString
+                                            ("description");
+                                    sampleItemArrayList.add(new ItemSampleItem
+                                            (sItemName,sLastValue,sItemUnits,sLastCheck,sDescription));
+                                }
+                                edtSearchLastValue.addTextChangedListener(new TextWatcher() {
+                                    @Override
+                                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                                    }
+
+                                    @Override
+                                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                                    }
+
+                                    @Override
+                                    public void afterTextChanged(Editable s) {
+                                        Filter(s.toString());
+                                    }
+                                });
                             }
                         }
                     }

@@ -62,6 +62,11 @@ public class HostSampleAdapter extends RecyclerView.Adapter<HostSampleAdapter.Sa
         return sampleDataList.size();
     }
 
+    public void filterList(ArrayList<HostSampleItem> filteredList){
+        sampleDataList = filteredList;
+        notifyDataSetChanged();
+    }
+
     public class SampleHolder extends RecyclerView.ViewHolder{
         private View view;
         private TextView txtHostName;

@@ -15,10 +15,13 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.example.esqueletoapp.Adapters.DeviceSampleAdapter;
 import com.example.esqueletoapp.Adapters.HostSampleAdapter;
@@ -50,6 +53,7 @@ public class HostFragment extends Fragment {
     private JSONObject jsonResponse;
     private HostSampleAdapter hostSampleAdapter;
     private ArrayList<HostSampleItem> sampleItemArrayList = new ArrayList<>();
+    private EditText edtSearchHost;
 
     public HostFragment() {
         // Required empty public constructor
@@ -76,6 +80,7 @@ public class HostFragment extends Fragment {
 
         rclHostList = view.findViewById(R.id.listHosts);
         swRefreshLayout = view.findViewById(R.id.swipeHostRefresh);
+        edtSearchHost = view.findViewById(R.id.textSearchHost);
 
         SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String sToken = userData.getString("Token",null);
@@ -90,7 +95,6 @@ public class HostFragment extends Fragment {
 
         LoadData(sToken,sURL);
 
-
         swRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -98,7 +102,16 @@ public class HostFragment extends Fragment {
                 swRefreshLayout.setRefreshing(false);
             }
         });
+    }
 
+    private void Filter(String text){
+        ArrayList<HostSampleItem> filteredList = new ArrayList<>();
+        for (HostSampleItem item : sampleItemArrayList){
+            if (item.getsHostName().toLowerCase().contains(text.toLowerCase())){
+                filteredList.add(item);
+            }
+        }
+        hostSampleAdapter.filterList(filteredList);
     }
 
     void LoadData(String sToken, String sURL){
@@ -146,6 +159,22 @@ public class HostFragment extends Fragment {
                                 String sHostID = jsonResult.optJSONObject(i).optString("hostid");
                                 sampleItemArrayList.add(new HostSampleItem(sHost,sHostID));
                             }
+                            edtSearchHost.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable s) {
+                                    Filter(s.toString());
+                                }
+                            });
                         }
                     }
                 });

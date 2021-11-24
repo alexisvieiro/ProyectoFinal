@@ -1,12 +1,15 @@
 package com.example.esqueletoapp.Adapters;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.esqueletoapp.Models.ItemSampleItem;
@@ -46,16 +49,31 @@ public class ItemSampleAdapter extends RecyclerView.Adapter<ItemSampleAdapter.Sa
 
         long lDate = Long.valueOf(sLastCheck)*1000;
         Date dd = new java.util.Date(lDate);
-        String sDate = new SimpleDateFormat("dd MMM yyyy HH:mm z").format(dd).toUpperCase();
-
         holder.setItemName(sItemName);
-        holder.setLastValue(sLastValue+" "+sItemUnits);
-        holder.setLastCheck(sDate);
+        if (lDate==0){
+            holder.setLastValue("No data");
+            holder.setLastCheck("No data");
+        }else{
+            String sDate = new SimpleDateFormat("dd MMM yyyy HH:mm z").format(dd).toUpperCase();
+
+            holder.setLastValue(sLastValue+" "+sItemUnits);
+            holder.setLastCheck(sDate);
+        }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Snackbar.make(v,sDescription,Snackbar.LENGTH_INDEFINITE).show();
+                if (!sDescription.isEmpty()){
+                    AlertDialog.Builder descriptionDialog = new AlertDialog.Builder(v.getContext());
+                    descriptionDialog.setMessage(sDescription);
+                    descriptionDialog.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    descriptionDialog.show();
+                }
             }
         });
     }
@@ -63,6 +81,11 @@ public class ItemSampleAdapter extends RecyclerView.Adapter<ItemSampleAdapter.Sa
     @Override
     public int getItemCount() {
         return sampleDataList.size();
+    }
+
+    public void filterList(ArrayList<ItemSampleItem> filteredList){
+        sampleDataList = filteredList;
+        notifyDataSetChanged();
     }
 
     public class SampleHolder extends RecyclerView.ViewHolder{

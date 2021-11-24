@@ -15,14 +15,18 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.example.esqueletoapp.Adapters.ItemGroupSampleAdapter;
 import com.example.esqueletoapp.Models.ItemGroupSampleItem;
 import com.example.esqueletoapp.R;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
@@ -43,6 +47,7 @@ import okhttp3.Response;
 public class ItemGroupFragment extends Fragment {
     private String sItemGroupID;
     private RecyclerView rclItemGroupList;
+    private EditText edtSearchItemGroup;
     private SwipeRefreshLayout swRefreshLayout;
     private Handler itemGroupHandler;
     private String sMessage;
@@ -75,6 +80,7 @@ public class ItemGroupFragment extends Fragment {
 
         rclItemGroupList = view.findViewById(R.id.listItemGroups);
         swRefreshLayout = view.findViewById(R.id.swipeItemGroupRefresh);
+        edtSearchItemGroup = view.findViewById(R.id.textSearchItemGroup);
 
         SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String sToken = userData.getString("Token",null);
@@ -96,6 +102,16 @@ public class ItemGroupFragment extends Fragment {
                 swRefreshLayout.setRefreshing(false);
             }
         });
+    }
+
+    private void Filter (String text){
+        ArrayList<ItemGroupSampleItem> filteredList = new ArrayList<>();
+        for (ItemGroupSampleItem item : sampleItemArrayList){
+            if (item.getsAppName().toLowerCase().contains(text.toLowerCase())){
+                filteredList.add(item);
+            }
+        }
+        itemGroupSampleAdapter.filterList(filteredList);
     }
 
     void LoadData(String sToken, String sURL){
@@ -142,13 +158,29 @@ public class ItemGroupFragment extends Fragment {
                         }
                         if(jsonResponse.has("result")){
                             JSONArray jsonResult = jsonResponse.optJSONArray("result");
-                            rclItemGroupList.setAdapter(itemGroupSampleAdapter);
                             sampleItemArrayList.clear();
+                            rclItemGroupList.setAdapter(itemGroupSampleAdapter);
                             for (int i=0;i<jsonResult.length();i++){
                                 String sHostID = jsonResult.optJSONObject(i).optString("hostid");
                                 String sAppName = jsonResult.optJSONObject(i).optString("name");
                                 sampleItemArrayList.add(new ItemGroupSampleItem(sAppName,sHostID));
                             }
+                            edtSearchItemGroup.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable s) {
+                                    Filter(s.toString());
+                                }
+                            });
                         }
                     }
                 });

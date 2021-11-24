@@ -9,10 +9,34 @@
     tools:context=".Fragments.ItemGroupFragment"
     tools:ignore="SpeakableTextPresentCheck">
 
+    <ImageView
+        android:id="@+id/imageSearchItemGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/swipeItemGroupRefresh"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_search"/>
+
+    <EditText
+        android:id="@+id/textSearchItemGroup"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:hint="Buscar..."
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageSearchItemGroup"
+        app:layout_constraintBottom_toTopOf="@+id/swipeItemGroupRefresh"
+        tools:ignore="SpeakableTextPresentCheck" />
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeItemGroupRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

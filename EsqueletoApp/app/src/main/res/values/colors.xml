@@ -12,6 +12,7 @@
     <color name="item_button_background">#FF306236</color>
     <color name="item_background">#FF767676</color>
     <color name="fab_icon">#FFC0CFC2</color>
+    <color name="background_hint_color">#FFF6F6F6</color>
 
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>

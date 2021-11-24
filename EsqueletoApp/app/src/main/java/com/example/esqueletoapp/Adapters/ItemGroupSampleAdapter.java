@@ -64,6 +64,11 @@ public class ItemGroupSampleAdapter extends
         return sampleDataList.size();
     }
 
+    public void filterList(ArrayList<ItemGroupSampleItem> filteredList){
+        sampleDataList = filteredList;
+        notifyDataSetChanged();
+    }
+
     public class SampleHolder extends RecyclerView.ViewHolder{
         private View view;
         private TextView txtItemGroupName;
