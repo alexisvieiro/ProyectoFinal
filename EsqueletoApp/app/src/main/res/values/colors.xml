@@ -22,4 +22,6 @@
     <color name="dashboard_delete_background">#FF00600F</color>
 
     <color name="host_item_background">#FF81D4FA</color>
+
+    <color name="problem_item_background">#FF2B2B2B</color>
 </resources>

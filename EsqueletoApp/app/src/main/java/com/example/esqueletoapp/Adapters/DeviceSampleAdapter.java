@@ -18,6 +18,7 @@ import com.example.esqueletoapp.Activities.MenuActivity;
 import com.example.esqueletoapp.Fragments.DashboardFragment;
 import com.example.esqueletoapp.Fragments.DeviceFragment;
 import com.example.esqueletoapp.Fragments.HostFragment;
+import com.example.esqueletoapp.Fragments.ProblemFragment;
 import com.example.esqueletoapp.Models.DeviceSampleItem;
 import com.example.esqueletoapp.R;
 
@@ -66,6 +67,11 @@ public class DeviceSampleAdapter extends RecyclerView.Adapter<DeviceSampleAdapte
                     DashboardFragment dashboardFragment = new DashboardFragment();
                     activity.getSupportFragmentManager().beginTransaction().
                             replace(R.id.constraintMenu,dashboardFragment).
+                            addToBackStack(null).commit();
+                }if (deviceSampleItemData.getsDeviceName().equals("Problemas")){
+                    ProblemFragment problemFragment = new ProblemFragment();
+                    activity.getSupportFragmentManager().beginTransaction().
+                            replace(R.id.constraintMenu,problemFragment).
                             addToBackStack(null).commit();
                 }
             }

@@ -4,7 +4,10 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable-anydpi/delete_icon.xml" value="0.18703703703703703" />
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable-v24/icon_notifications.xml" value="0.2175925925925926" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable/custom_round_corners.xml" value="0.240625" />
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable/ic_notifications.xml" value="0.22407407407407406" />
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable/icon_notifications_background.xml" value="0.2175925925925926" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable/rounded_corner.xml" value="0.240625" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/drawable/spinner_background.xml" value="0.240625" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/activity_main.xml" value="0.25" />
@@ -17,10 +20,14 @@
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/fragment_item_group.xml" value="0.11503623188405797" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/fragment_item_last_value.xml" value="0.10916919959473151" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/fragment_new_dashboard_item.xml" value="0.1035031847133758" />
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/fragment_problem.xml" value="0.2" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/host_item_layout.xml" value="0.13949275362318841" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/item_group_item_layout.xml" value="0.11503623188405797" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/item_last_value_layout.xml" value="0.25" />
         <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/item_layout.xml" value="0.25" />
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/layout/problem_item_layout.xml" value="0.1408514492753623" />
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/menu/notifications_menu.xml" value="0.2101851851851852" />
+        <entry key="..\:/android-projects/EsqueletoApp/app/src/main/res/mipmap-anydpi-v26/icon_notifications.xml" value="0.2175925925925926" />
       </map>
     </option>
   </component>
