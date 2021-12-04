@@ -95,56 +95,54 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-            case R.id.action_notifications:
-                String[] sOptions = {"Activadas", "Desactivadas"};
+            case R.id.action_request:
                 SharedPreferences userData = getSharedPreferences("UserData", Context.MODE_PRIVATE);
-                Integer iNotifStatus = userData.getInt("Notif",1);
-                final Integer[] checkedSelection = {iNotifStatus};
-                AlertDialog.Builder notifDialog = new
+                String sNotifToken =userData.getString("NotifToken","");
+                AlertDialog.Builder requestDialog = new
                         AlertDialog.Builder(this);
-                notifDialog.setTitle("¿Activar notificaciones?");
-                notifDialog.setSingleChoiceItems(sOptions, iNotifStatus, new DialogInterface.OnClickListener() {
+                requestDialog.setTitle("¿Solicitar alta de notificaciones?");
+                requestDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        checkedSelection[0] =which;
-                    }
-                });
-                notifDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (checkedSelection[0]==iNotifStatus){
-                            Snackbar.make(getWindow().getDecorView(),
-                                    "No cambiaste nada papu",Snackbar.LENGTH_LONG).show();
-                            dialog.dismiss();
+                        if(sNotifToken!=""){
+                            RequestNotifications(dialog, sNotifToken);
                         }else{
-                            if (checkedSelection[0]==0){
-                                String sNotifToken =userData.getString("NotifToken","");
-                                if(sNotifToken!=""){
-                                    RequestNotifications(dialog, sNotifToken, userData);
-                                }else{
-                                    Snackbar.make(getWindow().getDecorView(),
-                                            "No hay token generado",Snackbar.LENGTH_LONG).show();
-                                }
-                            }else{
-                                RequestCancelation(dialog, userData);
-                            }
+                            Snackbar.make(getWindow().getDecorView(),
+                                    "No hay token generado",Snackbar.LENGTH_LONG).show();
                         }
                     }
                 });
-                notifDialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                requestDialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
                     }
                 });
-                notifDialog.show();
+                requestDialog.show();
+                break;
+            case R.id.action_unrequest:
+                AlertDialog.Builder unrequestDialog = new
+                        AlertDialog.Builder(this);
+                unrequestDialog.setTitle("¿Solicitar baja de notificaciones?");
+                unrequestDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        UnrequestNotifications(dialog);
+                    }
+                });
+                unrequestDialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                unrequestDialog.show();
                 break;
         }
         return true;
     }
 
-    private void RequestNotifications(DialogInterface dialog, String sNotifToken,
-                                      SharedPreferences userData){
+    private void RequestNotifications(DialogInterface dialog, String sNotifToken){
         String RECIPIENT = "";
         String MESSAGE = "Token: "+ sNotifToken;
         String SUBJECT = "Solicitud de Alta de Usuario - Zabbix";
@@ -155,9 +153,6 @@ public class MenuActivity extends AppCompatActivity {
         try {
             startActivity(Intent.createChooser(emailIntent,
                     "Elegir cliente de mail..."));
-            SharedPreferences.Editor editor = userData.edit();
-            editor.putInt("Notif", 0);
-            editor.apply();
             dialog.dismiss();
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(MenuActivity.this,
@@ -165,7 +160,7 @@ public class MenuActivity extends AppCompatActivity {
         }
     }
 
-    private void RequestCancelation( DialogInterface dialog, SharedPreferences userData){
+    private void UnrequestNotifications(DialogInterface dialog){
         String RECIPIENT = "";
         String MESSAGE = "Solicito la baja de mi usuario";
         String SUBJECT = "Solicitud de Baja de Usuario - Zabbix";
@@ -176,9 +171,6 @@ public class MenuActivity extends AppCompatActivity {
         try {
             startActivity(Intent.createChooser(emailIntent,
                     "Elegir cliente de mail..."));
-            SharedPreferences.Editor editor = userData.edit();
-            editor.putInt("Notif", 1);
-            editor.apply();
             dialog.dismiss();
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(MenuActivity.this,

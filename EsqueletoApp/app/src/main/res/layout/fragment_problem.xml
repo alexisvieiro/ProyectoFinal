@@ -21,24 +21,116 @@
         app:layout_constraintVertical_bias="0.0"
         tools:ignore="SpeakableTextPresentCheck" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/problemList"
+    <TextView
+        android:id="@+id/textProblemDisaster"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="425dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:background="#E45959"
+        android:textSize="18sp"
+        app:layout_constraintHeight_percent=".1"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintWidth_percent=".166666"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerGetProblemHost"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <com.github.mikephil.charting.charts.PieChart
-        android:id="@+id/chartProblem"
+    <TextView
+        android:id="@+id/textProblemHigh"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:background="#E97659"
+        android:textSize="18sp"
+        app:layout_constraintHeight_percent=".1"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintWidth_percent=".166666"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerGetProblemHost"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textProblemDisaster"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/textProblemAverage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:background="#FFA059"
+        android:textSize="18sp"
+        app:layout_constraintHeight_percent=".1"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintWidth_percent=".166666"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerGetProblemHost"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textProblemHigh"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/textProblemWarning"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:background="#FFC859"
+        android:textSize="18sp"
+        app:layout_constraintHeight_percent=".1"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintWidth_percent=".166666"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerGetProblemHost"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textProblemAverage"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/textProblemInfo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:background="#7499FF"
+        android:textSize="18sp"
+        app:layout_constraintHeight_percent=".1"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintWidth_percent=".166666"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerGetProblemHost"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textProblemWarning"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/textProblemNotClass"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:background="#97AAB3"
+        android:textSize="18sp"
+        app:layout_constraintHeight_percent=".1"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintWidth_percent=".166666"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerGetProblemHost"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textProblemInfo"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/problemList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintTop_toBottomOf="@+id/textProblemAverage"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/problemList"/>
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

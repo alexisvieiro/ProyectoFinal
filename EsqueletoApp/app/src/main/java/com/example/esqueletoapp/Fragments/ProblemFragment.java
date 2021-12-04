@@ -1,5 +1,6 @@
 package com.example.esqueletoapp.Fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -18,10 +19,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import com.example.esqueletoapp.Adapters.ProblemSampleAdapter;
 import com.example.esqueletoapp.Models.ProblemSampleItem;
@@ -59,7 +62,8 @@ import okhttp3.Response;
 public class ProblemFragment extends Fragment {
     private SearchableSpinner spinnerHost;
     private RecyclerView rclProblemList;
-    private PieChart chartProblems;
+    private TextView txtNotClassified, txtInfo, txtWarning,
+            txtAverage, txtHigh, txtDisaster;
     private ProblemSampleAdapter problemSampleAdapter;
     private ArrayList<ProblemSampleItem> sampleItemArrayList = new ArrayList<>();
     private Handler hostHandler;
@@ -93,7 +97,12 @@ public class ProblemFragment extends Fragment {
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
-        chartProblems = view.findViewById(R.id.chartProblem);
+        txtNotClassified = view.findViewById(R.id.textProblemNotClass);
+        txtInfo = view.findViewById(R.id.textProblemInfo);
+        txtWarning = view.findViewById(R.id.textProblemWarning);
+        txtAverage = view.findViewById(R.id.textProblemAverage);
+        txtHigh = view.findViewById(R.id.textProblemHigh);
+        txtDisaster = view.findViewById(R.id.textProblemDisaster);
 
         rclProblemList = view.findViewById(R.id.problemList);
         problemSampleAdapter = new ProblemSampleAdapter(sampleItemArrayList,getActivity());
@@ -223,10 +232,8 @@ public class ProblemFragment extends Fragment {
                                     rclProblemList.setAdapter(problemSampleAdapter);
                                     sampleItemArrayList.clear();
                                     if (jsonResultProblem.length()==0){
-                                        chartProblems.clear();
-                                        chartProblems.setNoDataText("No hay datos para mostrar");
-                                        Paint paint = chartProblems.getPaint(Chart.PAINT_INFO);
-                                        paint.setTextSize(24f);
+                                        Snackbar.make(getView(),
+                                                "No hay datos para mostrar", Snackbar.LENGTH_LONG).show();
                                     }else{
                                         Integer[] sSeverityCounter = {0,0,0,0,0,0};
                                         for (int i=0;i<jsonResultProblem.length();i++){
@@ -242,8 +249,7 @@ public class ProblemFragment extends Fragment {
                                             sampleItemArrayList.add(new ProblemSampleItem
                                                     (sClock,sProblemName,sIsAck,sSeverity));
                                         }
-                                        InitChart();
-                                        DrawChart(sSeverityCounter);
+                                        SetSeverity(sSeverityCounter);
                                     }
                                 }
                             }
@@ -259,63 +265,62 @@ public class ProblemFragment extends Fragment {
         });
     }
 
-    private void InitChart(){
-        //chartProblems.setUsePercentValues(true);
-        chartProblems.getDescription().setEnabled(false);
-        chartProblems.setRotationEnabled(true);
-        chartProblems.setDragDecelerationFrictionCoef(0.9f);
-        chartProblems.setRotationAngle(0);
-        chartProblems.setDrawEntryLabels(false);
-        chartProblems.setHighlightPerTapEnabled(true);
-        chartProblems.animateY(1400, Easing.EaseInOutQuad);
-        chartProblems.setHoleRadius(0);
-        chartProblems.setTransparentCircleRadius(0);
-        chartProblems.setBackgroundColor(Color.parseColor("#000000"));
-        chartProblems.getLegend().setTextColor(Color.parseColor("#FFFFFF"));
-    }
+    @SuppressLint("ClickableViewAccessibility")
+    private void SetSeverity(Integer[] sSeverityCounter){
+        txtNotClassified.setText(String.valueOf(sSeverityCounter[0]));
+        txtInfo.setText(String.valueOf(sSeverityCounter[1]));
+        txtWarning.setText(String.valueOf(sSeverityCounter[2]));
+        txtAverage.setText(String.valueOf(sSeverityCounter[3]));
+        txtHigh.setText(String.valueOf(sSeverityCounter[4]));
+        txtDisaster.setText(String.valueOf(sSeverityCounter[5]));
 
-    private void DrawChart(Integer[] sSeverityCounter){
-        ArrayList<PieEntry> pieEntries = new ArrayList<>();
-
-        Map<String, Integer> amountMap = new HashMap<>();
-        amountMap.put("No clasificada", sSeverityCounter[0]);
-        amountMap.put("Información", sSeverityCounter[1]);
-        amountMap.put("Alerta", sSeverityCounter[2]);
-        amountMap.put("Media", sSeverityCounter[3]);
-        amountMap.put("Alta", sSeverityCounter[4]);
-        amountMap.put("Desastrosa", sSeverityCounter[5]);
-
-        ArrayList<Integer> colors = new ArrayList<>();
-        colors.add(Color.parseColor("#97AAB3"));
-        colors.add(Color.parseColor("#7499FF"));
-        colors.add(Color.parseColor("#E45959"));
-        colors.add(Color.parseColor("#E97659"));
-        colors.add(Color.parseColor("#FFA059"));
-        colors.add(Color.parseColor("#FFC859"));
-        //colors.add(Color.parseColor("#E45959"));
-
-        for (String type: amountMap.keySet()){
-            pieEntries.add(new PieEntry(amountMap.get(type).floatValue(),type));
-        }
-
-        PieDataSet pieDataSet = new PieDataSet(pieEntries,null);
-        pieDataSet.setValueTextSize(10f);
-        pieDataSet.setColors(colors);
-        pieDataSet.setSliceSpace(10f);
-        pieDataSet.setIconsOffset(new MPPointF(0, 30));
-        pieDataSet.setSelectionShift(5f);
-        //pieDataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-        pieDataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-        pieDataSet.setValueLineColor(Color.parseColor("#FFFFFF"));
-        pieDataSet.setValueLinePart1OffsetPercentage(75.f);
-        pieDataSet.setValueLinePart1Length(1f);
-        pieDataSet.setValueLinePart2Length(.1f);
-        PieData pieData = new PieData(pieDataSet);
-        pieData.setDrawValues(true);
-        //pieData.setValueFormatter(new PercentFormatter(chartProblems));
-        pieData.setValueTextColor(Color.parseColor("#FFFFFF"));
-
-        chartProblems.setData(pieData);
-        chartProblems.invalidate();
+        txtNotClassified.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Snackbar.make(v,"Problemas sin clasificar: "
+                        +txtNotClassified.getText(),Snackbar.LENGTH_LONG).show();
+                return true;
+            }
+        });
+        txtInfo.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Snackbar.make(v,"Informativos: "
+                        +txtInfo.getText(),Snackbar.LENGTH_LONG).show();
+                return true;
+            }
+        });
+        txtWarning.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Snackbar.make(v,"Problemas de alerta: "
+                        +txtWarning.getText(),Snackbar.LENGTH_LONG).show();
+                return true;
+            }
+        });
+        txtAverage.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Snackbar.make(v,"Problemas de nivel promedio: "
+                        +txtAverage.getText(),Snackbar.LENGTH_LONG).show();
+                return true;
+            }
+        });
+        txtHigh.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Snackbar.make(v,"Problemas de alto riesgo: "
+                        +txtHigh.getText(),Snackbar.LENGTH_LONG).show();
+                return true;
+            }
+        });
+        txtDisaster.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Snackbar.make(v,"Problemas desastrosos: "
+                        +txtDisaster.getText(),Snackbar.LENGTH_LONG).show();
+                return true;
+            }
+        });
     }
 }

@@ -25,9 +25,14 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="altoque_notification_channel_id" />
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_zabbix_notif" />
+
         <service
             android:name="com.example.esqueletoapp.Utilities.MyFirebaseMessagingService"
-            android:exported="false">
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
