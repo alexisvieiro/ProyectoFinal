@@ -47,7 +47,6 @@ public class MenuActivity extends AppCompatActivity {
 
     private RecyclerView rclDeviceList;
     private Toolbar toolbar;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private DeviceSampleAdapter deviceSampleAdapter;
     private ArrayList<DeviceSampleItem> sampleItemArrayList = new ArrayList<>();
 
@@ -59,7 +58,6 @@ public class MenuActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
         rclDeviceList = findViewById(R.id.listDevices);
-        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
 
         toolbar = findViewById(R.id.toolbarMainMenu);
         setSupportActionBar(toolbar);
@@ -76,14 +74,6 @@ public class MenuActivity extends AppCompatActivity {
         sampleItemArrayList.add(new DeviceSampleItem("Tablero"));
         sampleItemArrayList.add(new DeviceSampleItem("Hosts"));
         sampleItemArrayList.add(new DeviceSampleItem("Problemas"));
-
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                swipeRefreshLayout.setRefreshing(false);
-                recreate();
-            }
-        });
     }
 
     @Override
@@ -138,8 +128,36 @@ public class MenuActivity extends AppCompatActivity {
                 });
                 unrequestDialog.show();
                 break;
+            case R.id.action_logout:
+                AlertDialog.Builder logoutDialog = new AlertDialog.Builder(this);
+                logoutDialog.setTitle("¿Cerrar sesión?");
+                logoutDialog.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent aMain = new Intent(MenuActivity.this, MainActivity.class);
+                        startActivity(aMain);
+                        finish();
+                    }
+                });
+                logoutDialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                logoutDialog.show();
         }
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+        if (count == 0) {
+            moveTaskToBack(true);
+        } else {
+            getSupportFragmentManager().popBackStack();
+        }
     }
 
     private void RequestNotifications(DialogInterface dialog, String sNotifToken){

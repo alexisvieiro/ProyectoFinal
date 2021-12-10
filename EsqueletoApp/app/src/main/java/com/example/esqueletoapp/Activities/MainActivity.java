@@ -134,28 +134,13 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                 });
-
-                /*String sUsername = edtUsername.getText().toString();
-                String sPassword = edtPassword.getText().toString();
-                //if(sUsername.equals("AdministradorUTNEricnet")){
-                if(sUsername.equals("hola")){
-                    //if(sPassword.equals("DinosaurioElectronico39744836")){
-                    if(sPassword.equals("1234")){
-                        startActivity(aMenu);
-                        finish();
-                    }else{
-                        Snackbar.make(v,"Contraseña incorrecta", Snackbar.LENGTH_LONG).show();
-                        edtPassword.setError("Contraseña incorrecta");
-                    }
-                }else{
-                    Snackbar.make(v,"No existe usuario", Snackbar.LENGTH_LONG).show();
-                    edtUsername.setError("No existe usuario");
-                }*/
-
-
-
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        //Do nothing
     }
 }

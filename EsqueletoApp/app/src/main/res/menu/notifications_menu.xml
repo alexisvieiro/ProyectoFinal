@@ -20,4 +20,9 @@
 
     </item>
 
+    <item android:id="@+id/action_logout"
+        android:icon="@drawable/ic_logout"
+        android:title="Cerrar sesión"
+        app:showAsAction="always"/>
+
 </menu>

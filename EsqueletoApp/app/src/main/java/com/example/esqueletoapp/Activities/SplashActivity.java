@@ -47,7 +47,7 @@ public class SplashActivity extends AppCompatActivity {
         };
 
         Timer tTimer = new Timer();
-        tTimer.schedule(tmrTask,5000);
+        tTimer.schedule(tmrTask,SPLASH_SCREEN_DELAY);
 
     }
 }
