@@ -19,10 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.example.esqueletoapp.Adapters.DeviceSampleAdapter;
-import com.example.esqueletoapp.Models.DeviceSampleItem;
 import com.example.esqueletoapp.R;
 import com.google.android.material.snackbar.Snackbar;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
@@ -32,9 +29,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import okhttp3.Call;
 import okhttp3.Callback;

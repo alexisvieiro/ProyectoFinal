@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="300dp"
+    android:layout_height="150dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:cardBackgroundColor="@color/host_item_background"
-        app:cardCornerRadius="60dp"
-        app:cardElevation="10dp"
-        app:cardMaxElevation="10dp"
+        app:cardBackgroundColor="@color/card_background"
+        app:cardElevation="2dp"
+        app:cardUseCompatPadding="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,27 +19,42 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_item_lv_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.075"/>
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_item_lv_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.55"/>
+
             <TextView
                 android:id="@+id/textLastValueItemName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/autoscroll"
                 android:text="Item Name"
-                android:textColor="@color/black"
-                android:textSize="25sp"
+                android:textColor="@color/white"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:gravity="center_vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.2" />
+                app:layout_constraintVertical_bias="0.1" />
 
             <View
                 android:id="@+id/lastValueView"
-                android:layout_width="275dp"
+                android:layout_width="0dp"
                 android:layout_height="1dp"
-                android:background="@color/black"
+                app:layout_constraintWidth_percent=".8"
+                android:background="@color/white"
                 app:layout_constraintTop_toBottomOf="@id/textLastValueItemName"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -51,15 +65,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Último valor:"
-                android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:gravity="center_vertical"
-                app:layout_constraintHorizontal_bias="0.10"
+                app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintVertical_bias=".45"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@id/guideline_item_lv_1"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
@@ -67,28 +81,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Last Value"
-                android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:textSize="18sp"
                 android:gravity="center_vertical"
-                app:layout_constraintTop_toBottomOf="@id/ultimoValor"
+                style="@style/autoscroll"
+                app:layout_constraintVertical_bias="0.45"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/ultimaComprobacion"/>
+                app:layout_constraintStart_toEndOf="@+id/guideline_item_lv_2"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
             <TextView
                 android:id="@+id/ultimaComprobacion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Última comprobación:"
-                android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:gravity="center_vertical"
-                app:layout_constraintHorizontal_bias="0.10"
+                app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintVertical_bias=".75"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@id/guideline_item_lv_1"
                 app:layout_constraintTop_toTopOf="parent"/>
 
             <TextView
@@ -96,13 +113,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Last Check"
-                android:textColor="@color/black"
-                android:textSize="20sp"
+                style="@style/autoscroll"
+                android:textColor="@color/white"
+                android:maxWidth="100dp"
+                android:textSize="18sp"
                 android:gravity="center_vertical"
+                app:layout_constraintVertical_bias="0.75"
+                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@id/guideline_item_lv_2"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ultimaComprobacion"/>
+                app:layout_constraintTop_toTopOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

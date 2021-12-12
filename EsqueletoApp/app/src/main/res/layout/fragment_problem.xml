@@ -4,10 +4,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/black"
+    android:background="@color/app_background"
     android:clickable="true"
     tools:context=".Fragments.ProblemFragment"
     tools:ignore="SpeakableTextPresentCheck">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarProblemMenu"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.07"
+        android:background="@color/ic_launcher_background"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/textToolbarProblemMenu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Listado de problemas"
+            style="@style/autoscroll"
+            android:textSize="18sp"
+            android:textColor="@color/white"/>
+    </androidx.appcompat.widget.Toolbar>
 
     <com.toptoche.searchablespinnerlibrary.SearchableSpinner
         android:id="@+id/spinnerGetProblemHost"
@@ -17,7 +39,7 @@
         app:layout_constraintBottom_toTopOf="@+id/problemList"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarProblemMenu"
         app:layout_constraintVertical_bias="0.0"
         tools:ignore="SpeakableTextPresentCheck" />
 

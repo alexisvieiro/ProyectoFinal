@@ -4,43 +4,73 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/black"
+    android:background="@color/app_background"
     android:clickable="true"
     tools:context=".Fragments.ItemGroupFragment"
     tools:ignore="SpeakableTextPresentCheck">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarItemGroupMenu"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.07"
+        android:background="@color/ic_launcher_background"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/textToolbarItemGroupMenu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Listado de grupos de ítems"
+            style="@style/autoscroll"
+            android:textSize="18sp"
+            android:textColor="@color/white"/>
+    </androidx.appcompat.widget.Toolbar>
+
     <ImageView
         android:id="@+id/imageSearchItemGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/swipeItemGroupRefresh"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.07"
+        app:layout_constraintWidth_percent="0.1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintHorizontal_bias=".025"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbarItemGroupMenu"
         app:srcCompat="@android:drawable/ic_menu_search"/>
 
     <EditText
         android:id="@+id/textSearchItemGroup"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintWidth_percent="0.84"
+        app:layout_constraintHorizontal_bias="0.85"
+        app:layout_constraintHeight_percent="0.07"
+        app:layout_constraintVertical_bias="0"
         android:textSize="18sp"
-        android:hint="Buscar..."
+        android:hint="  Buscar..."
+        android:background="@drawable/edittext_background"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageSearchItemGroup"
-        app:layout_constraintBottom_toTopOf="@+id/swipeItemGroupRefresh"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbarItemGroupMenu"
         tools:ignore="SpeakableTextPresentCheck" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeItemGroupRefresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="50dp"
+        android:layout_height="0dp"
+        app:layout_constraintVertical_bias="0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/textSearchItemGroup">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listItemGroups"

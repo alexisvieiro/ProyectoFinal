@@ -9,7 +9,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -60,6 +62,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ProblemFragment extends Fragment {
+    private Toolbar toolbar;
     private SearchableSpinner spinnerHost;
     private RecyclerView rclProblemList;
     private TextView txtNotClassified, txtInfo, txtWarning,
@@ -103,6 +106,18 @@ public class ProblemFragment extends Fragment {
         txtAverage = view.findViewById(R.id.textProblemAverage);
         txtHigh = view.findViewById(R.id.textProblemHigh);
         txtDisaster = view.findViewById(R.id.textProblemDisaster);
+
+        toolbar = view.findViewById(R.id.toolbarProblemMenu);
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_baseline_arrow_back_24));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().popBackStack();
+                getActivity().findViewById(R.id.cardDashboard).setVisibility(View.VISIBLE);
+                getActivity().findViewById(R.id.cardHosts).setVisibility(View.VISIBLE);
+                getActivity().findViewById(R.id.cardProblems).setVisibility(View.VISIBLE);
+            }
+        });
 
         rclProblemList = view.findViewById(R.id.problemList);
         problemSampleAdapter = new ProblemSampleAdapter(sampleItemArrayList,getActivity());
@@ -234,6 +249,8 @@ public class ProblemFragment extends Fragment {
                                     if (jsonResultProblem.length()==0){
                                         Snackbar.make(getView(),
                                                 "No hay datos para mostrar", Snackbar.LENGTH_LONG).show();
+                                        Integer[] sSeverityClear = {0,0,0,0,0,0};
+                                        SetSeverity(sSeverityClear);
                                     }else{
                                         Integer[] sSeverityCounter = {0,0,0,0,0,0};
                                         for (int i=0;i<jsonResultProblem.length();i++){

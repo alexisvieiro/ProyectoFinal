@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.ImageView;
 
@@ -16,7 +17,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private ImageView imgSplash;
     private TimerTask tmrTask;
-    private static final long SPLASH_SCREEN_DELAY = 3000;
+    private static final long SPLASH_SCREEN_DELAY = 300;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,12 +28,7 @@ public class SplashActivity extends AppCompatActivity {
 
         imgSplash = findViewById(R.id.splash_logo);
 
-//        int id = getApplicationContext().getResources()
-//                .getIdentifier("ic_launcher_foreground","mipmap",
-//                        getApplicationContext().getPackageName());
-//        imgSplash.setImageResource(id);
-
-//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         imgSplash.setAlpha(0f);
         imgSplash.animate().setDuration(1500).alpha(1f);

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -45,6 +46,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ItemGroupFragment extends Fragment {
+    private Toolbar toolbar;
     private String sItemGroupID;
     private RecyclerView rclItemGroupList;
     private EditText edtSearchItemGroup;
@@ -81,6 +83,15 @@ public class ItemGroupFragment extends Fragment {
         rclItemGroupList = view.findViewById(R.id.listItemGroups);
         swRefreshLayout = view.findViewById(R.id.swipeItemGroupRefresh);
         edtSearchItemGroup = view.findViewById(R.id.textSearchItemGroup);
+
+        toolbar = view.findViewById(R.id.toolbarItemGroupMenu);
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_baseline_arrow_back_24));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
 
         SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String sToken = userData.getString("Token",null);

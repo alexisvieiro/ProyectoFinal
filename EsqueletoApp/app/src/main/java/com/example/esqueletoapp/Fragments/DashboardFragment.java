@@ -17,14 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.esqueletoapp.Adapters.DashboardSampleAdapter;
-import com.example.esqueletoapp.Adapters.DeviceSampleAdapter;
 import com.example.esqueletoapp.Models.DashboardSampleItem;
 import com.example.esqueletoapp.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public class DashboardFragment extends Fragment {
     private FloatingActionButton fabAdd;

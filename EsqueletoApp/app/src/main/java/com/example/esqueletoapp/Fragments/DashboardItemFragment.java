@@ -49,6 +49,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -176,6 +177,9 @@ public class DashboardItemFragment extends Fragment {
                                         series.resetData(dataPoints);
                                         graphView.addSeries(series);
                                         graphView.getViewport().setXAxisBoundsManual(true);
+                                        graphView.getViewport().setYAxisBoundsManual(true);
+                                        graphView.getViewport().setMinY(getMinValue(fValue)*0.5);
+                                        graphView.getViewport().setMaxY(getMaxValue(fValue)*1.5);
                                         graphView.getViewport().setMinX(0);
                                         graphView.getViewport().setMaxX(jsonResult.length()-1);
                                         graphView.onDataChanged(false,false);
@@ -214,6 +218,22 @@ public class DashboardItemFragment extends Fragment {
 
             }
         });
+    }
+
+    private Float getMaxValue(Float[] array){
+        List<Float> list = new ArrayList<Float>();
+        for (int i=0;i<array.length;i++){
+            list.add(array[i]);
+        }
+        return Collections.max(list);
+    }
+
+    private Float getMinValue(Float[] array){
+        List<Float> list = new ArrayList<Float>();
+        for (int i=0;i<array.length;i++){
+            list.add(array[i]);
+        }
+        return Collections.min(list);
     }
 
     String[] DateParser(String[] str){

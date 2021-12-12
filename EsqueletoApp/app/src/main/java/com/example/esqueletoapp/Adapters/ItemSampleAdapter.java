@@ -107,11 +107,13 @@ public class ItemSampleAdapter extends RecyclerView.Adapter<ItemSampleAdapter.Sa
 
         public void setLastValue(String sLastValue){
             txtLastValue = view.findViewById(R.id.textLastValue);
+            txtLastValue.setSelected(true);
             txtLastValue.setText(sLastValue);
         }
 
         public void setLastCheck(String sLastCheck){
             txtLastCheck = view.findViewById(R.id.textLastCheck);
+            txtLastCheck.setSelected(true);
             txtLastCheck.setText(sLastCheck);
         }
     }

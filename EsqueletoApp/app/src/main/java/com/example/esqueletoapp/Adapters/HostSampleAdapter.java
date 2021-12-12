@@ -78,6 +78,7 @@ public class HostSampleAdapter extends RecyclerView.Adapter<HostSampleAdapter.Sa
 
         public void setHostName(String sHostName){
             txtHostName = view.findViewById(R.id.textHostMenuName);
+            txtHostName.setSelected(true);
             txtHostName.setText(sHostName);
         }
     }

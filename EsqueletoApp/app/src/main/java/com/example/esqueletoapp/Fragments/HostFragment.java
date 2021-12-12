@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,9 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.example.esqueletoapp.Adapters.DeviceSampleAdapter;
 import com.example.esqueletoapp.Adapters.HostSampleAdapter;
-import com.example.esqueletoapp.Models.DeviceSampleItem;
 import com.example.esqueletoapp.Models.HostSampleItem;
 import com.example.esqueletoapp.R;
 import com.google.android.material.snackbar.Snackbar;
@@ -46,6 +45,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class HostFragment extends Fragment {
+    private Toolbar toolbar;
     private RecyclerView rclHostList;
     private SwipeRefreshLayout swRefreshLayout;
     private Handler hostHandler;
@@ -81,6 +81,18 @@ public class HostFragment extends Fragment {
         rclHostList = view.findViewById(R.id.listHosts);
         swRefreshLayout = view.findViewById(R.id.swipeHostRefresh);
         edtSearchHost = view.findViewById(R.id.textSearchHost);
+
+        toolbar = view.findViewById(R.id.toolbarHostMenu);
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_baseline_arrow_back_24));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().popBackStack();
+                getActivity().findViewById(R.id.cardDashboard).setVisibility(View.VISIBLE);
+                getActivity().findViewById(R.id.cardHosts).setVisibility(View.VISIBLE);
+                getActivity().findViewById(R.id.cardProblems).setVisibility(View.VISIBLE);
+            }
+        });
 
         SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String sToken = userData.getString("Token",null);

@@ -5,10 +5,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,39 +13,21 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
-import com.example.esqueletoapp.Adapters.DeviceSampleAdapter;
-import com.example.esqueletoapp.Models.DeviceSampleItem;
+import com.example.esqueletoapp.Fragments.DashboardFragment;
+import com.example.esqueletoapp.Fragments.HostFragment;
+import com.example.esqueletoapp.Fragments.ProblemFragment;
 import com.example.esqueletoapp.R;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.snackbar.Snackbar;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.ArrayList;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
 public class MenuActivity extends AppCompatActivity {
-
-    private RecyclerView rclDeviceList;
+    private MaterialCardView cardDashboard, cardProblems, cardHosts;
     private Toolbar toolbar;
-    private DeviceSampleAdapter deviceSampleAdapter;
-    private ArrayList<DeviceSampleItem> sampleItemArrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,23 +36,52 @@ public class MenuActivity extends AppCompatActivity {
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
-        rclDeviceList = findViewById(R.id.listDevices);
+        cardDashboard = findViewById(R.id.cardDashboard);
+        cardHosts = findViewById(R.id.cardHosts);
+        cardProblems = findViewById(R.id.cardProblems);
 
         toolbar = findViewById(R.id.toolbarMainMenu);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        rclDeviceList.setHasFixedSize(true);
-        rclDeviceList.setLayoutManager(new LinearLayoutManager(this));
-        rclDeviceList.addItemDecoration
-                (new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
+        cardDashboard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DashboardFragment dashboardFragment = new DashboardFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.constraintMenu,dashboardFragment).
+                        addToBackStack(null).commit();
+                cardDashboard.setVisibility(View.GONE);
+                cardHosts.setVisibility(View.GONE);
+                cardProblems.setVisibility(View.GONE);
+            }
+        });
 
-        deviceSampleAdapter = new DeviceSampleAdapter(sampleItemArrayList, getApplicationContext());
-        rclDeviceList.setAdapter(deviceSampleAdapter);
+        cardHosts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                HostFragment hostFragment = new HostFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.constraintMenu,hostFragment).
+                        addToBackStack(null).commit();
+                cardDashboard.setVisibility(View.GONE);
+                cardHosts.setVisibility(View.GONE);
+                cardProblems.setVisibility(View.GONE);
+            }
+        });
 
-        sampleItemArrayList.add(new DeviceSampleItem("Tablero"));
-        sampleItemArrayList.add(new DeviceSampleItem("Hosts"));
-        sampleItemArrayList.add(new DeviceSampleItem("Problemas"));
+        cardProblems.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ProblemFragment problemFragment = new ProblemFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.constraintMenu,problemFragment).
+                        addToBackStack(null).commit();
+                cardDashboard.setVisibility(View.GONE);
+                cardHosts.setVisibility(View.GONE);
+                cardProblems.setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override
@@ -155,7 +163,12 @@ public class MenuActivity extends AppCompatActivity {
         int count = getSupportFragmentManager().getBackStackEntryCount();
         if (count == 0) {
             moveTaskToBack(true);
-        } else {
+        } else if(count == 1){
+            getSupportFragmentManager().popBackStack();
+            cardDashboard.setVisibility(View.VISIBLE);
+            cardHosts.setVisibility(View.VISIBLE);
+            cardProblems.setVisibility(View.VISIBLE);
+        }else{
             getSupportFragmentManager().popBackStack();
         }
     }

@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -46,6 +47,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ItemLastValueFragment extends Fragment {
+    private Toolbar toolbar;
     private String sHostID;
     private String sAppName;
     private RecyclerView rclLastValueList;
@@ -84,6 +86,15 @@ public class ItemLastValueFragment extends Fragment {
         rclLastValueList = view.findViewById(R.id.lastValueList);
         swRefreshLayout = view.findViewById(R.id.swipeLastValueRefresh);
         edtSearchLastValue = view.findViewById(R.id.textSearchLastValue);
+
+        toolbar = view.findViewById(R.id.toolbarItemMenu);
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_baseline_arrow_back_24));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
 
         SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String sToken = userData.getString("Token",null);
