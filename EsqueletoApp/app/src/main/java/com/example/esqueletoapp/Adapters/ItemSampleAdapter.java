@@ -51,8 +51,8 @@ public class ItemSampleAdapter extends RecyclerView.Adapter<ItemSampleAdapter.Sa
         Date dd = new java.util.Date(lDate);
         holder.setItemName(sItemName);
         if (lDate==0){
-            holder.setLastValue("No data");
-            holder.setLastCheck("No data");
+            holder.setLastValue("Sin datos.");
+            holder.setLastCheck("Sin datos");
         }else{
             String sDate = new SimpleDateFormat("dd MMM yyyy HH:mm z").format(dd).toUpperCase();
 
