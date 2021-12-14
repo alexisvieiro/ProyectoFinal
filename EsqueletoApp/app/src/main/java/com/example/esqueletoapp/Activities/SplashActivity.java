@@ -17,7 +17,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private ImageView imgSplash;
     private TimerTask tmrTask;
-    private static final long SPLASH_SCREEN_DELAY = 300;
+    private static final long SPLASH_SCREEN_DELAY = 3000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

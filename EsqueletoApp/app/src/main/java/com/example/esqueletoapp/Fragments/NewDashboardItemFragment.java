@@ -8,7 +8,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -39,6 +41,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class NewDashboardItemFragment extends Fragment {
+    private Toolbar toolbar;
     private SearchableSpinner spinnerHost;
     private SearchableSpinner spinnerItem;
     private Button btnConfirm;
@@ -81,6 +84,15 @@ public class NewDashboardItemFragment extends Fragment {
         spinnerHost = view.findViewById(R.id.spinnerGetHost);
         spinnerItem = view.findViewById(R.id.spinnerGetItem);
         btnConfirm = view.findViewById(R.id.buttonCommitNewItem);
+
+        toolbar = view.findViewById(R.id.toolbarNewDashboardItem);
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_baseline_arrow_back_24));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
 
         spinnerHost.setTitle("Seleccione Host");
         spinnerHost.setPositiveButton("OK");
@@ -137,6 +149,11 @@ public class NewDashboardItemFragment extends Fragment {
                                     (getContext(), android.R.layout.simple_spinner_dropdown_item, sHostList);
                             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             spinnerHost.setAdapter(dataAdapter);
+                            String[] sItemDefault = {"Ítem no seleccionado"};
+                            ArrayAdapter<String> dataAdapterItem =  new ArrayAdapter<String>
+                                    (getContext(), android.R.layout.simple_spinner_dropdown_item, sItemDefault);
+                            dataAdapterItem.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spinnerItem.setAdapter(dataAdapterItem);
                         }
                     }
                 });
@@ -208,6 +225,12 @@ public class NewDashboardItemFragment extends Fragment {
                             });
                         }
                     });
+                }else{
+                    String[] sItemDefault = {"Ítem no seleccionado"};
+                    ArrayAdapter<String> dataAdapterItem =  new ArrayAdapter<String>
+                            (getContext(), android.R.layout.simple_spinner_dropdown_item, sItemDefault);
+                    dataAdapterItem.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerItem.setAdapter(dataAdapterItem);
                 }
             }
 
@@ -262,6 +285,11 @@ public class NewDashboardItemFragment extends Fragment {
                     editor.commit();
 
                     Snackbar.make(getView(),"Nuevo ítem agregado al tablero",Snackbar.LENGTH_LONG).show();
+                    /*getActivity().getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    DashboardFragment dashboardFragment = new DashboardFragment();
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.constraintMenu,dashboardFragment)
+                            .addToBackStack(null).commit();*/
                     getActivity().getSupportFragmentManager().popBackStack();
                 }else{
                     Snackbar.make(getView(),"No ha seleccionado host",Snackbar.LENGTH_LONG).show();

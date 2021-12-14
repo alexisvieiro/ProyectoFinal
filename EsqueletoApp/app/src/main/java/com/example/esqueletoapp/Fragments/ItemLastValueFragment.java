@@ -179,7 +179,7 @@ public class ItemLastValueFragment extends Fragment {
                             sampleItemArrayList.clear();
                             if(jsonResult.length()==0){
                                 AlertDialog.Builder alertItemsNotFound = new AlertDialog.Builder(getContext());
-                                alertItemsNotFound.setMessage("No hay ítems asignados al application seleccionado");
+                                alertItemsNotFound.setMessage("No hay ítems asignados al grupo seleccionado");
                                 alertItemsNotFound.setNeutralButton("Regresar", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {

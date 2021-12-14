@@ -130,6 +130,7 @@ public class DashboardSampleAdapter extends RecyclerView.Adapter<DashboardSample
 
         public void setItemName (String sItemName){
             txtItemName = view.findViewById(R.id.textItemName);
+            txtItemName.setSelected(true);
             txtItemName.setText(sItemName);
         }
 

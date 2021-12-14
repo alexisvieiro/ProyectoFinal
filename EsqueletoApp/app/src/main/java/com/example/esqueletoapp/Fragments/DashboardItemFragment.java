@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
@@ -63,6 +64,7 @@ import okhttp3.Response;
 
 
 public class DashboardItemFragment extends Fragment {
+    private Toolbar toolbar;
     private String sItemName;
     private Integer iPosition;
     private Handler mHandler;
@@ -102,10 +104,23 @@ public class DashboardItemFragment extends Fragment {
         graphView = view.findViewById(R.id.graphItem);
         spinnerTimeWindow = view.findViewById(R.id.spinnerSetTimeWindow);
 
+        toolbar = view.findViewById(R.id.toolbarDashboardItem);
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_baseline_arrow_back_24));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
+
+        if (sItemName.contains("!")){
+            sItemName.replace("!","");
+        }
         graphView.setTitle(sItemName);
         graphView.setTitleTextSize(35);
         series.setDrawDataPoints(true);
         series.setDataPointsRadius(5);
+        series.setColor(getResources().getColor(R.color.ic_launcher_background));
 
         SharedPreferences userData = getActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String sToken = userData.getString("Token",null);
@@ -119,6 +134,8 @@ public class DashboardItemFragment extends Fragment {
         String sItemID = arrayIDs[iPosition];
         String sItemUnit = arrayUnits[iPosition];
         String sValueType = arrayValueType[iPosition];
+        sItemUnit=sItemUnit.replaceAll("!","");
+
         graphView.getGridLabelRenderer().setVerticalAxisTitle(sItemUnit);
 
         spinnerTimeWindow.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -165,7 +182,7 @@ public class DashboardItemFragment extends Fragment {
                                     Log.e("Parsing","Could not parse malformed JSON: \"" + sMessage + "\"");
                                 }if(jsonResponse.has("result")){
                                     JSONArray jsonResult = jsonResponse.optJSONArray("result");
-                                    if (jsonResult.length()!=0){
+                                    if (jsonResult.length()>1){
                                         sTime = new String[jsonResult.length()];
                                         Float[] fValue = new Float[jsonResult.length()];
                                         DataPoint[] dataPoints= new DataPoint[jsonResult.length()];
@@ -187,10 +204,10 @@ public class DashboardItemFragment extends Fragment {
                                         StaticLabelsFormatter staticLabelsFormatter = new StaticLabelsFormatter(graphView);
                                         staticLabelsFormatter.setHorizontalLabels(sTime);
                                         graphView.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
-                                        graphView.getGridLabelRenderer().setNumHorizontalLabels(2);
+                                        graphView.getGridLabelRenderer().setNumHorizontalLabels(3);
                                         graphView.getGridLabelRenderer().setLabelHorizontalHeight(50);
                                         graphView.getGridLabelRenderer().setHorizontalLabelsAngle(15);
-                                        graphView.getViewport().setScrollable(true);
+                                        //graphView.getViewport().setScrollable(true);
                                         graphView.getViewport().setScalable(true);
 
                                         series.setOnDataPointTapListener(new OnDataPointTapListener() {
@@ -240,7 +257,7 @@ public class DashboardItemFragment extends Fragment {
         for (int i=0;i<str.length;i++){
             long dl = Long.valueOf(str[i])*1000; //Debe estar en milisegundos
             Date dd = new java.util.Date(dl);
-            str[i] = new SimpleDateFormat("dd MMM yyyy HH:mm z").format(dd).toUpperCase();
+            str[i] = new SimpleDateFormat("HH:mm:ss").format(dd).toUpperCase();
         }
         return str;
     }

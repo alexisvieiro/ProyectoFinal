@@ -85,6 +85,7 @@
                 android:textSize="18sp"
                 android:gravity="center_vertical"
                 style="@style/autoscroll"
+                android:maxWidth="100dp"
                 app:layout_constraintVertical_bias="0.45"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintTop_toTopOf="parent"

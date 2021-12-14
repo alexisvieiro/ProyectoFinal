@@ -25,7 +25,7 @@
             android:id="@+id/textToolbarProblemMenu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Listado de problemas"
+            android:text="Listado de eventos"
             style="@style/autoscroll"
             android:textSize="18sp"
             android:textColor="@color/white"/>

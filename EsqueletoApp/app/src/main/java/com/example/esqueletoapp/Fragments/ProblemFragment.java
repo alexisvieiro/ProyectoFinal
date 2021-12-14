@@ -294,7 +294,7 @@ public class ProblemFragment extends Fragment {
         txtNotClassified.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Snackbar.make(v,"Problemas sin clasificar: "
+                Snackbar.make(v,"Eventos sin clasificar: "
                         +txtNotClassified.getText(),Snackbar.LENGTH_LONG).show();
                 return true;
             }
@@ -302,7 +302,7 @@ public class ProblemFragment extends Fragment {
         txtInfo.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Snackbar.make(v,"Informativos: "
+                Snackbar.make(v,"Eventos informativos: "
                         +txtInfo.getText(),Snackbar.LENGTH_LONG).show();
                 return true;
             }
@@ -310,7 +310,7 @@ public class ProblemFragment extends Fragment {
         txtWarning.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Snackbar.make(v,"Problemas de alerta: "
+                Snackbar.make(v,"Eventos de alerta: "
                         +txtWarning.getText(),Snackbar.LENGTH_LONG).show();
                 return true;
             }
@@ -318,7 +318,7 @@ public class ProblemFragment extends Fragment {
         txtAverage.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Snackbar.make(v,"Problemas de nivel promedio: "
+                Snackbar.make(v,"Eventos de riesgo promedio: "
                         +txtAverage.getText(),Snackbar.LENGTH_LONG).show();
                 return true;
             }
@@ -326,7 +326,7 @@ public class ProblemFragment extends Fragment {
         txtHigh.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Snackbar.make(v,"Problemas de alto riesgo: "
+                Snackbar.make(v,"Eventos de alto riesgo: "
                         +txtHigh.getText(),Snackbar.LENGTH_LONG).show();
                 return true;
             }
@@ -334,7 +334,7 @@ public class ProblemFragment extends Fragment {
         txtDisaster.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Snackbar.make(v,"Problemas desastrosos: "
+                Snackbar.make(v,"Eventos desastrosos: "
                         +txtDisaster.getText(),Snackbar.LENGTH_LONG).show();
                 return true;
             }

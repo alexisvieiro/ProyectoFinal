@@ -3,15 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="200dp">
+    android:layout_height="150dp">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:cardBackgroundColor="@color/dashboard_item_background"
-        app:cardCornerRadius="30dp"
-        app:cardElevation="10dp"
-        app:cardMaxElevation="10dp"
+        app:cardBackgroundColor="@color/card_background"
+        app:cardElevation="2dp"
+        app:cardUseCompatPadding="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,12 +26,13 @@
                 android:id="@+id/textItemName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="100.5dp"
-                android:height="99.5dp"
                 android:gravity="center_vertical"
+                app:layout_constraintVertical_bias="0.2"
                 android:text="Item Name"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textSize="20sp"
+                style="@style/autoscroll"
+                android:maxWidth="250dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.65"
@@ -41,37 +41,38 @@
 
             <View
                 android:id="@+id/view"
-                android:layout_width="275dp"
+                android:layout_width="0dp"
                 android:layout_height="1dp"
-                android:background="@color/black"
-                app:layout_constraintBottom_toTopOf="@+id/textHostName"
+                app:layout_constraintWidth_percent="0.75"
+                android:background="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias=".75"
-                app:layout_constraintStart_toEndOf="@+id/buttonDeleteDashboardItem"
-                app:layout_constraintTop_toBottomOf="@+id/textItemName" />
+                app:layout_constraintHorizontal_bias=".975"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/textHostName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textItemName"
-                android:height="99.5dp"
                 android:gravity="center"
                 android:text="Host Name"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintVertical_bias="0.8"
                 app:layout_constraintHorizontal_bias=".65"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textItemName" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/buttonDeleteDashboardItem"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:background="@drawable/rounded_corner"
-                android:backgroundTint="@color/dashboard_delete_background"
+                android:backgroundTint="@color/ic_launcher_background"
                 android:src="@drawable/delete_icon"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

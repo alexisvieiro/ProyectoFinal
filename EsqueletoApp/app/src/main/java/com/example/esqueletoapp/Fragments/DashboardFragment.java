@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,6 +25,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 
 public class DashboardFragment extends Fragment {
+    private Toolbar toolbar;
     private FloatingActionButton fabAdd;
     private RecyclerView rclDashboardList;
     private DashboardSampleAdapter dashboardSampleAdapter;
@@ -54,6 +56,18 @@ public class DashboardFragment extends Fragment {
 
         fabAdd = view.findViewById(R.id.buttonAddToDashboard);
         rclDashboardList = view.findViewById(R.id.listDashboardItems);
+
+        toolbar = view.findViewById(R.id.toolbarDashboardMenu);
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_baseline_arrow_back_24));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().popBackStack();
+                getActivity().findViewById(R.id.cardDashboard).setVisibility(View.VISIBLE);
+                getActivity().findViewById(R.id.cardHosts).setVisibility(View.VISIBLE);
+                getActivity().findViewById(R.id.cardProblems).setVisibility(View.VISIBLE);
+            }
+        });
 
         rclDashboardList.setHasFixedSize(true);
         rclDashboardList.setLayoutManager(new LinearLayoutManager(getContext()));
