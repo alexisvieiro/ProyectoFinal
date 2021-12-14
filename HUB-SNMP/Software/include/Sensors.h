@@ -4,8 +4,8 @@
 #endif
 #define PinPuerta1 32
 #define PinPuerta2 33
-#define PinPuerta3 14
-#define PinPuerta4 16
+#define PinPuerta3 4
+#define PinPuerta4 0
 #define oneWireBus 13
 void SensorsInit();
 void SensadoPuertas();

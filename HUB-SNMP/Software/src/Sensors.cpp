@@ -67,16 +67,17 @@ void SensadoInterno(){
 }
 
 void SensadoTemperatura(){
-
+      int temporalC=0;
       //Lectura DS18B20
-      if(millis()>(periodoLecturaTemperatura+10000)){
+      if(millis()>(periodoLecturaTemperatura+1000)){
       periodoLecturaTemperatura=millis();
-      sensors.requestTemperatures(); 
+      sensors.requestTemperatures();
+      temporalC=temperaturaC;
       temperaturaC = round(sensors.getTempCByIndex(0));
       if(temperaturaC==-127){
-        temperaturaC=0;
+        temperaturaC=temporalC;
       }
-
+    Serial.println(temperaturaC);
     }
 }
 
