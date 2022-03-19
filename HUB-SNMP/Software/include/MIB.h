@@ -37,7 +37,7 @@ const char esp32Door1[] PROGMEM = "1.3.6.1.4.1.36582.2"; // read-only  (Integer)
 const char esp32Door2[] PROGMEM = "1.3.6.1.4.1.36582.3"; // read-only  (Integer)
 const char esp32Door3[] PROGMEM = "1.3.6.1.4.1.36582.4"; // read-only  (Integer)
 const char esp32Door4[] PROGMEM = "1.3.6.1.4.1.36582.5"; // read-only  (Integer)
-
+const char esp32TemperatureLimit[] PROGMEM = "1.3.6.1.4.1.36582.6"; // read-write (DisplayString)
 //
 //        
 #endif

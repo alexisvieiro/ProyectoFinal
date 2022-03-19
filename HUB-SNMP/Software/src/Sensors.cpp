@@ -68,16 +68,32 @@ void SensadoInterno(){
 
 void SensadoTemperatura(){
       int temporalC=0;
+      static int trapTemp=0;
       //Lectura DS18B20
       if(millis()>(periodoLecturaTemperatura+1000)){
-      periodoLecturaTemperatura=millis();
-      sensors.requestTemperatures();
-      temporalC=temperaturaC;
-      temperaturaC = round(sensors.getTempCByIndex(0));
-      if(temperaturaC==-127){
-        temperaturaC=temporalC;
-      }
-    Serial.println(temperaturaC);
+        periodoLecturaTemperatura=millis();
+        sensors.requestTemperatures();
+        temporalC=temperaturaC;
+        temperaturaC = round(sensors.getTempCByIndex(0));
+        if(temperaturaC==-127){
+            temperaturaC=temporalC;
+        }
+        Serial.println(temperaturaC);
+
+        if(temperaturaC>LimitTempInt && trapTemp==0){
+                Serial.println("Temperatura limite: ");
+                Serial.println(LimitTempInt);
+                Serial.println("Send TRAP: Temperatura Excedida");
+                Agentuino.Trap("Temperatura Excedida", RemoteIP, locUpTime);
+                trapTemp=1;
+        }else{
+            if(temperaturaC<LimitTempInt && trapTemp==1){
+                trapTemp=0;
+                Serial.println("Send TRAP: Temperatura Normalizada");
+                Agentuino.Trap("Temperatura Normalizada", RemoteIP, locUpTime);
+            }
+            
+        }
     }
 }
 
