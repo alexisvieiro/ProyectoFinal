@@ -15,4 +15,6 @@ extern byte my_IP_address[4];                                                   
 extern int temperaturaC;
 extern long usedHeap;
 extern int UltimoEstado[];
+extern char LimitTempString[10];
+extern int LimitTempInt;
 #endif

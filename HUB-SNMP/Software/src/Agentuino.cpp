@@ -697,6 +697,25 @@ void pduReceived() {
             }
             //
 
+    
+        } else if (strcmp_P(oid, esp32TemperatureLimit) == 0) {
+            // handle sysName (set/get) requests
+            if (pdu.type == SNMP_PDU_SET) {
+                // response packet from set-request - object is read/write
+                status = pdu.VALUE.decode(LimitTempString, strlen(LimitTempString));
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = status;
+                LimitTempInt= atoi(LimitTempString);
+            } else {
+                // response packet from get-request - locName
+                status = pdu.VALUE.encode(SNMP_SYNTAX_OCTETS, LimitTempString);
+                pdu.type = SNMP_PDU_RESPONSE;
+                pdu.error = status;
+            }
+            //
+
+        
+
         }else if (strcmp_P(oid, esp32Temperature1) == 0) {
             // handle esp32Temperature1 (set/get) requests
             if (pdu.type == SNMP_PDU_SET) {
