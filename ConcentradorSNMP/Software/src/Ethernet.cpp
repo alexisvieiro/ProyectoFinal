@@ -7,6 +7,7 @@ void EthernetInit(){
   WiFi.onEvent(EthernetEvent);
   ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
   while(!connected){
+    //Serial.println("Esperando que inicialice Ethernet");
     delay(500);
   }
 }
@@ -16,27 +17,27 @@ void EthernetInit(){
 
 void EthernetEvent(WiFiEvent_t event){
   switch (event) {
-    case SYSTEM_EVENT_ETH_START:
+    case ARDUINO_EVENT_ETH_START:
       Serial.println("ETH Iniciado");
-      //set eth hostname here
-      ETH.setHostname("esphub");
+      //Nombre de host
+      ETH.setHostname("ESP32_HUB");
       break;
-    case SYSTEM_EVENT_ETH_CONNECTED:
+    case ARDUINO_EVENT_ETH_CONNECTED:
+    connected = true;
       Serial.println("ETH Conectado");
       break;
-    case SYSTEM_EVENT_ETH_GOT_IP:
-
+    case ARDUINO_EVENT_ETH_GOT_IP:
+      
       Serial.print("IP: ");
       Serial.println(ETH.localIP());
       Serial.print(ETH.linkSpeed());
       Serial.println("Mbps");
-      connected = true;
       break;
-    case SYSTEM_EVENT_ETH_DISCONNECTED:
+    case ARDUINO_EVENT_ETH_DISCONNECTED:
       Serial.println("ETH Desconectado");
       connected = false;
       break;
-    case SYSTEM_EVENT_ETH_STOP:
+    case ARDUINO_EVENT_ETH_STOP:
       Serial.println("ETH Parado");
       connected = false;
       break;

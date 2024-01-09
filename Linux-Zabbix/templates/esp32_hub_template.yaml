@@ -1,0 +1,81 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-01-09T02:28:01Z'
+  groups:
+    - uuid: 36bff6c29af64692839d077febfc7079
+      name: 'Templates/Network devices'
+  templates:
+    - uuid: c93ec0b2f59f419ba2dd770a0854e96b
+      template: 'SNMP Hub Sensor'
+      name: 'SNMP Hub Sensor'
+      groups:
+        - name: 'Templates/Network devices'
+      items:
+        - uuid: 4b1f4558fd294743b42a23df19d7527c
+          name: 'Estado puerta 1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.36582.2
+          key: door1
+          delay: 10s
+        - uuid: 60d5847648dc4b4fbbf6329d608b137a
+          name: 'Estado puerta 2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.36582.3
+          key: door2
+          delay: 10s
+        - uuid: e62fdf9e557d49189354b3dcb6b04da2
+          name: 'Estado puerta 3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.36582.4
+          key: door3
+          delay: 10s
+        - uuid: 7415ef048f794ff1a86e3375603d245e
+          name: 'Estado puerta 4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.36582.5
+          key: door4
+          delay: 10s
+        - uuid: 4faf89ff732d4786bba4c55f9dfab638
+          name: '% de RAM Libre'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.36582.1
+          key: ram
+          delay: 10s
+        - uuid: dc5d8c8a4d2d4437ab2bd403d4876c36
+          name: 'ESP32 Trap'
+          type: SNMP_TRAP
+          key: snmptrap.fallback
+          delay: '0'
+          trends: '0'
+          value_type: TEXT
+          triggers:
+            - uuid: 7526b1bbdb484ed28f5a14a5ac55c69c
+              expression: 'find(/SNMP Hub Sensor/snmptrap.fallback,#1,"like","Puerta1 Abierta")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/SNMP Hub Sensor/snmptrap.fallback,#1,"like","Puerta1 Cerrada")=1'
+              name: 'Puerta 1 Abierta'
+              priority: INFO
+            - uuid: 98d8f21f24e94766958a03928830c7f4
+              expression: 'find(/SNMP Hub Sensor/snmptrap.fallback,#1,"like","Puerta2 Abierta")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/SNMP Hub Sensor/snmptrap.fallback,#1,"like","Puerta2 Cerrada")=1'
+              name: 'Puerta 2 Abierta'
+              priority: INFO
+            - uuid: 50f687c87a3d4efe88a12b0bd3c88ecf
+              expression: 'find(/SNMP Hub Sensor/snmptrap.fallback,#1,"like","Puerta3 Abierta")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/SNMP Hub Sensor/snmptrap.fallback,#1,"like","Puerta3 Cerrada")=1'
+              name: 'Puerta 3 Abierta'
+              priority: INFO
+            - uuid: db973b0feef34fa898114c1ba86b75a7
+              expression: 'find(/SNMP Hub Sensor/snmptrap.fallback,#1,"like","Puerta4 Abierta")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/SNMP Hub Sensor/snmptrap.fallback,#1,"like","Puerta4 Cerrada")=1'
+              name: 'Puerta 4 Abierta'
+              priority: INFO
+        - uuid: 26fd849308164fb5b6bbfbf77ee625b1
+          name: Temperatura
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.36582.0
+          key: Temp
+          delay: 10s

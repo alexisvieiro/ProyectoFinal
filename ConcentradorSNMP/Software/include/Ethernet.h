@@ -1,7 +1,7 @@
 #include <ETH.h>
 
 //Parametros del puerto Ethernet
-//Pin del ESP32 que hace de block al LAN8710
+//Pin del ESP32 que hace de clock al LAN8710
 #define ETH_CLK_MODE ETH_CLOCK_GPIO17_OUT
 // Pin del cristal externo, en este caso no hay.
 #define ETH_POWER_PIN -1

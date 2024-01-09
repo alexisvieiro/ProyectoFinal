@@ -7,15 +7,18 @@
 void setup(){
 
     Serial.begin(115200);
+    Serial.print("Pin Clock: ");
+    Serial.println(ETH_CLK_MODE);
     SensorsInit(); //Inicialización de Sensores
     EthernetInit(); //Inicialización de Ethernet
     ServerInit(); //Inicialización de Servidor HTTPS
-    SNMPInit(); //Inicialización SNMP   
-}
+    SNMPInit(); //Inicialización SNMP
+
+    }
 
 
 void loop() {
-
+    //Serial.println("Entra al loop");
     SNMPLoop();
     SensadoPuertas();
     SensadoTemperatura();
