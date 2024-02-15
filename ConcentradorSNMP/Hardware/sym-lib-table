@@ -1,5 +1,6 @@
 (sym_lib_table
-  (lib (name ESP32-GATEWAY_Rev_F)(type Legacy)(uri ${KIPRJMOD}/ESP32-GATEWAY_Rev_F.lib)(options "")(descr ""))
-  (lib (name ESP32-GATEWAY_Rev_F-rescue)(type Legacy)(uri ${KIPRJMOD}/ESP32-GATEWAY_Rev_F-rescue.lib)(options "")(descr ""))
-  (lib (name HUB-SNMP-rescue)(type Legacy)(uri ${KIPRJMOD}/HUB-SNMP-rescue.lib)(options "")(descr ""))
+  (version 7)
+  (lib (name "ESP32-GATEWAY_Rev_F")(type "Legacy")(uri "${KIPRJMOD}/ESP32-GATEWAY_Rev_F.lib")(options "")(descr ""))
+  (lib (name "ESP32-GATEWAY_Rev_F-rescue")(type "Legacy")(uri "${KIPRJMOD}/ESP32-GATEWAY_Rev_F-rescue.lib")(options "")(descr ""))
+  (lib (name "HUB-SNMP-rescue")(type "KiCad")(uri "${KIPRJMOD}/HUB-SNMP-rescue.kicad_sym")(options "")(descr ""))
 )
